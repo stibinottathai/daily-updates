@@ -6,9 +6,22 @@ export interface NewsArticle {
   imageUrl: string;
   author: string;
   date: string;
+  category: string;
 }
 
+export const CATEGORIES = [
+  'World',
+  'Business',
+  'Technology',
+  'Science',
+  'Health',
+  'Sports',
+  'Entertainment'
+];
+
 export interface User {
-  username: string;
+  id?: string;
+  email: string;
+  role?: 'super_admin' | 'admin' | 'sub_admin';
   isAuthenticated: boolean;
 }

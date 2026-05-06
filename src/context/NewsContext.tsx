@@ -1,15 +1,16 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { NewsArticle, User } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface NewsContextType {
   articles: NewsArticle[];
   user: User;
+  isLoading: boolean;
   addArticle: (article: Omit<NewsArticle, 'id' | 'date'>) => void;
   deleteArticle: (id: string) => void;
   updateArticle: (id: string, article: Partial<NewsArticle>) => void;
-  login: (username: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const initialArticles: NewsArticle[] = [
@@ -20,7 +21,8 @@ const initialArticles: NewsArticle[] = [
     content: 'Full article content here...',
     imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085',
     author: 'Jane Doe',
-    date: new Date().toISOString()
+    date: new Date().toISOString(),
+    category: 'Technology'
   },
   {
     id: '2',
@@ -29,7 +31,8 @@ const initialArticles: NewsArticle[] = [
     content: 'Full article content here...',
     imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e',
     author: 'John Smith',
-    date: new Date().toISOString()
+    date: new Date().toISOString(),
+    category: 'Science'
   }
 ];
 
@@ -37,7 +40,46 @@ const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [articles, setArticles] = useState<NewsArticle[]>(initialArticles);
-  const [user, setUser] = useState<User>({ username: '', isAuthenticated: false });
+  const [user, setUser] = useState<User>({ email: '', isAuthenticated: false });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async (userId: string, email: string) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      
+      setUser({ 
+        id: userId, 
+        email: email, 
+        role: data?.role || 'sub_admin',
+        isAuthenticated: true 
+      });
+      setIsLoading(false);
+    };
+
+    // Check active sessions and sets the user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user.email || '');
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // Listen for changes on auth state (logged in, signed out, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user.email || '');
+      } else {
+        setUser({ email: '', isAuthenticated: false });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const addArticle = (article: Omit<NewsArticle, 'id' | 'date'>) => {
     const newArticle = {
@@ -56,16 +98,13 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setArticles(articles.map(a => a.id === id ? { ...a, ...updatedFields } : a));
   };
 
-  const login = (username: string) => {
-    setUser({ username, isAuthenticated: true });
-  };
-
-  const logout = () => {
-    setUser({ username: '', isAuthenticated: false });
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser({ email: '', isAuthenticated: false });
   };
 
   return (
-    <NewsContext.Provider value={{ articles, user, addArticle, deleteArticle, updateArticle, login, logout }}>
+    <NewsContext.Provider value={{ articles, user, isLoading, addArticle, deleteArticle, updateArticle, logout }}>
       {children}
     </NewsContext.Provider>
   );

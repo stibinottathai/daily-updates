@@ -2,21 +2,22 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNews } from '../context/NewsContext';
 import type { NewsArticle } from '../types';
+import { CATEGORIES } from '../types';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { user, articles, addArticle, deleteArticle, updateArticle } = useNews();
+  const { user, isLoading, articles, addArticle, deleteArticle, updateArticle } = useNews();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<Partial<NewsArticle>>({});
 
   useEffect(() => {
-    if (!user.isAuthenticated) {
+    if (!isLoading && !user.isAuthenticated) {
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [user, isLoading, navigate]);
 
-  if (!user.isAuthenticated) return null;
+  if (isLoading || !user.isAuthenticated) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +45,7 @@ const AdminDashboard = () => {
         <button 
           className="btn btn-primary"
           onClick={() => {
-            setCurrentArticle({ author: user.username });
+            setCurrentArticle({ author: user.email, category: CATEGORIES[0] });
             setIsEditing(true);
           }}
         >
@@ -94,6 +95,20 @@ const AdminDashboard = () => {
               />
             </div>
             <div className="form-group">
+              <label className="form-label">Category</label>
+              <select
+                className="form-input"
+                value={currentArticle.category || ''}
+                onChange={e => setCurrentArticle({...currentArticle, category: e.target.value})}
+                required
+              >
+                <option value="" disabled>Select a category...</option>
+                {CATEGORIES.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
               <label className="form-label">Excerpt</label>
               <textarea
                 className="form-input"
@@ -122,6 +137,7 @@ const AdminDashboard = () => {
             <thead>
               <tr>
                 <th>Title</th>
+                <th>Category</th>
                 <th>Author</th>
                 <th>Date</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
@@ -130,12 +146,13 @@ const AdminDashboard = () => {
             <tbody>
               {articles.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--muted)' }}>No articles found.</td>
+                  <td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)' }}>No articles found.</td>
                 </tr>
               ) : (
                 articles.map(article => (
                   <tr key={article.id}>
                     <td style={{ fontWeight: '500' }}>{article.title}</td>
+                    <td>{article.category}</td>
                     <td>{article.author}</td>
                     <td>{new Date(article.date).toLocaleDateString()}</td>
                     <td>

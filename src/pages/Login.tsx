@@ -1,24 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNews } from '../context/NewsContext';
+import { supabase } from '../lib/supabase';
 import { LogIn } from 'lucide-react';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useNews();
+  const [loading, setLoading] = useState(false);
+  const { user } = useNews();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulate simple auth
-    if (username === 'admin' && password === 'admin') {
-      login(username);
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user.isAuthenticated) {
       navigate('/admin');
-    } else {
-      setError('Invalid username or password. Try admin/admin');
     }
+  }, [user, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      navigate('/admin');
+    }
+    setLoading(false);
   };
 
   return (
@@ -36,13 +52,14 @@ const Login = () => {
 
       <form onSubmit={handleLogin}>
         <div className="form-group">
-          <label className="form-label">Username</label>
+          <label className="form-label">Email</label>
           <input
-            type="text"
+            type="email"
             className="form-input"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
         <div className="form-group">
@@ -53,10 +70,11 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>
-          <LogIn size={18} /> Sign In
+        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
+          <LogIn size={18} /> {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
     </div>
