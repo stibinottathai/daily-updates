@@ -59,9 +59,11 @@ export function getReadingTime(content: string): number {
 /** Format a date string to a readable format */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
+  // Using explicit UTC to prevent timezone based hydration errors
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC'
   });
 }

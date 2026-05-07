@@ -36,13 +36,20 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
+  // Prevent hydration mismatch by using a mounted state
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
   }, []);
+
+  // Use a stable default during SSR and initial hydration
+  const currentTheme = mounted ? theme : 'dark';
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
@@ -246,8 +253,8 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <NewsContext.Provider value={{
-        articles, user, isLoading, toasts, bookmarks, theme, toggleTheme,
+      <NewsContext.Provider value={{
+        articles, user, isLoading, toasts, bookmarks, theme: currentTheme, toggleTheme,
         addArticle, deleteArticle, updateArticle, logout,
         addToast, toggleBookmark, isBookmarked,
         submitContactMessage, fetchContactMessages, deleteContactMessage,
