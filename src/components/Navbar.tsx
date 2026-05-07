@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun } from 'lucide-react';
+import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown } from 'lucide-react';
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
 import ContactUsModal from './ContactUsModal';
@@ -16,6 +16,10 @@ export default function Navbar() {
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+
+  const visibleCategories = CATEGORIES.slice(0, 9);
+  const hiddenCategories = CATEGORIES.slice(9);
 
   return (
     <>
@@ -110,7 +114,7 @@ export default function Navbar() {
           <Link href="/" className={`cat-link ${!currentCategory ? 'active' : ''}`}>
             Latest
           </Link>
-          {CATEGORIES.map(category => (
+          {visibleCategories.map(category => (
             <Link 
               key={category} 
               href={`/?category=${category}`} 
@@ -119,6 +123,57 @@ export default function Navbar() {
               {category}
             </Link>
           ))}
+          {hiddenCategories.length > 0 && (
+            <div 
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setMoreDropdownOpen(true)}
+              onMouseLeave={() => setMoreDropdownOpen(false)}
+            >
+              <button 
+                className={`cat-link ${hiddenCategories.includes(currentCategory as any) ? 'active' : ''}`}
+                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', outline: 'none' }}
+                onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+              >
+                More <ChevronDown size={14} />
+              </button>
+              
+              {moreDropdownOpen && (
+                <div 
+                  style={{ 
+                    position: 'absolute', 
+                    top: '100%', 
+                    right: 0, 
+                    background: 'var(--surface-color)', 
+                    border: '1px solid var(--border-color)', 
+                    borderRadius: '4px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    zIndex: 100,
+                    minWidth: '150px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '0.5rem 0'
+                  }}
+                >
+                  {hiddenCategories.map(category => (
+                    <Link 
+                      key={category} 
+                      href={`/?category=${category}`} 
+                      className="dropdown-item"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        color: currentCategory === category ? 'var(--accent-gold)' : 'var(--text-main)',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem'
+                      }}
+                      onClick={() => setMoreDropdownOpen(false)}
+                    >
+                      {category}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </nav>
       
