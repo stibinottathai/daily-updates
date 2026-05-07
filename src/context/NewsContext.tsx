@@ -100,6 +100,8 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addToast(`Error: ${error.message}`, 'error');
       return false;
     }
+
+    addToast('Message sent successfully', 'success');
     return true;
   }, [addToast]);
 
