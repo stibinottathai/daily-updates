@@ -10,7 +10,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user, addToast } = useNews();
+  const { user, addToast, refreshAuth } = useNews();
   const router = useRouter();
 
   // Redirect if already authenticated
@@ -32,6 +32,7 @@ export default function Login() {
     if (error) {
       addToast(error.message, 'error');
     } else {
+      await refreshAuth();
       addToast('Logged in successfully', 'success');
       router.push('/admin');
     }

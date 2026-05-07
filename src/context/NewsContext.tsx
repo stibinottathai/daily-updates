@@ -24,6 +24,7 @@ interface NewsContextType {
   fetchContactMessages: () => Promise<any[]>;
   deleteContactMessage: (id: string) => Promise<boolean>;
   clearAllMessages: () => Promise<boolean>;
+  refreshAuth: () => Promise<void>;
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
@@ -145,6 +146,27 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   }, [addToast]);
 
+  const refreshAuth = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      setUser({
+        id: session.user.id,
+        email: session.user.email || '',
+        role: data?.role || 'sub_admin',
+        isAuthenticated: true,
+      });
+    } else {
+      setUser({ email: '', isAuthenticated: false });
+    }
+  }, []);
+
   // Fetch articles and auth state
   useEffect(() => {
     const fetchArticles = async () => {
@@ -160,29 +182,10 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
-    const fetchProfile = async (userId: string, email: string) => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-      
-      setUser({ 
-        id: userId, 
-        email: email, 
-        role: data?.role || 'sub_admin',
-        isAuthenticated: true 
-      });
-    };
-
     const init = async () => {
       setIsLoading(true);
       await fetchArticles();
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        await fetchProfile(session.user.id, session.user.email || '');
-      }
+      await refreshAuth();
       setIsLoading(false);
     };
 
@@ -191,7 +194,7 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Listen for changes on auth state
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchProfile(session.user.id, session.user.email || '');
+        refreshAuth();
       } else {
         setUser({ email: '', isAuthenticated: false });
       }
@@ -214,7 +217,7 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       authSub.unsubscribe();
       supabase.removeChannel(articleSub);
     };
-  }, [addToast]);
+  }, [addToast, refreshAuth]);
 
   const addArticle = async (article: Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>) => {
     const { error } = await supabase.from('articles').insert([{...article, author_id: user.id}]);
@@ -258,7 +261,7 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addArticle, deleteArticle, updateArticle, logout,
         addToast, toggleBookmark, isBookmarked,
         submitContactMessage, fetchContactMessages, deleteContactMessage,
-        clearAllMessages
+        clearAllMessages, refreshAuth
       }}>
       {children}
     </NewsContext.Provider>
