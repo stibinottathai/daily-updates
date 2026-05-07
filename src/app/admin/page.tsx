@@ -1,13 +1,15 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useNews } from '../context/NewsContext';
-import type { NewsArticle } from '../types';
-import { CATEGORIES, formatDate } from '../types';
+import { useRouter } from 'next/navigation';
+import { useNews } from '../../context/NewsContext';
+import type { NewsArticle } from '../../types';
+import { CATEGORIES, formatDate } from '../../types';
 import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare } from 'lucide-react';
 
-const AdminDashboard = () => {
-  const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage } = useNews();
-  const navigate = useNavigate();
+export default function AdminDashboard() {
+  const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages } = useNews();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<Partial<NewsArticle>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -20,9 +22,9 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!isLoading && !user.isAuthenticated) {
-      navigate('/login');
+      router.push('/login');
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, router]);
 
   if (isLoading || !user.isAuthenticated) return null;
 
@@ -58,6 +60,16 @@ const AdminDashboard = () => {
       const success = await deleteContactMessage(id);
       if (success) {
         setMessages(messages.filter(m => m.id !== id));
+      }
+    }
+  };
+
+  const handleClearAllMessages = async () => {
+    if (messages.length === 0) return;
+    if (window.confirm('Are you sure you want to clear ALL messages? This action cannot be undone.')) {
+      const success = await clearAllMessages();
+      if (success) {
+        setMessages([]);
       }
     }
   };
@@ -189,20 +201,28 @@ const AdminDashboard = () => {
         </table>
       </div>
       ) : (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Sender Email</th>
-                <th>Message Content</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
+        <div>
+          {messages.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+              <button className="btn btn-destructive" onClick={handleClearAllMessages}>
+                <Trash2 size={16} /> Clear All Messages
+              </button>
+            </div>
+          )}
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Sender Email</th>
+                  <th>Message Content</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
             <tbody>
               {messages.length === 0 ? (
                 <tr>
-                  <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>No messages found.</td>
+                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>No messages found.</td>
                 </tr>
               ) : (
                 messages.map(msg => (
@@ -222,6 +242,7 @@ const AdminDashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       )}
 
@@ -333,6 +354,4 @@ const AdminDashboard = () => {
       )}
     </div>
   );
-};
-
-export default AdminDashboard;
+}

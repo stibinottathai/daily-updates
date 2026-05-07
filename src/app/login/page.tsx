@@ -1,22 +1,24 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useNews } from '../context/NewsContext';
-import { supabase } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
+import { useNews } from '../../context/NewsContext';
+import { supabase } from '../../lib/supabase';
 import { LogIn, X } from 'lucide-react';
 
-const Login = () => {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { user, addToast } = useNews();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user.isAuthenticated) {
-      navigate('/admin');
+      router.push('/admin');
     }
-  }, [user, navigate]);
+  }, [user, router]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ const Login = () => {
       addToast(error.message, 'error');
     } else {
       addToast('Logged in successfully', 'success');
-      navigate('/admin');
+      router.push('/admin');
     }
     setLoading(false);
   };
@@ -53,7 +55,7 @@ const Login = () => {
         
         {/* Close Button */}
         <button 
-          onClick={() => navigate('/')}
+          onClick={() => router.push('/')}
           style={{ 
             position: 'absolute', 
             top: '1rem', 
@@ -108,6 +110,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

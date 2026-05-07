@@ -1,16 +1,17 @@
-import { useParams, useNavigate } from 'react-router-dom';
+"use client";
+
+import { useRouter } from 'next/navigation';
 import { useNews } from '../context/NewsContext';
 import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
-import { getReadingTime, formatDate } from '../types';
+import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 
-const ArticleDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const { articles, toggleBookmark, isBookmarked, addToast } = useNews();
-  const navigate = useNavigate();
+export default function ArticleDetailClient({ article }: { article: NewsArticle }) {
+  const { toggleBookmark, isBookmarked, addToast } = useNews();
+  const router = useRouter();
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const article = articles.find(a => a.id === id);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,18 +29,6 @@ const ArticleDetail = () => {
     addToast('Link copied to clipboard', 'success');
   };
 
-  if (!article) {
-    return (
-      <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Article not found</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>The article you are looking for does not exist or has been removed.</p>
-        <button className="btn btn-outline" onClick={() => navigate('/')}>
-          <ArrowLeft size={16} /> Return Home
-        </button>
-      </div>
-    );
-  }
-
   return (
     <>
       {/* Reading Progress Bar */}
@@ -49,7 +38,7 @@ const ArticleDetail = () => {
 
       <article className="animate-fade-in stagger-1">
         <div className="article-hero">
-          <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: 0 }}>
+          <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: 0 }}>
             <ArrowLeft size={16} /> Back
           </button>
           
@@ -92,14 +81,40 @@ const ArticleDetail = () => {
           />
         </div>
 
-        <div className="article-body">
-          <div style={{ whiteSpace: 'pre-wrap' }}>
+        <div className="article-body" style={{ position: 'relative' }}>
+          <div style={{ 
+            whiteSpace: 'pre-wrap',
+            maxHeight: isExpanded ? 'none' : '400px',
+            overflow: 'hidden',
+            maskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',
+            WebkitMaskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',
+            transition: 'max-height 0.3s ease-out'
+          }}>
             {article.content}
           </div>
+          
+          {!isExpanded && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              position: 'absolute', 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              paddingTop: '4rem',
+              background: 'linear-gradient(to bottom, transparent, var(--bg-color) 80%)'
+            }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => setIsExpanded(true)}
+                style={{ padding: '0.75rem 2rem', borderRadius: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}
+              >
+                Read More
+              </button>
+            </div>
+          )}
         </div>
       </article>
     </>
   );
-};
-
-export default ArticleDetail;
+}

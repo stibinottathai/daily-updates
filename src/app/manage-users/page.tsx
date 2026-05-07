@@ -1,9 +1,11 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useNews } from '../context/NewsContext';
-import { supabase } from '../lib/supabase';
+import { useRouter } from 'next/navigation';
+import { useNews } from '../../context/NewsContext';
+import { supabase } from '../../lib/supabase';
 import { UserPlus, Shield, Mail, Lock, ShieldAlert } from 'lucide-react';
-import { formatDate } from '../types';
+import { formatDate } from '../../types';
 
 interface Profile {
   id: string;
@@ -12,9 +14,9 @@ interface Profile {
   created_at: string;
 }
 
-const ManageUsers = () => {
+export default function ManageUsers() {
   const { user, isLoading, addToast } = useNews();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   
@@ -26,9 +28,9 @@ const ManageUsers = () => {
 
   useEffect(() => {
     if (!isLoading && (!user.isAuthenticated || user.role !== 'super_admin')) {
-      navigate('/admin');
+      router.push('/admin');
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, router]);
 
   const fetchProfiles = async () => {
     setLoadingProfiles(true);
@@ -188,6 +190,4 @@ const ManageUsers = () => {
       </div>
     </div>
   );
-};
-
-export default ManageUsers;
+}

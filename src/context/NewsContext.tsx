@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { NewsArticle, User, Toast } from '../types';
@@ -9,6 +11,8 @@ interface NewsContextType {
   isLoading: boolean;
   toasts: Toast[];
   bookmarks: string[];
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
   addArticle: (article: Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>) => Promise<boolean>;
   deleteArticle: (id: string) => Promise<boolean>;
   updateArticle: (id: string, article: Partial<NewsArticle>) => Promise<boolean>;
@@ -19,6 +23,7 @@ interface NewsContextType {
   submitContactMessage: (email: string, content: string) => Promise<boolean>;
   fetchContactMessages: () => Promise<any[]>;
   deleteContactMessage: (id: string) => Promise<boolean>;
+  clearAllMessages: () => Promise<boolean>;
 }
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
@@ -29,6 +34,24 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      const newTheme = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+      return newTheme;
+    });
+  }, []);
 
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -97,6 +120,21 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     
     addToast('Message deleted successfully', 'success');
+    return true;
+  }, [addToast]);
+
+  const clearAllMessages = useCallback(async () => {
+    const { error } = await supabase
+      .from('contact_messages')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+    
+    if (error) {
+      addToast(`Failed to clear messages: ${error.message}`, 'error');
+      return false;
+    }
+    
+    addToast('All messages cleared successfully', 'success');
     return true;
   }, [addToast]);
 
@@ -208,12 +246,13 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <NewsContext.Provider value={{ 
-      articles, user, isLoading, toasts, bookmarks, 
-      addArticle, deleteArticle, updateArticle, logout,
-      addToast, toggleBookmark, isBookmarked,
-      submitContactMessage, fetchContactMessages, deleteContactMessage
-    }}>
+    <NewsContext.Provider value={{
+        articles, user, isLoading, toasts, bookmarks, theme, toggleTheme,
+        addArticle, deleteArticle, updateArticle, logout,
+        addToast, toggleBookmark, isBookmarked,
+        submitContactMessage, fetchContactMessages, deleteContactMessage,
+        clearAllMessages
+      }}>
       {children}
     </NewsContext.Provider>
   );

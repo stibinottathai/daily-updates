@@ -25,7 +25,13 @@ export const CATEGORIES = [
   'Science',
   'Health',
   'Sports',
-  'Entertainment'
+  'Entertainment',
+  'Politics',
+  'Travel',
+  'Lifestyle',
+  'Automotive',
+  'Education',
+  'Environment'
 ] as const;
 
 export type Category = typeof CATEGORIES[number];

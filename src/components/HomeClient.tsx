@@ -1,18 +1,15 @@
+"use client";
+
 import { useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock } from 'lucide-react';
-import { getReadingTime, formatDate } from '../types';
+import { getReadingTime, formatDate, type NewsArticle } from '../types';
 
-const Home = () => {
-  const { articles, isLoading, toggleBookmark, isBookmarked } = useNews();
-  const [searchParams] = useSearchParams();
+export default function HomeClient({ articles, initialCategory }: { articles: NewsArticle[], initialCategory: string | null }) {
+  const { toggleBookmark, isBookmarked } = useNews();
   const [searchQuery, setSearchQuery] = useState('');
-  const selectedCategory = searchParams.get('category');
-
-  if (isLoading) {
-    return <div style={{ padding: '5rem 0', textAlign: 'center', color: 'var(--text-muted)' }}>Loading stories...</div>;
-  }
+  const selectedCategory = initialCategory;
 
   // Filter logic
   let filteredArticles = selectedCategory 
@@ -60,7 +57,7 @@ const Home = () => {
             {/* Featured Article */}
             {featuredArticle && (
               <article className="article-card featured-card animate-fade-in stagger-2">
-                <Link to={`/article/${featuredArticle.id}`}>
+                <Link href={`/article/${featuredArticle.id}`}>
                   <div className="card-image-wrapper">
                     <img src={featuredArticle.image_url} alt={featuredArticle.title} className="card-image" />
                   </div>
@@ -75,7 +72,7 @@ const Home = () => {
                       <Bookmark size={20} fill={isBookmarked(featuredArticle.id) ? "currentColor" : "none"} />
                     </button>
                   </div>
-                  <Link to={`/article/${featuredArticle.id}`}>
+                  <Link href={`/article/${featuredArticle.id}`}>
                     <h2 className="card-title">{featuredArticle.title}</h2>
                     <p className="card-excerpt" style={{ fontSize: '1.1rem' }}>{featuredArticle.excerpt}</p>
                   </Link>
@@ -101,7 +98,7 @@ const Home = () => {
                       <Bookmark size={16} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
                     </button>
                   </div>
-                  <Link to={`/article/${article.id}`}>
+                  <Link href={`/article/${article.id}`}>
                     <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
                   </Link>
                   <div className="meta-text" style={{ marginTop: '0.5rem' }}>
@@ -117,7 +114,7 @@ const Home = () => {
             <div className="secondary-grid">
               {regularArticles.slice(3).map((article) => (
                 <article key={article.id} className="article-card animate-fade-in stagger-3">
-                  <Link to={`/article/${article.id}`}>
+                  <Link href={`/article/${article.id}`}>
                     <div className="card-image-wrapper">
                       <img src={article.image_url} alt={article.title} className="card-image" />
                     </div>
@@ -126,7 +123,7 @@ const Home = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span className="card-category">{article.category}</span>
                     </div>
-                    <Link to={`/article/${article.id}`}>
+                    <Link href={`/article/${article.id}`}>
                       <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
                     </Link>
                     <div className="meta-text" style={{ marginTop: '1rem' }}>
@@ -141,6 +138,4 @@ const Home = () => {
       )}
     </div>
   );
-};
-
-export default Home;
+}
