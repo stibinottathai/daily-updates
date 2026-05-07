@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNews } from '../context/NewsContext';
 import { supabase } from '../lib/supabase';
-import { LogIn } from 'lucide-react';
+import { LogIn, X } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user } = useNews();
+  const { user, addToast } = useNews();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
@@ -19,64 +18,94 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
+    
     if (error) {
-      setError(error.message);
+      addToast(error.message, 'error');
     } else {
+      addToast('Logged in successfully', 'success');
       navigate('/admin');
     }
     setLoading(false);
   };
 
   return (
-    <div className="login-container">
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Admin Login</h2>
-        <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>Access the dashboard to manage news.</p>
-      </div>
-
-      {error && (
-        <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '0.5rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleLogin}>
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            className="form-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={loading}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={loading}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loading}>
-          <LogIn size={18} /> {loading ? 'Signing in...' : 'Sign In'}
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <div className="animate-fade-in stagger-1" style={{ 
+        width: '100%', 
+        maxWidth: '400px', 
+        padding: '2.5rem', 
+        background: 'var(--surface-color)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: 'var(--radius-md)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Accent top border */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gold)' }}></div>
+        
+        {/* Close Button */}
+        <button 
+          onClick={() => navigate('/')}
+          style={{ 
+            position: 'absolute', 
+            top: '1rem', 
+            right: '1rem', 
+            background: 'none', 
+            border: 'none', 
+            color: 'var(--text-muted)', 
+            cursor: 'pointer' 
+          }}
+          title="Close"
+        >
+          <X size={20} />
         </button>
-      </form>
+
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Admin Login</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            Access the dashboard to manage news.
+          </p>
+        </div>
+
+        <form onSubmit={handleAuth}>
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+              placeholder="editor@dailyupdates.com"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+              placeholder="••••••••"
+            />
+          </div>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem', padding: '0.8rem' }} disabled={loading}>
+            <LogIn size={18} />
+            {loading ? 'Processing...' : 'Sign In'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

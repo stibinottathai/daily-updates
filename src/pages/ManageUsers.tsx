@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNews } from '../context/NewsContext';
 import { supabase } from '../lib/supabase';
-import { UserPlus, ShieldAlert, Check } from 'lucide-react';
+import { UserPlus, Shield, Mail, Lock, ShieldAlert } from 'lucide-react';
+import { formatDate } from '../types';
 
 interface Profile {
   id: string;
@@ -12,22 +13,20 @@ interface Profile {
 }
 
 const ManageUsers = () => {
-  const { user, isLoading } = useNews();
+  const { user, isLoading, addToast } = useNews();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
-  const [successMsg, setSuccessMsg] = useState('');
   
   // New user state
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'sub_admin'>('sub_admin');
   const [createLoading, setCreateLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (!isLoading && (!user.isAuthenticated || user.role !== 'super_admin')) {
-      navigate('/admin'); // Kick them out if not super admin
+      navigate('/admin');
     }
   }, [user, isLoading, navigate]);
 
@@ -38,7 +37,9 @@ const ManageUsers = () => {
       .select('*')
       .order('created_at', { ascending: false });
       
-    if (!error && data) {
+    if (error) {
+      addToast(`Error loading users: ${error.message}`, 'error');
+    } else if (data) {
       setProfiles(data as Profile[]);
     }
     setLoadingProfiles(false);
@@ -51,143 +52,138 @@ const ManageUsers = () => {
   }, [user.role]);
 
   const updateRole = async (userId: string, newRole: string) => {
-    setSuccessMsg('');
     const { error } = await supabase
       .from('profiles')
       .update({ role: newRole })
       .eq('id', userId);
       
-    if (!error) {
-      setSuccessMsg('Role updated successfully.');
+    if (error) {
+      addToast(`Failed to update role: ${error.message}`, 'error');
+    } else {
+      addToast('Role updated successfully.', 'success');
       fetchProfiles();
-      setTimeout(() => setSuccessMsg(''), 3000);
     }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreateLoading(true);
-    setErrorMsg('');
-    setSuccessMsg('');
 
-    // Sign up the new user
     const { data, error } = await supabase.auth.signUp({
       email: newEmail,
       password: newPassword,
     });
 
     if (error) {
-      setErrorMsg(error.message);
+      addToast(error.message, 'error');
       setCreateLoading(false);
       return;
     }
 
-    // Since our trigger might set them to sub_admin by default, update their role if needed
     if (data.user && newRole !== 'sub_admin') {
       await supabase.from('profiles').update({ role: newRole }).eq('id', data.user.id);
     }
 
-    setSuccessMsg(`User ${newEmail} created successfully!`);
+    addToast(`User ${newEmail} created successfully!`, 'success');
     setNewEmail('');
     setNewPassword('');
     fetchProfiles();
     setCreateLoading(false);
-    setTimeout(() => setSuccessMsg(''), 3000);
   };
 
   if (isLoading || user.role !== 'super_admin') return null;
 
   return (
-    <div>
-      <div className="admin-header">
+    <div className="animate-fade-in stagger-1">
+      <div className="dashboard-header">
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <ShieldAlert className="text-primary" /> Super Admin Control Panel
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <ShieldAlert size={36} color="var(--accent-gold)" /> Access Control
           </h2>
-          <p style={{ color: 'var(--muted)' }}>Create and manage admins and sub-admins across the system.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Manage platform administrators and their permissions.</p>
         </div>
       </div>
 
-      {successMsg && (
-        <div style={{ padding: '1rem', backgroundColor: '#dcfce7', color: '#166534', borderRadius: '0.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Check size={18} /> {successMsg}
-        </div>
-      )}
-
-      {errorMsg && (
-        <div style={{ padding: '1rem', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '0.5rem', marginBottom: '2rem' }}>
-          {errorMsg}
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '3rem', alignItems: 'start' }}>
+        
         {/* Create User Form */}
-        <div style={{ background: 'var(--card)', padding: '1.5rem', borderRadius: '0.5rem', border: '1px solid var(--border)' }}>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <UserPlus size={20} /> Add New User
+        <div style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <UserPlus size={24} color="var(--accent-gold)" /> Provision New Admin
           </h3>
-          <form onSubmit={handleCreateUser}>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input type="email" className="form-input" value={newEmail} onChange={e => setNewEmail(e.target.value)} required />
+          <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Mail size={14} /> Email Address</label>
+              <input type="email" className="form-input" value={newEmail} onChange={e => setNewEmail(e.target.value)} required placeholder="editor@dailyupdates.com" />
             </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input type="password" className="form-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Lock size={14} /> Password</label>
+              <input type="password" className="form-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} required placeholder="••••••••" />
             </div>
-            <div className="form-group">
-              <label className="form-label">Role</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Shield size={14} /> Access Level</label>
               <select className="form-input" value={newRole} onChange={e => setNewRole(e.target.value as any)}>
-                <option value="admin">Admin</option>
-                <option value="sub_admin">Sub Admin</option>
+                <option value="admin">Editor (Admin)</option>
+                <option value="sub_admin">Contributor (Sub Admin)</option>
               </select>
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={createLoading}>
-              {createLoading ? 'Creating...' : 'Create User'}
+            <button type="submit" className="btn btn-primary" style={{ height: '45px' }} disabled={createLoading}>
+              {createLoading ? 'Provisioning...' : 'Provision User'}
             </button>
           </form>
         </div>
 
         {/* Users Table */}
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingProfiles ? (
+        <div>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Active Administrators</h3>
+          <div className="table-container">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={3} style={{ textAlign: 'center', color: 'var(--muted)' }}>Loading users...</td>
+                  <th>Identity</th>
+                  <th>Permission Level</th>
+                  <th>Granted</th>
                 </tr>
-              ) : (
-                profiles.map(profile => (
-                  <tr key={profile.id}>
-                    <td style={{ fontWeight: '500' }}>
-                      {profile.email} {profile.id === user.id && <span style={{ fontSize: '0.75rem', background: 'var(--primary)', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '1rem', marginLeft: '0.5rem' }}>You</span>}
-                    </td>
-                    <td>
-                      <select 
-                        className="form-input" 
-                        style={{ padding: '0.25rem', width: 'auto' }}
-                        value={profile.role}
-                        onChange={(e) => updateRole(profile.id, e.target.value)}
-                        disabled={profile.id === user.id} // Don't let super admin change their own role accidentally
-                      >
-                        <option value="super_admin">Super Admin</option>
-                        <option value="admin">Admin</option>
-                        <option value="sub_admin">Sub Admin</option>
-                      </select>
-                    </td>
-                    <td>{new Date(profile.created_at).toLocaleDateString()}</td>
+              </thead>
+              <tbody>
+                {loadingProfiles ? (
+                  <tr>
+                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>Fetching access records...</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  profiles.map(profile => (
+                    <tr key={profile.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                            {profile.email.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{profile.email}</div>
+                            {profile.id === user.id && <span style={{ fontSize: '0.7rem', color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Session</span>}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <select 
+                          className="form-input" 
+                          style={{ padding: '0.5rem', width: 'auto', background: profile.id === user.id ? 'transparent' : 'var(--surface-color)', border: profile.id === user.id ? 'none' : '1px solid var(--border-color)' }}
+                          value={profile.role}
+                          onChange={(e) => updateRole(profile.id, e.target.value)}
+                          disabled={profile.id === user.id}
+                        >
+                          <option value="super_admin">Super Administrator</option>
+                          <option value="admin">Editor (Admin)</option>
+                          <option value="sub_admin">Contributor (Sub Admin)</option>
+                        </select>
+                      </td>
+                      <td style={{ color: 'var(--text-muted)' }}>{formatDate(profile.created_at)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

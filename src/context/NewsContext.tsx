@@ -1,51 +1,122 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { NewsArticle, User } from '../types';
+import type { NewsArticle, User, Toast } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface NewsContextType {
   articles: NewsArticle[];
   user: User;
   isLoading: boolean;
-  addArticle: (article: Omit<NewsArticle, 'id' | 'date'>) => void;
-  deleteArticle: (id: string) => void;
-  updateArticle: (id: string, article: Partial<NewsArticle>) => void;
+  toasts: Toast[];
+  bookmarks: string[];
+  addArticle: (article: Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>) => Promise<boolean>;
+  deleteArticle: (id: string) => Promise<boolean>;
+  updateArticle: (id: string, article: Partial<NewsArticle>) => Promise<boolean>;
   logout: () => Promise<void>;
+  addToast: (message: string, type: 'success' | 'error' | 'info') => void;
+  toggleBookmark: (id: string) => void;
+  isBookmarked: (id: string) => boolean;
+  submitContactMessage: (email: string, content: string) => Promise<boolean>;
+  fetchContactMessages: () => Promise<any[]>;
+  deleteContactMessage: (id: string) => Promise<boolean>;
 }
-
-const initialArticles: NewsArticle[] = [
-  {
-    id: '1',
-    title: 'The Future of Web Development',
-    excerpt: 'Exploring the latest trends in React, edge computing, and serverless architectures.',
-    content: 'Full article content here...',
-    imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085',
-    author: 'Jane Doe',
-    date: new Date().toISOString(),
-    category: 'Technology'
-  },
-  {
-    id: '2',
-    title: 'Sustainable Technology Innovations',
-    excerpt: 'How tech companies are shifting towards green energy and reducing their carbon footprint.',
-    content: 'Full article content here...',
-    imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e',
-    author: 'John Smith',
-    date: new Date().toISOString(),
-    category: 'Science'
-  }
-];
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
 export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [articles, setArticles] = useState<NewsArticle[]>(initialArticles);
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [user, setUser] = useState<User>({ email: '', isAuthenticated: false });
   const [isLoading, setIsLoading] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [bookmarks, setBookmarks] = useState<string[]>([]);
 
+  const addToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  }, []);
+
+  // Load bookmarks from local storage
   useEffect(() => {
-    const fetchProfile = async (userId: string, email: string) => {
+    const saved = localStorage.getItem('bookmarks');
+    if (saved) {
+      try {
+        setBookmarks(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse bookmarks');
+      }
+    }
+  }, []);
+
+  const toggleBookmark = useCallback((id: string) => {
+    setBookmarks(prev => {
+      const newBookmarks = prev.includes(id) ? prev.filter(b => b !== id) : [...prev, id];
+      localStorage.setItem('bookmarks', JSON.stringify(newBookmarks));
+      return newBookmarks;
+    });
+  }, []);
+
+  const isBookmarked = useCallback((id: string) => bookmarks.includes(id), [bookmarks]);
+
+  const submitContactMessage = useCallback(async (email: string, content: string) => {
+    const { error } = await supabase
+      .from('contact_messages')
+      .insert([{ email, content }]);
+    
+    if (error) {
+      addToast(`Error: ${error.message}`, 'error');
+      return false;
+    }
+    return true;
+  }, [addToast]);
+
+  const fetchContactMessages = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('contact_messages')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      addToast(`Error: ${error.message}`, 'error');
+      return [];
+    }
+    return data || [];
+  }, [addToast]);
+
+  const deleteContactMessage = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('contact_messages')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      addToast(`Failed to delete message: ${error.message}`, 'error');
+      return false;
+    }
+    
+    addToast('Message deleted successfully', 'success');
+    return true;
+  }, [addToast]);
+
+  // Fetch articles and auth state
+  useEffect(() => {
+    const fetchArticles = async () => {
       const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        addToast('Failed to load articles', 'error');
+      } else if (data) {
+        setArticles(data as NewsArticle[]);
+      }
+    };
+
+    const fetchProfile = async (userId: string, email: string) => {
+      const { data } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
@@ -57,20 +128,23 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         role: data?.role || 'sub_admin',
         isAuthenticated: true 
       });
+    };
+
+    const init = async () => {
+      setIsLoading(true);
+      await fetchArticles();
+      
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await fetchProfile(session.user.id, session.user.email || '');
+      }
       setIsLoading(false);
     };
 
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchProfile(session.user.id, session.user.email || '');
-      } else {
-        setIsLoading(false);
-      }
-    });
+    init();
 
-    // Listen for changes on auth state (logged in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for changes on auth state
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         fetchProfile(session.user.id, session.user.email || '');
       } else {
@@ -78,33 +152,68 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Real-time subscription for articles
+    const articleSub = supabase.channel('public:articles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, payload => {
+        if (payload.eventType === 'INSERT') {
+          setArticles(prev => [payload.new as NewsArticle, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setArticles(prev => prev.map(a => a.id === payload.new.id ? payload.new as NewsArticle : a));
+        } else if (payload.eventType === 'DELETE') {
+          setArticles(prev => prev.filter(a => a.id !== payload.old.id));
+        }
+      })
+      .subscribe();
 
-  const addArticle = (article: Omit<NewsArticle, 'id' | 'date'>) => {
-    const newArticle = {
-      ...article,
-      id: Math.random().toString(36).substr(2, 9),
-      date: new Date().toISOString(),
+    return () => {
+      authSub.unsubscribe();
+      supabase.removeChannel(articleSub);
     };
-    setArticles([newArticle, ...articles]);
+  }, [addToast]);
+
+  const addArticle = async (article: Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>) => {
+    const { error } = await supabase.from('articles').insert([{...article, author_id: user.id}]);
+    if (error) {
+      addToast(`Error: ${error.message}`, 'error');
+      return false;
+    }
+    addToast('Article published successfully', 'success');
+    return true;
   };
 
-  const deleteArticle = (id: string) => {
-    setArticles(articles.filter(a => a.id !== id));
+  const deleteArticle = async (id: string) => {
+    const { error } = await supabase.from('articles').delete().eq('id', id);
+    if (error) {
+      addToast(`Error: ${error.message}`, 'error');
+      return false;
+    }
+    addToast('Article deleted', 'success');
+    return true;
   };
 
-  const updateArticle = (id: string, updatedFields: Partial<NewsArticle>) => {
-    setArticles(articles.map(a => a.id === id ? { ...a, ...updatedFields } : a));
+  const updateArticle = async (id: string, updatedFields: Partial<NewsArticle>) => {
+    const { error } = await supabase.from('articles').update(updatedFields).eq('id', id);
+    if (error) {
+      addToast(`Error: ${error.message}`, 'error');
+      return false;
+    }
+    addToast('Article updated', 'success');
+    return true;
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
     setUser({ email: '', isAuthenticated: false });
+    addToast('Logged out successfully', 'info');
   };
 
   return (
-    <NewsContext.Provider value={{ articles, user, isLoading, addArticle, deleteArticle, updateArticle, logout }}>
+    <NewsContext.Provider value={{ 
+      articles, user, isLoading, toasts, bookmarks, 
+      addArticle, deleteArticle, updateArticle, logout,
+      addToast, toggleBookmark, isBookmarked,
+      submitContactMessage, fetchContactMessages, deleteContactMessage
+    }}>
       {children}
     </NewsContext.Provider>
   );
