@@ -10,6 +10,8 @@ export default async function Page({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedSearchParams = await searchParams;
+  const categoryParam = resolvedSearchParams.category;
+  const initialCategory = typeof categoryParam === 'string' ? categoryParam : null;
   const { data, error } = await supabase
     .from('articles')
     .select('*')
@@ -17,11 +19,8 @@ export default async function Page({
 
   if (error) {
     console.error('Error fetching articles:', error);
-    return <div>Error loading articles</div>;
+    return <HomeClient articles={[]} initialCategory={initialCategory} serverLoadFailed />;
   }
-
-  const categoryParam = resolvedSearchParams.category;
-  const initialCategory = typeof categoryParam === 'string' ? categoryParam : null;
 
   return <HomeClient articles={data as NewsArticle[]} initialCategory={initialCategory} />;
 }

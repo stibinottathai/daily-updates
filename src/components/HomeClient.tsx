@@ -7,15 +7,25 @@ import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 
-export default function HomeClient({ articles, initialCategory }: { articles: NewsArticle[], initialCategory: string | null }) {
-  const { toggleBookmark, isBookmarked } = useNews();
+export default function HomeClient({
+  articles,
+  initialCategory,
+  serverLoadFailed = false,
+}: {
+  articles: NewsArticle[];
+  initialCategory: string | null;
+  serverLoadFailed?: boolean;
+}) {
+  const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked } = useNews();
   const [searchQuery, setSearchQuery] = useState('');
   const selectedCategory = initialCategory;
+  const displayArticles = articles.length > 0 ? articles : liveArticles;
+  const isRecovering = serverLoadFailed && isLoading && displayArticles.length === 0;
 
   // Filter logic
   let filteredArticles = selectedCategory 
-    ? articles.filter(a => a.category === selectedCategory)
-    : articles;
+    ? displayArticles.filter(a => a.category === selectedCategory)
+    : displayArticles;
     
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
@@ -48,7 +58,11 @@ export default function HomeClient({ articles, initialCategory }: { articles: Ne
         </div>
       </div>
 
-      {filteredArticles.length === 0 ? (
+      {isRecovering ? (
+        <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }} className="animate-fade-in stagger-2">
+          <p>Loading the latest stories...</p>
+        </div>
+      ) : filteredArticles.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }} className="animate-fade-in stagger-2">
           <p>No stories found matching your criteria.</p>
         </div>
