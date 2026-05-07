@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
 import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
@@ -74,11 +75,17 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             </div>
           </div>
           
-          <img 
-            src={article.image_url} 
-            alt={article.title} 
-            className="article-hero-image"
-          />
+          <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
+            <Image 
+              src={article.image_url} 
+              alt={article.title} 
+              fill
+              priority
+              className="article-hero-image"
+              sizes="100vw"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
         </div>
 
         <div className="article-body" style={{ position: 'relative' }}>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
@@ -59,7 +60,15 @@ export default function HomeClient({ articles, initialCategory }: { articles: Ne
               <article className="article-card featured-card animate-fade-in stagger-2">
                 <Link href={`/article/${featuredArticle.id}`}>
                   <div className="card-image-wrapper">
-                    <img src={featuredArticle.image_url} alt={featuredArticle.title} className="card-image" />
+                    <Image 
+                      src={featuredArticle.image_url} 
+                      alt={featuredArticle.title}
+                      fill
+                      priority
+                      className="card-image"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      style={{ objectFit: 'cover' }}
+                    />
                   </div>
                 </Link>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
@@ -116,7 +125,14 @@ export default function HomeClient({ articles, initialCategory }: { articles: Ne
                 <article key={article.id} className="article-card animate-fade-in stagger-3">
                   <Link href={`/article/${article.id}`}>
                     <div className="card-image-wrapper">
-                      <img src={article.image_url} alt={article.title} className="card-image" />
+                      <Image 
+                        src={article.image_url} 
+                        alt={article.title} 
+                        fill
+                        className="card-image"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{ objectFit: 'cover' }}
+                      />
                     </div>
                   </Link>
                   <div style={{ marginTop: '1rem' }}>

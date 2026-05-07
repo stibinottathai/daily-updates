@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle } from '../../types';
 import { CATEGORIES, formatDate } from '../../types';
@@ -311,8 +312,16 @@ export default function AdminDashboard() {
                   placeholder="https://images.unsplash.com/..."
                 />
                 {currentArticle.image_url && (
-                  <div style={{ marginTop: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', height: '150px', background: 'var(--bg-color)' }}>
-                    <img src={currentArticle.image_url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.currentTarget.style.display = 'none')} onLoad={(e) => (e.currentTarget.style.display = 'block')} />
+                  <div style={{ marginTop: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', height: '150px', background: 'var(--bg-color)', position: 'relative' }}>
+                    <Image 
+                      src={currentArticle.image_url} 
+                      alt="Preview" 
+                      fill
+                      sizes="300px"
+                      style={{ objectFit: 'cover' }} 
+                      onError={(e) => (e.currentTarget.style.display = 'none')} 
+                      onLoad={(e) => (e.currentTarget.style.display = 'block')} 
+                    />
                   </div>
                 )}
               </div>
