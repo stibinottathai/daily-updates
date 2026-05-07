@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown } from 'lucide-react';
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
@@ -11,6 +11,7 @@ import ContactUsModal from './ContactUsModal';
 export default function Navbar() {
   const { user, logout, theme, toggleTheme } = useNews();
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get('category');
   
@@ -22,6 +23,12 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMoreDropdownOpen(false);
+    setContactModalOpen(false);
+  }, [pathname]);
 
   const visibleCategories = CATEGORIES.slice(0, 9);
   const hiddenCategories = CATEGORIES.slice(9);
