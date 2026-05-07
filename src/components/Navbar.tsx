@@ -7,10 +7,9 @@ import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, 
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
 import ContactUsModal from './ContactUsModal';
-import { supabase } from '../lib/supabase';
 
 export default function Navbar() {
-  const { user, logout, theme, toggleTheme, addToast, refreshAuth } = useNews();
+  const { user, logout, theme, toggleTheme } = useNews();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -20,10 +19,6 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -33,47 +28,12 @@ export default function Navbar() {
     setMobileMenuOpen(false);
     setMoreDropdownOpen(false);
     setContactModalOpen(false);
-    setLoginModalOpen(false);
   }, [pathname]);
 
   const visibleCategories = CATEGORIES.slice(0, 9);
   const hiddenCategories = CATEGORIES.slice(9);
   const themeLabel = mounted ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : 'Theme';
   const ThemeIcon = mounted ? (theme === 'dark' ? Sun : Moon) : null;
-
-  const openLoginModal = () => {
-    setMobileMenuOpen(false);
-    setMoreDropdownOpen(false);
-    setContactModalOpen(false);
-    setLoginModalOpen(true);
-  };
-
-  const closeLoginModal = () => {
-    setLoginModalOpen(false);
-    setLoginEmail('');
-    setLoginPassword('');
-  };
-
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoginLoading(true);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    });
-
-    if (error) {
-      addToast(error.message, 'error');
-    } else {
-      await refreshAuth();
-      addToast('Logged in successfully', 'success');
-      closeLoginModal();
-      router.push('/admin');
-    }
-
-    setLoginLoading(false);
-  };
 
   return (
     <>
@@ -107,9 +67,9 @@ export default function Navbar() {
                 <button onClick={() => setContactModalOpen(true)} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <MessageSquare size={16} /> Contact Us
                 </button>
-                <button onClick={openLoginModal} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Link href="/login" className="meta-text" style={{ color: 'var(--text-muted)' }}>
                   <LogIn size={16} /> Admin
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -151,9 +111,6 @@ export default function Navbar() {
                 <button onClick={() => { setContactModalOpen(true); setMobileMenuOpen(false); }} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <MessageSquare size={16} /> Contact Us
                 </button>
-                <button onClick={openLoginModal} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', textAlign: 'left' }}>
-                  <LogIn size={16} /> Admin Login
-                </button>
               </div>
             )}
           </div>
@@ -161,50 +118,6 @@ export default function Navbar() {
       </nav>
       
       <ContactUsModal isOpen={contactModalOpen} onClose={() => setContactModalOpen(false)} />
-
-      {loginModalOpen && (
-        <div className="modal-overlay" onClick={closeLoginModal}>
-          <div className="modal-content animate-fade-in" onClick={(event) => event.stopPropagation()} style={{ maxWidth: '420px', width: 'calc(100% - 2rem)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.5rem', margin: 0 }}>Admin Login</h3>
-              <button onClick={closeLoginModal} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <XIcon size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={handleLogin}>
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input
-                  type="email"
-                  className="form-input"
-                  value={loginEmail}
-                  onChange={(event) => setLoginEmail(event.target.value)}
-                  required
-                  disabled={loginLoading}
-                  placeholder="editor@dailyupdates.com"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Password</label>
-                <input
-                  type="password"
-                  className="form-input"
-                  value={loginPassword}
-                  onChange={(event) => setLoginPassword(event.target.value)}
-                  required
-                  disabled={loginLoading}
-                  placeholder="••••••••"
-                />
-              </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loginLoading}>
-                <LogIn size={18} />
-                {loginLoading ? 'Processing...' : 'Sign In'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
       
       {/* Category Sub Navbar */}
       <nav className="category-nav">
