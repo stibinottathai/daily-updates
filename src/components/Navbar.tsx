@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown } from 'lucide-react';
@@ -14,12 +14,19 @@ export default function Navbar() {
   const searchParams = useSearchParams();
   const currentCategory = searchParams.get('category');
   
+  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const visibleCategories = CATEGORIES.slice(0, 9);
   const hiddenCategories = CATEGORIES.slice(9);
+  const themeLabel = mounted ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : 'Theme';
+  const ThemeIcon = mounted ? (theme === 'dark' ? Sun : Moon) : null;
 
   return (
     <>
@@ -32,7 +39,7 @@ export default function Navbar() {
           
           <div className="nav-actions" style={{ display: 'none' }} id="desktop-actions">
             <button onClick={toggleTheme} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} 
+              {ThemeIcon ? <ThemeIcon size={16} /> : <span style={{ display: 'inline-block', width: '16px', height: '16px' }} />} 
             </button>
             {user.isAuthenticated ? (
               <>
@@ -74,8 +81,8 @@ export default function Navbar() {
           <div style={{ padding: '1rem', background: 'var(--surface-color)', borderBottom: '1px solid var(--border-color)', position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 }}>
             <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
               <button onClick={() => { toggleTheme(); setMobileMenuOpen(false); }} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />} 
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                {ThemeIcon ? <ThemeIcon size={16} /> : <span style={{ display: 'inline-block', width: '16px', height: '16px' }} />} 
+                {themeLabel}
               </button>
             </div>
              {user.isAuthenticated ? (
