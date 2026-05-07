@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown } from 'lucide-react';
@@ -24,7 +24,7 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMobileMenuOpen(false);
     setMoreDropdownOpen(false);
     setContactModalOpen(false);
@@ -39,7 +39,7 @@ export default function Navbar() {
     <>
       <nav className="masthead">
         <div className="container masthead-inner">
-          <Link href="/" className="logo">
+          <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
             <span>Daily Updates</span>
             <span className="logo-accent">Premium News</span>
           </Link>
@@ -133,6 +133,7 @@ export default function Navbar() {
               key={category} 
               href={`/?category=${category}`} 
               className={`cat-link ${currentCategory === category ? 'active' : ''}`}
+              onClick={() => setMobileMenuOpen(false)}
             >
               {category}
             </Link>
@@ -179,7 +180,10 @@ export default function Navbar() {
                         textDecoration: 'none',
                         fontSize: '0.875rem'
                       }}
-                      onClick={() => setMoreDropdownOpen(false)}
+                      onClick={() => {
+                        setMoreDropdownOpen(false);
+                        setMobileMenuOpen(false);
+                      }}
                     >
                       {category}
                     </Link>
