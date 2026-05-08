@@ -178,6 +178,7 @@ export default function AdminDashboard() {
           <div>
             <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Unique Visitors</p>
             <p style={{ fontSize: '2rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>{visitorStats.uniqueVisitors}</p>
+            <p style={{ color: 'var(--text-muted)', margin: '0.15rem 0 0', fontSize: '0.85rem' }}>Browsers/devices</p>
           </div>
         </div>
         <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -211,7 +212,10 @@ export default function AdminDashboard() {
 
       <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.5rem', marginBottom: '3rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Top Visited Pages</h3>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Top Visited Pages</h3>
+            <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0', fontSize: '0.9rem' }}>Site visits count page loads. Unique visitors count each browser/device once.</p>
+          </div>
           <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.7rem' }} onClick={() => fetchVisitorStats().then(setVisitorStats)}>
             Refresh
           </button>
