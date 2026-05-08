@@ -1,45 +1,61 @@
+import { redirect } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
-import type { Metadata, ResolvingMetadata } from 'next';
+import { articlePath, absoluteUrl, baseMetadata, slugify, truncateDescription, SITE_NAME, defaultOgImage } from '../../../lib/seo';
 
-export const revalidate = 0; // Disable cache
+export const revalidate = 60;
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata(
-  props: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const params = await props.params;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function getArticleByParam(param: string): Promise<NewsArticle | null> {
+  if (uuidPattern.test(param)) {
+    const { data } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('id', param)
+      .single();
+
+    return (data as NewsArticle | null) || null;
+  }
+
   const { data } = await supabase
     .from('articles')
-    .select('title, excerpt, image_url')
-    .eq('id', params.id)
-    .single();
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  if (!data) return { title: 'Article Not Found' };
-
-  return {
-    title: `${data.title} | Daily Updates`,
-    description: data.excerpt,
-    openGraph: {
-      images: [data.image_url],
-    },
-  }
+  return ((data as NewsArticle[] | null) || []).find(article => slugify(article.title) === param) || null;
 }
 
-export default async function ArticlePage(props: Props) {
-  const params = await props.params;
-  const { data, error } = await supabase
-    .from('articles')
-    .select('*')
-    .eq('id', params.id)
-    .single();
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+  const article = await getArticleByParam(id);
 
-  if (error || !data) {
+  if (!article) {
+    return {
+      title: 'Article Not Found',
+      description: 'This Daily Updates story could not be found.',
+    };
+  }
+
+  return baseMetadata({
+    title: article.title,
+    description: truncateDescription(article.excerpt),
+    path: articlePath(article),
+    image: article.image_url || defaultOgImage,
+    type: 'article',
+  });
+}
+
+export default async function ArticlePage({ params }: Props) {
+  const { id } = await params;
+  const article = await getArticleByParam(id);
+
+  if (!article) {
     return (
       <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
         <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Article not found</h2>
@@ -49,5 +65,44 @@ export default async function ArticlePage(props: Props) {
     );
   }
 
-  return <ArticleDetailClient article={data as NewsArticle} />;
+  if (id !== slugify(article.title)) {
+    redirect(articlePath(article));
+  }
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: truncateDescription(article.excerpt),
+    image: [absoluteUrl(article.image_url || defaultOgImage)],
+    datePublished: article.created_at,
+    dateModified: article.updated_at || article.created_at,
+    author: {
+      '@type': 'Person',
+      name: article.author || SITE_NAME,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: {
+        '@type': 'ImageObject',
+        url: absoluteUrl('/favicon.svg'),
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': absoluteUrl(articlePath(article)),
+    },
+    articleSection: article.category,
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
+      <ArticleDetailClient article={article} />
+    </>
+  );
 }

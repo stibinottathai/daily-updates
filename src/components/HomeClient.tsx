@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
+import { articlePath } from '../lib/seo';
 
 export default function HomeClient({
   articles,
@@ -72,7 +73,7 @@ export default function HomeClient({
             {/* Featured Article */}
             {featuredArticle && (
               <article className="article-card featured-card animate-fade-in stagger-2">
-                <Link href={`/article/${featuredArticle.id}`}>
+                <Link href={articlePath(featuredArticle)}>
                   <div className="card-image-wrapper">
                     <Image 
                       src={featuredArticle.image_url} 
@@ -95,7 +96,7 @@ export default function HomeClient({
                       <Bookmark size={20} fill={isBookmarked(featuredArticle.id) ? "currentColor" : "none"} />
                     </button>
                   </div>
-                  <Link href={`/article/${featuredArticle.id}`}>
+                  <Link href={articlePath(featuredArticle)}>
                     <h2 className="card-title">{featuredArticle.title}</h2>
                     <p className="card-excerpt" style={{ fontSize: '1.1rem' }}>{featuredArticle.excerpt}</p>
                   </Link>
@@ -121,7 +122,7 @@ export default function HomeClient({
                       <Bookmark size={16} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
                     </button>
                   </div>
-                  <Link href={`/article/${article.id}`}>
+                  <Link href={articlePath(article)}>
                     <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
                   </Link>
                   <div className="meta-text" style={{ marginTop: '0.5rem' }}>
@@ -137,7 +138,7 @@ export default function HomeClient({
             <div className="secondary-grid">
               {regularArticles.slice(3).map((article) => (
                 <article key={article.id} className="article-card animate-fade-in stagger-3">
-                  <Link href={`/article/${article.id}`}>
+                  <Link href={articlePath(article)}>
                     <div className="card-image-wrapper">
                       <Image 
                         src={article.image_url} 
@@ -153,7 +154,7 @@ export default function HomeClient({
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span className="card-category">{article.category}</span>
                     </div>
-                    <Link href={`/article/${article.id}`}>
+                    <Link href={articlePath(article)}>
                       <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
                     </Link>
                     <div className="meta-text" style={{ marginTop: '1rem' }}>

@@ -7,13 +7,17 @@ import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, 
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
 import ContactUsModal from './ContactUsModal';
+import { categoryFromSlug, categoryPath } from '../lib/seo';
 
 export default function Navbar() {
   const { user, logout, theme, toggleTheme } = useNews();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentCategory = searchParams.get('category');
+  const pathCategorySlug = pathname.startsWith('/category/') ? pathname.split('/')[2] : null;
+  const currentCategory = pathCategorySlug
+    ? categoryFromSlug(pathCategorySlug, CATEGORIES)
+    : searchParams.get('category');
   
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -128,7 +132,7 @@ export default function Navbar() {
           {visibleCategories.map(category => (
             <Link 
               key={category} 
-              href={`/?category=${category}`} 
+              href={categoryPath(category)} 
               className={`cat-link ${currentCategory === category ? 'active' : ''}`}
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -169,7 +173,7 @@ export default function Navbar() {
                   {hiddenCategories.map(category => (
                     <Link 
                       key={category} 
-                      href={`/?category=${category}`} 
+                      href={categoryPath(category)} 
                       className="dropdown-item"
                       style={{ 
                         padding: '0.5rem 1rem', 
