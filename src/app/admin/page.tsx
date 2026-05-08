@@ -22,6 +22,7 @@ export default function AdminDashboard() {
     todayVisits: 0,
     topPages: [],
   });
+  const [topPagesExpanded, setTopPagesExpanded] = useState(false);
   const contentRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -140,6 +141,7 @@ export default function AdminDashboard() {
       return acc;
     }, {} as Record<string, number>)
   ).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+  const visibleTopPages = topPagesExpanded ? visitorStats.topPages : visitorStats.topPages.slice(0, 3);
 
   return (
     <div className="animate-fade-in stagger-1">
@@ -216,15 +218,22 @@ export default function AdminDashboard() {
             <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Top Visited Pages</h3>
             <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0', fontSize: '0.9rem' }}>Site visits count page loads. Unique visitors count each browser/device once.</p>
           </div>
-          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.7rem' }} onClick={() => fetchVisitorStats().then(setVisitorStats)}>
-            Refresh
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {visitorStats.topPages.length > 3 && (
+              <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.7rem' }} onClick={() => setTopPagesExpanded(prev => !prev)}>
+                {topPagesExpanded ? 'Shrink' : 'Expand'}
+              </button>
+            )}
+            <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.7rem' }} onClick={() => fetchVisitorStats().then(setVisitorStats)}>
+              Refresh
+            </button>
+          </div>
         </div>
         {visitorStats.topPages.length === 0 ? (
           <p style={{ color: 'var(--text-muted)', margin: 0 }}>Visitor data will appear here after the analytics table is created and the site receives traffic.</p>
         ) : (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {visitorStats.topPages.map(page => (
+            {visibleTopPages.map(page => (
               <div key={page.path} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'center', padding: '0.75rem 0', borderTop: '1px solid var(--border-color)' }}>
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{page.path}</span>
                 <span className="meta-text">{page.visits} visits</span>
