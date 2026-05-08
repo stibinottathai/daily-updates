@@ -42,13 +42,35 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 
-  return baseMetadata({
+  const metadata = baseMetadata({
     title: article.title,
     description: truncateDescription(article.excerpt),
     path: articlePath(article),
     image: article.image_url || defaultOgImage,
     type: 'article',
   });
+
+  return {
+    ...metadata,
+    authors: [{ name: article.author || SITE_NAME }],
+    category: article.category,
+    keywords: [
+      article.category,
+      article.title,
+      'Daily Updates',
+      'latest news',
+      'breaking news',
+    ],
+    openGraph: {
+      ...metadata.openGraph,
+      type: 'article',
+      publishedTime: article.created_at,
+      modifiedTime: article.updated_at || article.created_at,
+      authors: [article.author || SITE_NAME],
+      section: article.category,
+      tags: [article.category, 'news'],
+    },
+  };
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -83,6 +105,7 @@ export default async function ArticlePage({ params }: Props) {
     },
     publisher: {
       '@type': 'Organization',
+      '@id': `${absoluteUrl('/')}#organization`,
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
@@ -94,6 +117,7 @@ export default async function ArticlePage({ params }: Props) {
       '@id': absoluteUrl(articlePath(article)),
     },
     articleSection: article.category,
+    keywords: [article.category, 'latest news', 'breaking news'].join(', '),
   };
 
   return (

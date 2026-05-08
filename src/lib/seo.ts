@@ -5,6 +5,7 @@ export const SITE_NAME = 'Daily Updates';
 export const SITE_TAGLINE = 'Latest World News, Business, Tech, Health and Sports';
 export const DEFAULT_DESCRIPTION =
   'Daily Updates brings you the latest world news, business, technology, health, sports and culture stories, curated fresh every day.';
+export const SITE_LOCALE = 'en_US';
 
 export const siteUrl = (() => {
   const configuredUrl =
@@ -88,9 +89,13 @@ export function baseMetadata({
     description,
     alternates: {
       canonical: canonicalUrl,
+      types: {
+        'application/rss+xml': absoluteUrl('/rss.xml'),
+      },
     },
     openGraph: {
       type,
+      locale: SITE_LOCALE,
       siteName: SITE_NAME,
       title: resolvedTitle,
       description,
@@ -106,9 +111,19 @@ export function baseMetadata({
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@DailyUpdates',
       title: resolvedTitle,
       description,
       images: [imageUrl],
     },
   };
+}
+
+export function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
