@@ -3,14 +3,14 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown, Search } from 'lucide-react';
+import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, Moon, Sun, ChevronDown, Search } from 'lucide-react';
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
-import ContactUsModal from './ContactUsModal';
 import { categoryFromSlug, categoryPath } from '../lib/seo';
+import { supabase } from '../lib/supabase';
 
 export default function Navbar() {
-  const { user, logout, theme, toggleTheme } = useNews();
+  const { user, logout, theme, toggleTheme, addToast, refreshAuth } = useNews();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -21,10 +21,13 @@ export default function Navbar() {
   
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [contactModalOpen, setContactModalOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(Boolean(searchParams.get('q')));
   const [searchDraft, setSearchDraft] = useState(searchParams.get('q') ?? '');
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   const searchQuery = searchParams.get('q') ?? '';
   const searchTimerRef = useRef<number | null>(null);
 
@@ -70,8 +73,29 @@ export default function Navbar() {
   useLayoutEffect(() => {
     setMobileMenuOpen(false);
     setMoreDropdownOpen(false);
-    setContactModalOpen(false);
   }, [pathname]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginEmail,
+      password: loginPassword,
+    });
+    
+    if (error) {
+      addToast(error.message, 'error');
+    } else {
+      await refreshAuth();
+      addToast('Logged in successfully', 'success');
+      setLoginModalOpen(false);
+      setLoginEmail('');
+      setLoginPassword('');
+      router.push('/admin');
+    }
+    setLoginLoading(false);
+  };
 
   const visibleCategories = CATEGORIES.slice(0, 9);
   const hiddenCategories = CATEGORIES.slice(9);
@@ -139,12 +163,12 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <button onClick={() => setContactModalOpen(true)} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <MessageSquare size={16} /> Contact Us
-                </button>
-                <Link href="/login" className="meta-text" style={{ color: 'var(--text-muted)' }}>
-                  <LogIn size={16} /> Admin
+                <Link href="/contact" className="meta-text" style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Contact Us
                 </Link>
+                <button onClick={() => setLoginModalOpen(true)} className="meta-text" style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <LogIn size={16} /> Admin
+                </button>
               </>
             )}
           </div>
@@ -183,16 +207,14 @@ export default function Navbar() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button onClick={() => { setContactModalOpen(true); setMobileMenuOpen(false); }} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <MessageSquare size={16} /> Contact Us
-                </button>
+                <Link href="/contact" className="meta-text" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  Contact Us
+                </Link>
               </div>
             )}
           </div>
         )}
       </nav>
-      
-      <ContactUsModal isOpen={contactModalOpen} onClose={() => setContactModalOpen(false)} />
       
       {/* Category Sub Navbar */}
       <nav className="category-nav">
@@ -274,6 +296,65 @@ export default function Navbar() {
           #mobile-menu-btn { display: none !important; }
         }
       `}</style>
+
+      {loginModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px', position: 'relative' }}>
+            {/* Close Button */}
+            <button 
+              onClick={() => setLoginModalOpen(false)}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--text-muted)', 
+                cursor: 'pointer' 
+              }}
+              title="Close"
+            >
+              <XIcon size={20} />
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Admin Login</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                Access the dashboard to manage news.
+              </p>
+            </div>
+
+            <form onSubmit={handleLogin}>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-input"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  required
+                  disabled={loginLoading}
+                  placeholder="editor@dailyupdates.com"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                  disabled={loginLoading}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loginLoading}>
+                {loginLoading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

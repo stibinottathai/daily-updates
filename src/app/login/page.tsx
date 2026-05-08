@@ -40,16 +40,25 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '70vh',
+      padding: '2rem 0',
+      background: 'radial-gradient(circle at top, rgba(232, 197, 71, 0.08), transparent 35%), linear-gradient(180deg, rgba(255,255,255,0.02), transparent 65%)',
+    }}>
       <div className="animate-fade-in stagger-1" style={{ 
         width: '100%', 
         maxWidth: '400px', 
         padding: '2.5rem', 
-        background: 'var(--surface-color)', 
+        background: 'rgba(18, 18, 18, 0.72)', 
         border: '1px solid var(--border-color)', 
         borderRadius: 'var(--radius-md)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backdropFilter: 'blur(16px)',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
       }}>
         {/* Accent top border */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--accent-gold)' }}></div>

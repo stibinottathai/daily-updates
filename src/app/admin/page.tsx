@@ -41,7 +41,28 @@ export default function AdminDashboard() {
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || !user.isAuthenticated) return null;
+  if (isLoading || !user.isAuthenticated) {
+    return (
+      <div className="container" style={{ minHeight: '75vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4rem 0' }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '720px',
+          padding: '3rem',
+          borderRadius: '1.25rem',
+          border: '1px solid var(--border-color)',
+          background: 'rgba(18, 18, 18, 0.55)',
+          backdropFilter: 'blur(14px)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.28)'
+        }}>
+          <p className="card-category" style={{ marginBottom: '1rem' }}>Admin</p>
+          <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Loading dashboard...</h2>
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>
+            Preparing the editorial dashboard and checking your session.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,7 +379,7 @@ export default function AdminDashboard() {
 
       {/* Editor Modal */}
       {isEditing && (
-        <div className="modal-overlay">
+        <div className="modal-overlay modal-overlay-soft">
           <div className="modal-content animate-fade-in" style={{ animationDuration: '0.2s' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
               <h3 style={{ fontSize: '1.75rem', margin: 0 }}>

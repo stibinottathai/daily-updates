@@ -6,6 +6,7 @@ import { NewsProvider } from '../context/NewsContext';
 import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
+import PopupAd from '../components/PopupAd';
 import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, siteUrl } from '../lib/seo';
 import { CATEGORIES } from '../types';
 
@@ -59,10 +60,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const themeInitScript = `
+    (() => {
+      try {
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const initialTheme = savedTheme === 'light' || savedTheme === 'dark'
+          ? savedTheme
+          : (systemPrefersLight ? 'light' : 'dark');
+
+        document.documentElement.setAttribute('data-theme', initialTheme);
+        document.documentElement.style.colorScheme = initialTheme;
+      } catch (error) {}
+    })();
+  `;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -83,6 +99,7 @@ export default function RootLayout({
           <React.Suspense fallback={null}>
             <VisitorTracker />
           </React.Suspense>
+          <PopupAd />
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
@@ -151,10 +168,10 @@ export default function RootLayout({
               <div className="footer-column">
                 <h3>Company</h3>
                 <div className="footer-links">
-                  <a href="/">Latest Stories</a>
-                  <a href="/category/world">World Desk</a>
-                  <a href="/category/business">Business Desk</a>
-                  <a href="/login">Admin Login</a>
+                  <a href="/about">About this page</a>
+                  <a href="/contact">Contact Us</a>
+                  <a href="/privacy-policy">Privacy Policy</a>
+                  <a href="/terms">Terms</a>
                 </div>
               </div>
             </div>
