@@ -474,10 +474,11 @@ h1, h2, h3, h4, h5, h6 {
 .article-body blockquote { margin: 2rem 0; padding: 1rem 1.25rem; border-left: 3px solid var(--accent-gold); background: var(--surface-color); color: var(--text-main); font-family: var(--font-display); font-size: 1.35rem; line-height: 1.5; }
 .article-body a { color: var(--accent-gold); text-decoration: underline; text-underline-offset: 0.2em; }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .navbar-search-shell {
     display: flex;
   }
+
   .home-page-search {
     display: none;
   }
