@@ -4,6 +4,7 @@ import './globals.css';
 import { NewsProvider } from '../context/NewsContext';
 import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
+import VisitorTracker from '../components/VisitorTracker';
 import { baseMetadata, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, siteUrl } from '../lib/seo';
 
 export const metadata: Metadata = {
@@ -59,6 +60,9 @@ export default function RootLayout({
         <NewsProvider>
           <React.Suspense fallback={<div style={{ height: '60px' }}>Loading...</div>}>
             <Navbar />
+          </React.Suspense>
+          <React.Suspense fallback={null}>
+            <VisitorTracker />
           </React.Suspense>
           <main className="container" style={{ minHeight: '80vh' }}>
             {children}

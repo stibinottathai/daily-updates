@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import type { NewsArticle, User, Toast } from '../types';
+import type { NewsArticle, User, Toast, VisitorStats } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface NewsContextType {
@@ -24,6 +24,7 @@ interface NewsContextType {
   fetchContactMessages: () => Promise<any[]>;
   deleteContactMessage: (id: string) => Promise<boolean>;
   clearAllMessages: () => Promise<boolean>;
+  fetchVisitorStats: () => Promise<VisitorStats>;
   refreshAuth: () => Promise<void>;
 }
 
@@ -148,6 +149,60 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return true;
   }, [addToast]);
 
+  const fetchVisitorStats = useCallback(async (): Promise<VisitorStats> => {
+    const emptyStats: VisitorStats = {
+      totalVisits: 0,
+      uniqueVisitors: 0,
+      todayVisits: 0,
+      topPages: [],
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { count: totalVisits, error: totalError } = await supabase
+      .from('site_visits')
+      .select('id', { count: 'exact', head: true });
+
+    if (totalError) {
+      console.warn('Failed to load visitor stats:', totalError.message);
+      return emptyStats;
+    }
+
+    const { count: todayVisits } = await supabase
+      .from('site_visits')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', today.toISOString());
+
+    const { data } = await supabase
+      .from('site_visits')
+      .select('visitor_id, page_path')
+      .limit(10000);
+
+    const visitorIds = new Set<string>();
+    const pageCounts = new Map<string, number>();
+
+    (data || []).forEach((visit: any) => {
+      if (visit.visitor_id) {
+        visitorIds.add(visit.visitor_id);
+      }
+
+      if (visit.page_path) {
+        pageCounts.set(visit.page_path, (pageCounts.get(visit.page_path) || 0) + 1);
+      }
+    });
+
+    return {
+      totalVisits: totalVisits || 0,
+      uniqueVisitors: visitorIds.size,
+      todayVisits: todayVisits || 0,
+      topPages: Array.from(pageCounts.entries())
+        .map(([path, visits]) => ({ path, visits }))
+        .sort((a, b) => b.visits - a.visits)
+        .slice(0, 5),
+    };
+  }, []);
+
   const refreshAuth = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
 
@@ -263,7 +318,7 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addArticle, deleteArticle, updateArticle, logout,
         addToast, toggleBookmark, isBookmarked,
         submitContactMessage, fetchContactMessages, deleteContactMessage,
-        clearAllMessages, refreshAuth
+        clearAllMessages, fetchVisitorStats, refreshAuth
       }}>
       {children}
     </NewsContext.Provider>

@@ -4,23 +4,35 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useNews } from '../../context/NewsContext';
-import type { NewsArticle } from '../../types';
+import type { NewsArticle, VisitorStats } from '../../types';
 import { CATEGORIES, formatDate } from '../../types';
-import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon, Eye } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages } = useNews();
+  const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages, fetchVisitorStats } = useNews();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<Partial<NewsArticle>>({});
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'articles' | 'messages'>('articles');
   const [messages, setMessages] = useState<any[]>([]);
+  const [visitorStats, setVisitorStats] = useState<VisitorStats>({
+    totalVisits: 0,
+    uniqueVisitors: 0,
+    todayVisits: 0,
+    topPages: [],
+  });
   const contentRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchContactMessages().then(data => setMessages(data));
   }, [fetchContactMessages, activeTab]);
+
+  useEffect(() => {
+    if (user.isAuthenticated) {
+      fetchVisitorStats().then(setVisitorStats);
+    }
+  }, [fetchVisitorStats, user.isAuthenticated]);
 
   useEffect(() => {
     if (!isLoading && !user.isAuthenticated) {
@@ -148,7 +160,26 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ background: 'rgba(232, 197, 71, 0.1)', color: 'var(--accent-gold)', padding: '1rem', borderRadius: '50%' }}>
+            <Eye size={24} />
+          </div>
+          <div>
+            <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Site Visits</p>
+            <p style={{ fontSize: '2rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>{visitorStats.totalVisits}</p>
+            <p style={{ color: 'var(--text-muted)', margin: '0.15rem 0 0', fontSize: '0.85rem' }}>{visitorStats.todayVisits} today</p>
+          </div>
+        </div>
+        <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ background: 'rgba(232, 197, 71, 0.1)', color: 'var(--accent-gold)', padding: '1rem', borderRadius: '50%' }}>
+            <BarChart3 size={24} />
+          </div>
+          <div>
+            <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Unique Visitors</p>
+            <p style={{ fontSize: '2rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>{visitorStats.uniqueVisitors}</p>
+          </div>
+        </div>
         <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <div style={{ background: 'rgba(232, 197, 71, 0.1)', color: 'var(--accent-gold)', padding: '1rem', borderRadius: '50%' }}>
             <FileText size={24} />
@@ -169,13 +200,34 @@ export default function AdminDashboard() {
         </div>
         <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <div style={{ background: 'rgba(232, 197, 71, 0.1)', color: 'var(--accent-gold)', padding: '1rem', borderRadius: '50%' }}>
-            <BarChart3 size={24} />
+            <LayoutDashboard size={24} />
           </div>
           <div>
             <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Your Stories</p>
             <p style={{ fontSize: '2rem', fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>{myArticles}</p>
           </div>
         </div>
+      </div>
+
+      <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1.5rem', marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Top Visited Pages</h3>
+          <button type="button" className="btn btn-outline" style={{ padding: '0.4rem 0.7rem' }} onClick={() => fetchVisitorStats().then(setVisitorStats)}>
+            Refresh
+          </button>
+        </div>
+        {visitorStats.topPages.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Visitor data will appear here after the analytics table is created and the site receives traffic.</p>
+        ) : (
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {visitorStats.topPages.map(page => (
+              <div key={page.path} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '1rem', alignItems: 'center', padding: '0.75rem 0', borderTop: '1px solid var(--border-color)' }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{page.path}</span>
+                <span className="meta-text">{page.visits} visits</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>

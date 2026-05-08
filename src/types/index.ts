@@ -49,6 +49,16 @@ export interface Toast {
   type: 'success' | 'error' | 'info';
 }
 
+export interface VisitorStats {
+  totalVisits: number;
+  uniqueVisitors: number;
+  todayVisits: number;
+  topPages: Array<{
+    path: string;
+    visits: number;
+  }>;
+}
+
 /** Estimate reading time in minutes from article content */
 export function getReadingTime(content: string): number {
   const wordsPerMinute = 200;
