@@ -32,11 +32,10 @@ export default function VisitorTracker() {
     const pagePath = queryString ? `${pathname}?${queryString}` : pathname;
 
     supabase
-      .from('site_visits')
-      .insert({
-        page_path: pagePath,
-        visitor_id: getVisitorId(),
-        user_agent: navigator.userAgent,
+      .rpc('record_site_visit', {
+        p_page_path: pagePath,
+        p_visitor_id: getVisitorId(),
+        p_user_agent: navigator.userAgent,
       })
       .then(({ error }) => {
         if (error) {

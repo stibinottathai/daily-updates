@@ -157,49 +157,18 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       topPages: [],
     };
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const { data, error } = await supabase.rpc('get_visitor_stats');
 
-    const { count: totalVisits, error: totalError } = await supabase
-      .from('site_visits')
-      .select('id', { count: 'exact', head: true });
-
-    if (totalError) {
-      console.warn('Failed to load visitor stats:', totalError.message);
+    if (error) {
+      console.warn('Failed to load visitor stats:', error.message);
       return emptyStats;
     }
 
-    const { count: todayVisits } = await supabase
-      .from('site_visits')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', today.toISOString());
-
-    const { data } = await supabase
-      .from('site_visits')
-      .select('visitor_id, page_path')
-      .limit(10000);
-
-    const visitorIds = new Set<string>();
-    const pageCounts = new Map<string, number>();
-
-    (data || []).forEach((visit: any) => {
-      if (visit.visitor_id) {
-        visitorIds.add(visit.visitor_id);
-      }
-
-      if (visit.page_path) {
-        pageCounts.set(visit.page_path, (pageCounts.get(visit.page_path) || 0) + 1);
-      }
-    });
-
     return {
-      totalVisits: totalVisits || 0,
-      uniqueVisitors: visitorIds.size,
-      todayVisits: todayVisits || 0,
-      topPages: Array.from(pageCounts.entries())
-        .map(([path, visits]) => ({ path, visits }))
-        .sort((a, b) => b.visits - a.visits)
-        .slice(0, 5),
+      totalVisits: Number(data?.totalVisits || 0),
+      uniqueVisitors: Number(data?.uniqueVisitors || 0),
+      todayVisits: Number(data?.todayVisits || 0),
+      topPages: Array.isArray(data?.topPages) ? data.topPages : [],
     };
   }, []);
 
