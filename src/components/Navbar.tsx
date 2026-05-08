@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown } from 'lucide-react';
+import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, MessageSquare, Moon, Sun, ChevronDown, Search } from 'lucide-react';
 import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
 import ContactUsModal from './ContactUsModal';
@@ -23,10 +23,49 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(Boolean(searchParams.get('q')));
+  const [searchDraft, setSearchDraft] = useState(searchParams.get('q') ?? '');
+  const searchQuery = searchParams.get('q') ?? '';
+  const searchTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setSearchDraft(searchParams.get('q') ?? '');
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (searchTimerRef.current) {
+      window.clearTimeout(searchTimerRef.current);
+    }
+
+    searchTimerRef.current = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      const trimmedQuery = searchDraft.trim();
+
+      if (trimmedQuery) {
+        params.set('q', trimmedQuery);
+        setSearchOpen(true);
+      } else {
+        params.delete('q');
+      }
+
+      const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+
+      if (nextUrl !== currentUrl) {
+        router.replace(nextUrl, { scroll: false });
+      }
+    }, 350);
+
+    return () => {
+      if (searchTimerRef.current) {
+        window.clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, [pathname, router, searchDraft, searchParams]);
 
   useLayoutEffect(() => {
     setMobileMenuOpen(false);
@@ -47,6 +86,38 @@ export default function Navbar() {
             <span>Daily Updates</span>
             <span className="logo-accent">Premium News</span>
           </Link>
+
+          <div className="navbar-search-shell">
+            <button
+              type="button"
+              className="navbar-search-trigger"
+              aria-label="Open search"
+              aria-expanded={searchOpen}
+              onClick={() => setSearchOpen(prev => !prev)}
+            >
+              <Search size={18} />
+            </button>
+
+            {searchOpen && (
+              <form
+                className="navbar-search"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                <Search size={16} className="navbar-search-icon" />
+                <input
+                  type="search"
+                  className="navbar-search-input"
+                  placeholder="Search articles..."
+                  aria-label="Search articles"
+                  value={searchDraft}
+                  autoFocus
+                  onChange={(e) => setSearchDraft(e.target.value)}
+                />
+              </form>
+            )}
+          </div>
           
           <div className="nav-actions" style={{ display: 'none' }} id="desktop-actions">
             <button onClick={toggleTheme} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>

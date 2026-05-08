@@ -43,6 +43,20 @@ export default defineConfig([
 ])
 ```
 
+## Ads Setup
+
+This project includes an AdSense-ready ad slot component. To enable real ads, add these environment variables before building or deploying:
+
+```bash
+NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-xxxxxxxxxxxxxxxx
+NEXT_PUBLIC_ADSENSE_SLOT_HOME=1234567890
+NEXT_PUBLIC_ADSENSE_SLOT_HOME_SIDEBAR=1234567890
+NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE=1234567890
+NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM=1234567890
+```
+
+The layout loads the AdSense script only when `NEXT_PUBLIC_ADSENSE_CLIENT` is set, and the ad slots render a local placeholder when the values are missing.
+
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js

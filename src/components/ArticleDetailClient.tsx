@@ -6,6 +6,10 @@ import { useNews } from '../context/NewsContext';
 import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
+import AdUnit from './AdUnit';
+
+const articleAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE || '';
+const articleBottomAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM || '';
 
 function renderInline(text: string) {
   const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g);
@@ -156,6 +160,8 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
               />
             </div>
           )}
+
+          <AdUnit slot={articleAdSlot} label="Advertisement" className="article-ad-slot" />
         </div>
 
         <div className="article-body" style={{ position: 'relative' }}>
@@ -191,6 +197,8 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             </div>
           )}
         </div>
+
+        <AdUnit slot={articleBottomAdSlot} label="Sponsored" className="article-bottom-ad-slot" />
       </article>
     </>
   );

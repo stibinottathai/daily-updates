@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
+import AdUnit from './AdUnit';
+
+const homeAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME || '';
+const homeSidebarAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME_SIDEBAR || '';
 
 const hasImage = (url?: string) => Boolean(url?.trim());
 
@@ -20,10 +25,48 @@ export default function HomeClient({
   serverLoadFailed?: boolean;
 }) {
   const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked } = useNews();
-  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
+  const searchTimerRef = useRef<number | null>(null);
   const selectedCategory = initialCategory;
   const displayArticles = articles.length > 0 ? articles : liveArticles;
   const isRecovering = serverLoadFailed && isLoading && displayArticles.length === 0;
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') ?? '');
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (searchTimerRef.current) {
+      window.clearTimeout(searchTimerRef.current);
+    }
+
+    searchTimerRef.current = window.setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      const trimmedQuery = searchQuery.trim();
+
+      if (trimmedQuery) {
+        params.set('q', trimmedQuery);
+      } else {
+        params.delete('q');
+      }
+
+      const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+
+      if (nextUrl !== currentUrl) {
+        router.replace(nextUrl, { scroll: false });
+      }
+    }, 350);
+
+    return () => {
+      if (searchTimerRef.current) {
+        window.clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, [pathname, router, searchParams, searchQuery]);
 
   // Filter logic
   let filteredArticles = selectedCategory 
@@ -48,7 +91,7 @@ export default function HomeClient({
           {searchQuery ? 'Search Results' : selectedCategory || 'Top Stories'}
         </h1>
         
-        <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }} className="animate-fade-in stagger-1">
+        <div className="home-page-search animate-fade-in stagger-1" style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
           <Search size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
@@ -116,26 +159,34 @@ export default function HomeClient({
             {/* Sidebar Articles */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {regularArticles.slice(0, 3).map((article, idx) => (
-                <article key={article.id} className={`article-card animate-fade-in stagger-${(idx % 3) + 2}`} style={{ paddingBottom: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <span className="card-category">{article.category}</span>
-                    <button 
-                      onClick={(e) => { e.preventDefault(); toggleBookmark(article.id); }}
-                      style={{ background: 'none', border: 'none', color: isBookmarked(article.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
-                    >
-                      <Bookmark size={16} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
-                    </button>
-                  </div>
-                  <Link href={articlePath(article)}>
-                    <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
-                  </Link>
-                  <div className="meta-text" style={{ marginTop: '0.5rem' }}>
-                    <span>{formatDate(article.created_at)}</span>
-                  </div>
-                </article>
+                <div key={article.id}>
+                  <article className={`article-card animate-fade-in stagger-${(idx % 3) + 2}`} style={{ paddingBottom: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <span className="card-category">{article.category}</span>
+                      <button 
+                        onClick={(e) => { e.preventDefault(); toggleBookmark(article.id); }}
+                        style={{ background: 'none', border: 'none', color: isBookmarked(article.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
+                      >
+                        <Bookmark size={16} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
+                      </button>
+                    </div>
+                    <Link href={articlePath(article)}>
+                      <h3 className="card-title" style={{ fontSize: '1.25rem' }}>{article.title}</h3>
+                    </Link>
+                    <div className="meta-text" style={{ marginTop: '0.5rem' }}>
+                      <span>{formatDate(article.created_at)}</span>
+                    </div>
+                  </article>
+
+                  {idx === 1 && (
+                    <AdUnit slot={homeSidebarAdSlot} label="Sponsored" className="home-sidebar-ad-slot" />
+                  )}
+                </div>
               ))}
             </div>
           </div>
+
+          <AdUnit slot={homeAdSlot} label="Sponsored" className="home-ad-slot" />
 
           {/* Secondary Grid */}
           {regularArticles.length > 3 && (
