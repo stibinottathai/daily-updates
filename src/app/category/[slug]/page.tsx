@@ -1,3 +1,4 @@
+import React from 'react';
 import { notFound } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import HomeClient from '../../../components/HomeClient';
@@ -51,8 +52,16 @@ export default async function CategoryPage({ params }: Props) {
 
   if (error) {
     console.error('Error fetching category articles:', error);
-    return <HomeClient articles={[]} initialCategory={category} serverLoadFailed />;
+    return (
+      <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
+        <HomeClient articles={[]} initialCategory={category} serverLoadFailed />
+      </React.Suspense>
+    );
   }
 
-  return <HomeClient articles={data as NewsArticle[]} initialCategory={category} />;
+  return (
+    <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
+      <HomeClient articles={data as NewsArticle[]} initialCategory={category} />
+    </React.Suspense>
+  );
 }

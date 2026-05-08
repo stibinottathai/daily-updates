@@ -1,3 +1,4 @@
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import HomeClient from '../components/HomeClient';
@@ -32,8 +33,16 @@ export default async function Page({
 
   if (error) {
     console.error('Error fetching articles:', error);
-    return <HomeClient articles={[]} initialCategory={initialCategory} serverLoadFailed />;
+    return (
+      <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
+        <HomeClient articles={[]} initialCategory={initialCategory} serverLoadFailed />
+      </React.Suspense>
+    );
   }
 
-  return <HomeClient articles={data as NewsArticle[]} initialCategory={initialCategory} />;
+  return (
+    <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
+      <HomeClient articles={data as NewsArticle[]} initialCategory={initialCategory} />
+    </React.Suspense>
+  );
 }
