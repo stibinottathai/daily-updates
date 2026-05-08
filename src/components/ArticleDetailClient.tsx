@@ -7,6 +7,74 @@ import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 
+function renderInline(text: string) {
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+
+  return parts.map((part, index) => {
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      return (
+        <a key={index} href={linkMatch[2]} target="_blank" rel="noopener noreferrer">
+          {linkMatch[1]}
+        </a>
+      );
+    }
+
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={index}>{part.slice(1, -1)}</em>;
+    }
+
+    return part;
+  });
+}
+
+function renderArticleContent(content: string) {
+  const blocks = content.split(/\n{2,}/).filter(block => block.trim());
+
+  return blocks.map((block, index) => {
+    const lines = block.split('\n').filter(line => line.trim());
+    const trimmed = block.trim();
+
+    if (trimmed.startsWith('## ')) {
+      return <h2 key={index}>{renderInline(trimmed.replace(/^##\s+/, ''))}</h2>;
+    }
+
+    if (lines.every(line => line.trim().startsWith('- '))) {
+      return (
+        <ul key={index}>
+          {lines.map((line, lineIndex) => (
+            <li key={lineIndex}>{renderInline(line.trim().replace(/^-\s+/, ''))}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    if (lines.every(line => /^\d+\.\s+/.test(line.trim()))) {
+      return (
+        <ol key={index}>
+          {lines.map((line, lineIndex) => (
+            <li key={lineIndex}>{renderInline(line.trim().replace(/^\d+\.\s+/, ''))}</li>
+          ))}
+        </ol>
+      );
+    }
+
+    if (lines.every(line => line.trim().startsWith('> '))) {
+      return (
+        <blockquote key={index}>
+          {lines.map(line => line.trim().replace(/^>\s+/, '')).join(' ')}
+        </blockquote>
+      );
+    }
+
+    return <p key={index}>{renderInline(trimmed)}</p>;
+  });
+}
+
 export default function ArticleDetailClient({ article }: { article: NewsArticle }) {
   const { toggleBookmark, isBookmarked, addToast } = useNews();
   const router = useRouter();
@@ -75,17 +143,19 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             </div>
           </div>
           
-          <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
-            <Image 
-              src={article.image_url} 
-              alt={article.title} 
-              fill
-              priority
-              className="article-hero-image"
-              sizes="100vw"
-              style={{ objectFit: 'cover' }}
-            />
-          </div>
+          {article.image_url?.trim() && (
+            <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
+              <Image
+                src={article.image_url}
+                alt={article.title}
+                fill
+                priority
+                className="article-hero-image"
+                sizes="100vw"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="article-body" style={{ position: 'relative' }}>
@@ -97,7 +167,7 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             WebkitMaskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',
             transition: 'max-height 0.3s ease-out'
           }}>
-            {article.content}
+            {renderArticleContent(article.content)}
           </div>
           
           {!isExpanded && (

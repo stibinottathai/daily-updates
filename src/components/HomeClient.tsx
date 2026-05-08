@@ -8,6 +8,8 @@ import { Bookmark, Search, Clock } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
 
+const hasImage = (url?: string) => Boolean(url?.trim());
+
 export default function HomeClient({
   articles,
   initialCategory,
@@ -73,19 +75,21 @@ export default function HomeClient({
             {/* Featured Article */}
             {featuredArticle && (
               <article className="article-card featured-card animate-fade-in stagger-2">
-                <Link href={articlePath(featuredArticle)}>
-                  <div className="card-image-wrapper">
-                    <Image 
-                      src={featuredArticle.image_url} 
-                      alt={featuredArticle.title}
-                      fill
-                      priority
-                      className="card-image"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </div>
-                </Link>
+                {hasImage(featuredArticle.image_url) && (
+                  <Link href={articlePath(featuredArticle)}>
+                    <div className="card-image-wrapper">
+                      <Image
+                        src={featuredArticle.image_url}
+                        alt={featuredArticle.title}
+                        fill
+                        priority
+                        className="card-image"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  </Link>
+                )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="card-category">{featuredArticle.category}</span>
@@ -138,18 +142,20 @@ export default function HomeClient({
             <div className="secondary-grid">
               {regularArticles.slice(3).map((article) => (
                 <article key={article.id} className="article-card animate-fade-in stagger-3">
-                  <Link href={articlePath(article)}>
-                    <div className="card-image-wrapper">
-                      <Image 
-                        src={article.image_url} 
-                        alt={article.title} 
-                        fill
-                        className="card-image"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </div>
-                  </Link>
+                  {hasImage(article.image_url) && (
+                    <Link href={articlePath(article)}>
+                      <div className="card-image-wrapper">
+                        <Image
+                          src={article.image_url}
+                          alt={article.title}
+                          fill
+                          className="card-image"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    </Link>
+                  )}
                   <div style={{ marginTop: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span className="card-category">{article.category}</span>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle } from '../../types';
 import { CATEGORIES, formatDate } from '../../types';
-import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages } = useNews();
@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'articles' | 'messages'>('articles');
   const [messages, setMessages] = useState<any[]>([]);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetchContactMessages().then(data => setMessages(data));
@@ -33,10 +34,14 @@ export default function AdminDashboard() {
     e.preventDefault();
     setSubmitting(true);
     let success = false;
+    const articleToSave = {
+      ...currentArticle,
+      image_url: currentArticle.image_url?.trim() || '',
+    };
     if (currentArticle.id) {
-      success = await updateArticle(currentArticle.id, currentArticle);
+      success = await updateArticle(currentArticle.id, articleToSave);
     } else {
-      success = await addArticle(currentArticle as Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>);
+      success = await addArticle(articleToSave as Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>);
     }
     setSubmitting(false);
     if (success) {
@@ -48,6 +53,45 @@ export default function AdminDashboard() {
   const editArticle = (article: NewsArticle) => {
     setCurrentArticle(article);
     setIsEditing(true);
+  };
+
+  const insertContent = (before: string, after = '', placeholder = 'text') => {
+    const textarea = contentRef.current;
+    const content = currentArticle.content || '';
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const selected = content.slice(start, end) || placeholder;
+    const nextContent = `${content.slice(0, start)}${before}${selected}${after}${content.slice(end)}`;
+
+    setCurrentArticle({ ...currentArticle, content: nextContent });
+
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      const selectionStart = start + before.length;
+      textarea?.setSelectionRange(selectionStart, selectionStart + selected.length);
+    });
+  };
+
+  const insertLinePrefix = (prefix: string) => {
+    const textarea = contentRef.current;
+    const content = currentArticle.content || '';
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const lineStart = content.lastIndexOf('\n', start - 1) + 1;
+    const selected = content.slice(lineStart, end) || 'New point';
+    const lines = selected.split('\n');
+    const numbered = prefix === '1. ';
+    const formatted = lines
+      .map((line, index) => `${numbered ? `${index + 1}. ` : prefix}${line.replace(/^(\s*[-*>#]|\d+\.)\s+/, '')}`)
+      .join('\n');
+    const nextContent = `${content.slice(0, lineStart)}${formatted}${content.slice(end)}`;
+
+    setCurrentArticle({ ...currentArticle, content: nextContent });
+
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(lineStart, lineStart + formatted.length);
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -302,14 +346,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Hero Image URL</label>
+                <label className="form-label">Hero Image URL <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
                 <input
                   type="url"
                   className="form-input"
                   value={currentArticle.image_url || ''}
                   onChange={e => setCurrentArticle({...currentArticle, image_url: e.target.value})}
-                  required
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="https://images.unsplash.com/... or leave blank"
                 />
                 {currentArticle.image_url && (
                   <div style={{ marginTop: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', height: '150px', background: 'var(--bg-color)', position: 'relative' }}>
@@ -340,7 +383,31 @@ export default function AdminDashboard() {
               
               <div className="form-group">
                 <label className="form-label">Article Body</label>
+                <div className="editor-toolbar" aria-label="Article formatting tools">
+                  <button type="button" className="editor-tool" onClick={() => insertContent('**', '**', 'bold text')} title="Bold">
+                    <Bold size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertContent('*', '*', 'italic text')} title="Italic">
+                    <Italic size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('## ')} title="Heading">
+                    <Heading2 size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('- ')} title="Bullet list">
+                    <List size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('1. ')} title="Numbered list">
+                    <ListOrdered size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('> ')} title="Quote">
+                    <Quote size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertContent('[', '](https://example.com)', 'link text')} title="Link">
+                    <LinkIcon size={16} />
+                  </button>
+                </div>
                 <textarea
+                  ref={contentRef}
                   className="form-input"
                   rows={12}
                   style={{ lineHeight: 1.6 }}
