@@ -1,13 +1,14 @@
 import type { MetadataRoute } from 'next';
-import { siteUrl } from '../lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dailyupdatesnews.online';
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/admin', '/login', '/manage-users'],
     },
-    sitemap: [`${siteUrl}/sitemap.xml`, `${siteUrl}/news-sitemap.xml`],
+    sitemap: [`${base}/sitemap.xml`, `${base}/news-sitemap.xml`],
   };
 }
