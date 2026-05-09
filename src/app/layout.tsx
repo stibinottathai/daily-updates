@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
 import PopupAd from '../components/PopupAd';
-import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, siteUrl } from '../lib/seo';
+import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE } from '../lib/seo';
 import { CATEGORIES } from '../types';
 
 export const metadata: Metadata = {
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.webmanifest',
   alternates: {
-    canonical: siteUrl,
+    canonical: '/',
     types: {
-      'application/rss+xml': `${siteUrl}/rss.xml`,
+      'application/rss+xml': '/rss.xml',
     },
   },
   ...baseMetadata({
