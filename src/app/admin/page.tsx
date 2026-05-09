@@ -28,6 +28,76 @@ export default function AdminDashboard() {
   const [topPagesExpanded, setTopPagesExpanded] = useState(false);
   const contentRef = useRef<HTMLTextAreaElement>(null);
 
+  // Image Style Builder
+  const [imgUrl, setImgUrl] = useState('');
+  const [imgAlt, setImgAlt] = useState('');
+  const [imgWidthMode, setImgWidthMode] = useState<'auto' | 'manual'>('auto');
+  const [imgWidth, setImgWidth] = useState('100%');
+  const [imgHeightMode, setImgHeightMode] = useState<'auto' | 'manual'>('auto');
+  const [imgHeight, setImgHeight] = useState('400px');
+  const [imgRadius, setImgRadius] = useState('0');
+  const [imgFit, setImgFit] = useState<'cover' | 'contain' | 'fill' | 'none'>('cover');
+
+  const buildImgTag = (url: string, alt: string, widthMode: string, width: string, heightMode: string, height: string, radius: string, fit: string) => {
+    const w = widthMode === 'auto' ? '100%' : width;
+    const h = heightMode === 'auto' ? 'auto' : height;
+    return `<img src="${url}" alt="${alt}" style="width:${w}; height:${h}; border-radius:${radius}px; object-fit:${fit};" />`;
+  };
+
+  // Parse an existing <img> tag back into builder fields
+  const parseImgTag = (html: string) => {
+    const src = html.match(/src=["']([^"']+)["']/)?.[1] || '';
+    const alt = html.match(/alt=["']([^"']*)["']/)?.[1] || '';
+    const style = html.match(/style=["']([^"']+)["']/)?.[1] || '';
+    const rawW = style.match(/width:\s*([^;]+)/)?.[1]?.trim() || '100%';
+    const rawH = style.match(/height:\s*([^;]+)/)?.[1]?.trim() || 'auto';
+    const rawR = (style.match(/border-radius:\s*([^;]+)/)?.[1]?.trim() || '0px').replace('px', '');
+    const fit = (style.match(/object-fit:\s*([^;]+)/)?.[1]?.trim() || 'cover') as 'cover' | 'contain' | 'fill' | 'none';
+    return {
+      src, alt,
+      widthMode: rawW === '100%' ? 'auto' : 'manual' as 'auto' | 'manual',
+      width: rawW,
+      heightMode: rawH === 'auto' ? 'auto' : 'manual' as 'auto' | 'manual',
+      height: rawH === 'auto' ? '400px' : rawH,
+      radius: rawR,
+      fit,
+    };
+  };
+
+  const handleImgUrlChange = (value: string) => {
+    if (value.trim().startsWith('<')) {
+      setImgUrl('');
+      setCurrentArticle({ ...currentArticle, image_url: value });
+      return;
+    }
+    setImgUrl(value);
+    if (value.trim()) {
+      setCurrentArticle({ ...currentArticle, image_url: buildImgTag(value.trim(), imgAlt, imgWidthMode, imgWidth, imgHeightMode, imgHeight, imgRadius, imgFit) });
+    } else {
+      setCurrentArticle({ ...currentArticle, image_url: '' });
+    }
+  };
+
+  const handleImgOptionChange = (overrides: { alt?: string; widthMode?: 'auto' | 'manual'; width?: string; heightMode?: 'auto' | 'manual'; height?: string; radius?: string; fit?: 'cover' | 'contain' | 'fill' | 'none' }) => {
+    const newAlt = overrides.alt ?? imgAlt;
+    const newWidthMode = overrides.widthMode ?? imgWidthMode;
+    const newWidth = overrides.width ?? imgWidth;
+    const newHeightMode = overrides.heightMode ?? imgHeightMode;
+    const newHeight = overrides.height ?? imgHeight;
+    const newRadius = overrides.radius ?? imgRadius;
+    const newFit = overrides.fit ?? imgFit;
+    if (overrides.alt !== undefined) setImgAlt(newAlt);
+    if (overrides.widthMode !== undefined) setImgWidthMode(newWidthMode);
+    if (overrides.width !== undefined) setImgWidth(newWidth);
+    if (overrides.heightMode !== undefined) setImgHeightMode(newHeightMode);
+    if (overrides.height !== undefined) setImgHeight(newHeight);
+    if (overrides.radius !== undefined) setImgRadius(newRadius);
+    if (overrides.fit !== undefined) setImgFit(newFit);
+    if (imgUrl.trim()) {
+      setCurrentArticle({ ...currentArticle, image_url: buildImgTag(imgUrl.trim(), newAlt, newWidthMode, newWidth, newHeightMode, newHeight, newRadius, newFit) });
+    }
+  };
+
   useEffect(() => {
     fetchContactMessages().then(data => setMessages(data));
   }, [fetchContactMessages, activeTab]);
@@ -102,6 +172,27 @@ export default function AdminDashboard() {
       content = content.replace('<!-- FORMAT:HTML -->\n', '').replace('<!-- FORMAT:HTML -->', '');
     } else {
       setIsHtmlMode(false);
+    }
+    // Parse existing img tag into builder (if present)
+    if (article.image_url?.trim().startsWith('<')) {
+      const parsed = parseImgTag(article.image_url);
+      setImgUrl(parsed.src);
+      setImgAlt(parsed.alt);
+      setImgWidthMode(parsed.widthMode);
+      setImgWidth(parsed.width);
+      setImgHeightMode(parsed.heightMode);
+      setImgHeight(parsed.height);
+      setImgRadius(parsed.radius);
+      setImgFit(parsed.fit);
+    } else {
+      setImgUrl(article.image_url || '');
+      setImgAlt('');
+      setImgWidthMode('auto');
+      setImgWidth('100%');
+      setImgHeightMode('auto');
+      setImgHeight('400px');
+      setImgRadius('0');
+      setImgFit('cover');
     }
     setCurrentArticle({ ...article, content });
     setActiveEditorTab('write');
@@ -260,18 +351,135 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Hero Image <span style={{ textTransform: 'none', letterSpacing: 0 }}>(URL or &lt;img&gt; tag — optional)</span></label>
-                  <textarea
+                  <label className="form-label">Hero Image <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <input
+                    type="text"
                     className="form-input"
-                    rows={3}
-                    value={currentArticle.image_url || ''}
-                    onChange={e => setCurrentArticle({...currentArticle, image_url: e.target.value})}
-                    placeholder={`Option 1 — Plain URL:\nhttps://i.postimg.cc/your-image.png\n\nOption 2 — HTML img tag:\n<img src="https://i.postimg.cc/your-image.png" alt="Description" style="width:100%; height:auto; border-radius:10px;" />`}
-                    style={{ fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical' }}
+                    value={imgUrl}
+                    onChange={e => handleImgUrlChange(e.target.value)}
+                    placeholder="Paste image URL here (e.g. https://i.postimg.cc/abc.png)"
                   />
-                  <p style={{ margin: '0.4rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Paste an image URL <em>or</em> a full <code>&lt;img&gt;</code> tag with custom styles (e.g. <code>width:100%; height:auto; object-fit:cover;</code>) for full control over how the image displays.
-                  </p>
+
+                  {/* Image Style Builder — appears when a plain URL is entered OR when editing */}
+                  {imgUrl.trim() && !imgUrl.trim().startsWith('<') && (
+                    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'grid', gap: '0.85rem' }}>
+                      <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--accent-gold)' }}>Image Style Builder</p>
+
+                      {/* Alt Text */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Image Description (Alt Text)</label>
+                        <input
+                          type="text"
+                          className="form-input"
+                          style={{ padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
+                          placeholder="Describe the image for accessibility & SEO"
+                          value={imgAlt}
+                          onChange={e => handleImgOptionChange({ alt: e.target.value })}
+                        />
+                      </div>
+
+                      {/* Width */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Width</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleImgOptionChange({ widthMode: 'auto' })}
+                            style={{ padding: '0.35rem 0.9rem', borderRadius: '6px', border: '1px solid', fontSize: '0.8rem', cursor: 'pointer', background: imgWidthMode === 'auto' ? 'var(--accent-gold)' : 'transparent', color: imgWidthMode === 'auto' ? '#000' : 'var(--text-muted)', borderColor: imgWidthMode === 'auto' ? 'var(--accent-gold)' : 'var(--border-color)', fontWeight: imgWidthMode === 'auto' ? 700 : 400 }}
+                          >Auto (100%)</button>
+                          <button
+                            type="button"
+                            onClick={() => handleImgOptionChange({ widthMode: 'manual' })}
+                            style={{ padding: '0.35rem 0.9rem', borderRadius: '6px', border: '1px solid', fontSize: '0.8rem', cursor: 'pointer', background: imgWidthMode === 'manual' ? 'var(--accent-gold)' : 'transparent', color: imgWidthMode === 'manual' ? '#000' : 'var(--text-muted)', borderColor: imgWidthMode === 'manual' ? 'var(--accent-gold)' : 'var(--border-color)', fontWeight: imgWidthMode === 'manual' ? 700 : 400 }}
+                          >Manual</button>
+                          {imgWidthMode === 'manual' && (
+                            <input
+                              type="text"
+                              className="form-input"
+                              style={{ width: '130px', padding: '0.35rem 0.65rem', fontSize: '0.875rem' }}
+                              placeholder="e.g. 800px or 60%"
+                              value={imgWidth}
+                              onChange={e => handleImgOptionChange({ width: e.target.value })}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Height */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Height</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleImgOptionChange({ heightMode: 'auto' })}
+                            style={{ padding: '0.35rem 0.9rem', borderRadius: '6px', border: '1px solid', fontSize: '0.8rem', cursor: 'pointer', background: imgHeightMode === 'auto' ? 'var(--accent-gold)' : 'transparent', color: imgHeightMode === 'auto' ? '#000' : 'var(--text-muted)', borderColor: imgHeightMode === 'auto' ? 'var(--accent-gold)' : 'var(--border-color)', fontWeight: imgHeightMode === 'auto' ? 700 : 400 }}
+                          >Auto</button>
+                          <button
+                            type="button"
+                            onClick={() => handleImgOptionChange({ heightMode: 'manual' })}
+                            style={{ padding: '0.35rem 0.9rem', borderRadius: '6px', border: '1px solid', fontSize: '0.8rem', cursor: 'pointer', background: imgHeightMode === 'manual' ? 'var(--accent-gold)' : 'transparent', color: imgHeightMode === 'manual' ? '#000' : 'var(--text-muted)', borderColor: imgHeightMode === 'manual' ? 'var(--accent-gold)' : 'var(--border-color)', fontWeight: imgHeightMode === 'manual' ? 700 : 400 }}
+                          >Manual</button>
+                          {imgHeightMode === 'manual' && (
+                            <input
+                              type="text"
+                              className="form-input"
+                              style={{ width: '130px', padding: '0.35rem 0.65rem', fontSize: '0.875rem' }}
+                              placeholder="e.g. 400px or 50vh"
+                              value={imgHeight}
+                              onChange={e => handleImgOptionChange({ height: e.target.value })}
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Border Radius */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Border Radius: <strong>{imgRadius}px</strong></label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <input
+                            type="range"
+                            min="0" max="40" step="1"
+                            value={imgRadius}
+                            onChange={e => handleImgOptionChange({ radius: e.target.value })}
+                            style={{ flex: 1, accentColor: 'var(--accent-gold)' }}
+                          />
+                          <input
+                            type="number"
+                            className="form-input"
+                            style={{ width: '70px', padding: '0.35rem 0.5rem', fontSize: '0.875rem', textAlign: 'center' }}
+                            min="0" max="200"
+                            value={imgRadius}
+                            onChange={e => handleImgOptionChange({ radius: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Object Fit */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Image Fit</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {(['cover', 'contain', 'fill', 'none'] as const).map(fit => (
+                            <button
+                              key={fit}
+                              type="button"
+                              onClick={() => handleImgOptionChange({ fit })}
+                              style={{ padding: '0.35rem 0.9rem', borderRadius: '6px', border: '1px solid', fontSize: '0.8rem', cursor: 'pointer', background: imgFit === fit ? 'var(--accent-gold)' : 'transparent', color: imgFit === fit ? '#000' : 'var(--text-muted)', borderColor: imgFit === fit ? 'var(--accent-gold)' : 'var(--border-color)', fontWeight: imgFit === fit ? 700 : 400, textTransform: 'capitalize' }}
+                            >
+                              {fit === 'cover' ? 'Cover (crop to fit)' : fit === 'contain' ? 'Contain (show full)' : fit === 'fill' ? 'Stretched' : 'None'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Generated tag preview */}
+                      <div style={{ background: 'rgba(232,197,71,0.06)', borderRadius: '6px', padding: '0.6rem 0.85rem' }}>
+                        <p style={{ margin: '0 0 0.3rem', fontSize: '0.72rem', color: 'var(--accent-gold)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Generated Tag</p>
+                        <code style={{ fontSize: '0.75rem', color: 'var(--text-muted)', wordBreak: 'break-all', display: 'block' }}>
+                          {buildImgTag(imgUrl.trim(), imgAlt, imgWidthMode, imgWidth, imgHeightMode, imgHeight, imgRadius, imgFit)}
+                        </code>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="form-group">
