@@ -33,7 +33,7 @@ export default function AboutPage() {
               <li>Sports</li>
               <li>World News</li>
               <li>Lifestyle</li>
-              <li>UAE & Local Updates</li>
+              <li>Kerala and Local Updates</li>
             </ul>
             <p>
               At {SITE_NAME}, we believe that information should be accessible, reliable, and engaging. Our goal is to
