@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { baseMetadata } from '../../lib/seo';
+import { baseMetadata, SITE_NAME } from '../../lib/seo';
 
 export const metadata: Metadata = baseMetadata({
   title: 'Terms',
@@ -20,7 +20,7 @@ export default function TermsPage() {
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
           <section>
             <p style={{ marginTop: 0 }}>
-              Welcome to [Your Website Name]. By accessing and using this website, you agree to comply with and be bound by the
+              Welcome to {SITE_NAME}. By accessing and using this website, you agree to comply with and be bound by the
               following Terms and Conditions.
             </p>
             <p>If you do not agree with any part of these terms, please do not use our website.</p>
@@ -42,7 +42,7 @@ export default function TermsPage() {
             <h2>Intellectual Property</h2>
             <p>
               All content published on this website, including articles, text, logos, graphics, and design elements, is the property
-              of [Your Website Name] unless otherwise stated.
+              of {SITE_NAME} unless otherwise stated.
             </p>
             <p>
               Unauthorized copying, reproduction, or redistribution of website content is prohibited without permission.
@@ -79,7 +79,7 @@ export default function TermsPage() {
           <section>
             <h2>Limitation of Liability</h2>
             <p>
-              [Your Website Name] and its owners shall not be held liable for any losses, damages, or issues arising from the use of
+              {SITE_NAME} and its owners shall not be held liable for any losses, damages, or issues arising from the use of
               this website.
             </p>
           </section>
@@ -96,8 +96,8 @@ export default function TermsPage() {
             <h2>Contact Us</h2>
             <p>If you have any questions regarding these Terms and Conditions, you may contact us at:</p>
             <ul>
-              <li>Email: [your-email@example.com]</li>
-              <li>Website: [your website URL]</li>
+              <li>Email: dailyupdatesnewss@gmail.com</li>
+              <li>Website: https://www.dailyupdatesnews.online</li>
             </ul>
           </section>
         </div>

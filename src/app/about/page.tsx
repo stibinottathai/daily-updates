@@ -19,7 +19,7 @@ export default function AboutPage() {
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
           <section>
             <p style={{ marginTop: 0 }}>
-              Welcome to [Your Website Name], your trusted destination for the latest news, trending stories, and informative
+              Welcome to {SITE_NAME}, your trusted destination for the latest news, trending stories, and informative
               updates from around the world.
             </p>
             <p>
@@ -36,7 +36,7 @@ export default function AboutPage() {
               <li>UAE & Local Updates</li>
             </ul>
             <p>
-              At [Your Website Name], we believe that information should be accessible, reliable, and engaging. Our goal is to
+              At {SITE_NAME}, we believe that information should be accessible, reliable, and engaging. Our goal is to
               keep readers informed with quality content and a smooth reading experience across all devices.
             </p>
           </section>
@@ -54,7 +54,7 @@ export default function AboutPage() {
               keeps you connected and informed.
             </p>
             <p>
-              Thank you for visiting [Your Website Name] and being part of our growing community.
+              Thank you for visiting {SITE_NAME} and being part of our growing community.
             </p>
           </section>
 
@@ -62,8 +62,8 @@ export default function AboutPage() {
             <h2>Contact Us</h2>
             <p>If you have any questions, suggestions, or business inquiries, feel free to contact us:</p>
             <ul>
-              <li>Email: [your-email@example.com]</li>
-              <li>Website: [your website URL]</li>
+              <li>Email: dailyupdatesnewss@gmail.com</li>
+              <li>Website: https://www.dailyupdatesnews.online</li>
             </ul>
           </section>
         </div>

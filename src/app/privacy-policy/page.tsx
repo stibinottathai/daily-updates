@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { baseMetadata } from '../../lib/seo';
+import { baseMetadata, SITE_NAME } from '../../lib/seo';
 
 export const metadata: Metadata = baseMetadata({
   title: 'Privacy Policy',
@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
           <section>
             <p style={{ marginTop: 0 }}>
-              Welcome to [Your Website Name]. Your privacy is important to us. This Privacy Policy explains how we collect,
+              Welcome to {SITE_NAME}. Your privacy is important to us. This Privacy Policy explains how we collect,
               use, and protect your information when you visit our website.
             </p>
             <p>By using our website, you agree to the terms outlined in this Privacy Policy.</p>
@@ -114,8 +114,8 @@ export default function PrivacyPolicyPage() {
             <h2>Contact Us</h2>
             <p>If you have any questions or concerns regarding this Privacy Policy, you may contact us at:</p>
             <ul>
-              <li>Email: [your-email@example.com]</li>
-              <li>Website: [your website URL]</li>
+              <li>Email: dailyupdatesnewss@gmail.com</li>
+              <li>Website: https://www.dailyupdatesnews.online</li>
             </ul>
           </section>
         </div>
