@@ -243,45 +243,58 @@ export default function Navbar() {
                 style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', outline: 'none' }}
                 onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
               >
-                More <ChevronDown size={14} />
+                More <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: moreDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </button>
               
               {moreDropdownOpen && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, paddingTop: '8px', zIndex: 100, minWidth: '220px' }}>
                 <div 
                   style={{ 
-                    position: 'absolute', 
-                    top: '100%', 
-                    right: 0, 
                     background: 'var(--surface-color)', 
                     border: '1px solid var(--border-color)', 
-                    borderRadius: '4px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    zIndex: 100,
-                    minWidth: '150px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '0.5rem 0'
+                    borderRadius: '12px',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04)',
+                    overflow: 'hidden',
+                    animation: 'fadeInUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) both',
                   }}
                 >
-                  {hiddenCategories.map(category => (
-                    <Link 
-                      key={category} 
-                      href={categoryPath(category)} 
-                      className="dropdown-item"
-                      style={{ 
-                        padding: '0.5rem 1rem', 
-                        color: currentCategory === category ? 'var(--accent-gold)' : 'var(--text-main)',
-                        textDecoration: 'none',
-                        fontSize: '0.875rem'
-                      }}
-                      onClick={() => {
-                        setMoreDropdownOpen(false);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      {category}
-                    </Link>
-                  ))}
+                  {/* Header */}
+                  <div style={{ padding: '0.75rem 1.25rem 0.6rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ width: '3px', height: '14px', background: 'var(--accent-gold)', borderRadius: '2px', display: 'inline-block' }} />
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>More Categories</span>
+                  </div>
+                  {/* Items */}
+                  <div style={{ padding: '0.5rem 0.5rem' }}>
+                    {hiddenCategories.map(category => (
+                      <Link 
+                        key={category} 
+                        href={categoryPath(category)} 
+                        style={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.6rem',
+                          padding: '0.55rem 0.85rem', 
+                          color: currentCategory === category ? 'var(--accent-gold)' : 'var(--text-main)',
+                          textDecoration: 'none',
+                          fontSize: '0.875rem',
+                          fontWeight: currentCategory === category ? 700 : 500,
+                          borderRadius: '8px',
+                          transition: 'background 0.15s, color 0.15s',
+                          background: currentCategory === category ? 'rgba(232,197,71,0.08)' : 'transparent',
+                        }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface-hover)'; (e.currentTarget as HTMLElement).style.color = 'var(--accent-gold)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = currentCategory === category ? 'rgba(232,197,71,0.08)' : 'transparent'; (e.currentTarget as HTMLElement).style.color = currentCategory === category ? 'var(--accent-gold)' : 'var(--text-main)'; }}
+                        onClick={() => {
+                          setMoreDropdownOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: currentCategory === category ? 'var(--accent-gold)' : 'var(--text-muted)', flexShrink: 0 }} />
+                        {category}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
                 </div>
               )}
             </div>

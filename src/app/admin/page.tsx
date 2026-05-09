@@ -260,14 +260,18 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Hero Image URL <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                  <input
-                    type="url"
+                  <label className="form-label">Hero Image <span style={{ textTransform: 'none', letterSpacing: 0 }}>(URL or &lt;img&gt; tag — optional)</span></label>
+                  <textarea
                     className="form-input"
+                    rows={3}
                     value={currentArticle.image_url || ''}
                     onChange={e => setCurrentArticle({...currentArticle, image_url: e.target.value})}
-                    placeholder="https://images.unsplash.com/... or leave blank"
+                    placeholder={`Option 1 — Plain URL:\nhttps://i.postimg.cc/your-image.png\n\nOption 2 — HTML img tag:\n<img src="https://i.postimg.cc/your-image.png" alt="Description" style="width:100%; height:auto; border-radius:10px;" />`}
+                    style={{ fontFamily: 'monospace', fontSize: '0.85rem', resize: 'vertical' }}
                   />
+                  <p style={{ margin: '0.4rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    Paste an image URL <em>or</em> a full <code>&lt;img&gt;</code> tag with custom styles (e.g. <code>width:100%; height:auto; object-fit:cover;</code>) for full control over how the image displays.
+                  </p>
                 </div>
                 
                 <div className="form-group">
