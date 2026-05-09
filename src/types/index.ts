@@ -27,6 +27,7 @@ export const CATEGORIES = [
   'Sports',
   'Entertainment',
   'Politics',
+  'Blog',
   'Travel',
   'Kerala',
   'Lifestyle',
