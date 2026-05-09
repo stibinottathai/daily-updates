@@ -159,7 +159,7 @@ export default function RootLayout({
               <div className="footer-column">
                 <h3>More News</h3>
                 <div className="footer-links">
-                  {CATEGORIES.slice(6, 12).map(category => (
+                  {CATEGORIES.slice(6).map(category => (
                     <a key={category} href={categoryPath(category)}>{category}</a>
                   ))}
                 </div>

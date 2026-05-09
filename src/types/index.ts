@@ -28,6 +28,7 @@ export const CATEGORIES = [
   'Entertainment',
   'Politics',
   'Travel',
+  'Kerala',
   'Lifestyle',
   'Automotive',
   'Education',
