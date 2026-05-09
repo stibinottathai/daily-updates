@@ -243,17 +243,24 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
           </div>
           
           {article.image_url?.trim() && (
-            <div style={{ position: 'relative', width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
-              <Image
-                src={article.image_url}
-                alt={article.title}
-                fill
-                priority
-                className="article-hero-image"
-                sizes="(max-width: 900px) 100vw, 900px"
-                style={{ objectFit: 'cover' }}
+            article.image_url.trim().startsWith('<') ? (
+              <div 
+                style={{ width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', borderRadius: '12px', overflow: 'hidden' }}
+                dangerouslySetInnerHTML={{ __html: article.image_url.trim() }}
               />
-            </div>
+            ) : (
+              <div style={{ position: 'relative', width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
+                <Image
+                  src={article.image_url}
+                  alt={article.title}
+                  fill
+                  priority
+                  className="article-hero-image"
+                  sizes="(max-width: 900px) 100vw, 900px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+            )
           )}
 
           <AdUnit slot={articleAdSlot} label="Advertisement" className="article-ad-slot" />

@@ -121,15 +121,19 @@ export default function HomeClient({
                 {hasImage(featuredArticle.image_url) && (
                   <Link href={articlePath(featuredArticle)}>
                     <div className="card-image-wrapper">
-                      <Image
-                        src={featuredArticle.image_url}
-                        alt={featuredArticle.title}
-                        fill
-                        priority
-                        className="card-image"
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        style={{ objectFit: 'cover' }}
-                      />
+                      {featuredArticle.image_url.trim().startsWith('<') ? (
+                        <div dangerouslySetInnerHTML={{ __html: featuredArticle.image_url.trim() }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                      ) : (
+                        <Image
+                          src={featuredArticle.image_url}
+                          alt={featuredArticle.title}
+                          fill
+                          priority
+                          className="card-image"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      )}
                     </div>
                   </Link>
                 )}
@@ -196,14 +200,18 @@ export default function HomeClient({
                   {hasImage(article.image_url) && (
                     <Link href={articlePath(article)}>
                       <div className="card-image-wrapper">
-                        <Image
-                          src={article.image_url}
-                          alt={article.title}
-                          fill
-                          className="card-image"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          style={{ objectFit: 'cover' }}
-                        />
+                        {article.image_url.trim().startsWith('<') ? (
+                          <div dangerouslySetInnerHTML={{ __html: article.image_url.trim() }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                        ) : (
+                          <Image
+                            src={article.image_url}
+                            alt={article.title}
+                            fill
+                            className="card-image"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        )}
                       </div>
                     </Link>
                   )}
