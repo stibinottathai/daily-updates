@@ -47,6 +47,37 @@ function renderArticleContent(content: string) {
       return <h2 key={index}>{renderInline(trimmed.replace(/^##\s+/, ''))}</h2>;
     }
 
+    // Check for image syntax: ![alt](url)
+    const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgMatch) {
+      return (
+        <div key={index} className="article-body-image" style={{ margin: '2.5rem 0', textAlign: 'center' }}>
+          <img 
+            src={imgMatch[2]} 
+            alt={imgMatch[1]} 
+            style={{ 
+              maxWidth: '100%', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              display: 'block',
+              margin: '0 auto'
+            }} 
+          />
+          {imgMatch[1] && (
+            <p style={{ 
+              fontSize: '0.9rem', 
+              color: 'var(--text-muted)', 
+              marginTop: '0.75rem', 
+              fontStyle: 'italic',
+              lineHeight: 1.4
+            }}>
+              {imgMatch[1]}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     if (lines.every(line => line.trim().startsWith('- '))) {
       return (
         <ul key={index}>

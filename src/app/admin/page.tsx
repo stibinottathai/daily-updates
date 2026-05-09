@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
 import { CATEGORIES, formatDate } from '../../types';
-import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon, Eye, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages, fetchVisitorStats } = useNews();
@@ -490,6 +490,9 @@ export default function AdminDashboard() {
                   </button>
                   <button type="button" className="editor-tool" onClick={() => insertContent('[', '](https://example.com)', 'link text')} title="Link">
                     <LinkIcon size={16} />
+                  </button>
+                  <button type="button" className="editor-tool" onClick={() => insertContent('![', '](https://images.unsplash.com/photo-...)', 'image caption')} title="Insert Inline Image">
+                    <ImageIcon size={16} />
                   </button>
                 </div>
                 <textarea
