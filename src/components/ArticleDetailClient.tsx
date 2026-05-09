@@ -12,9 +12,27 @@ const articleAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE || '';
 const articleBottomAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM || '';
 
 function renderInline(text: string) {
-  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  const parts = text.split(/(!\[[^\]]*\]\([^)]+\)|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*)/g);
 
   return parts.map((part, index) => {
+    const imgMatch = part.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgMatch) {
+      return (
+        <span key={index} className="inline-image" style={{ display: 'inline-block', margin: '0 0.5rem', verticalAlign: 'middle' }}>
+          <img 
+            src={imgMatch[2]} 
+            alt={imgMatch[1]} 
+            style={{ 
+              maxWidth: '200px', 
+              maxHeight: '150px',
+              borderRadius: '4px', 
+              display: 'inline-block',
+            }} 
+          />
+        </span>
+      );
+    }
+
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
       return (
@@ -37,77 +55,123 @@ function renderInline(text: string) {
 }
 
 function renderArticleContent(content: string) {
-  const blocks = content.split(/\n{2,}/).filter(block => block.trim());
+  if (content.startsWith('<!-- FORMAT:HTML -->')) {
+    const htmlContent = content.replace('<!-- FORMAT:HTML -->\n', '').replace('<!-- FORMAT:HTML -->', '');
+    return <div className="article-content html-mode" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  }
 
-  return blocks.map((block, index) => {
-    const lines = block.split('\n').filter(line => line.trim());
-    const trimmed = block.trim();
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  
+  let currentList: { type: 'ul' | 'ol', items: string[] } | null = null;
+  let currentParagraph: string[] = [];
 
-    if (trimmed.startsWith('## ')) {
-      return <h2 key={index}>{renderInline(trimmed.replace(/^##\s+/, ''))}</h2>;
+  const flushParagraph = () => {
+    if (currentParagraph.length > 0) {
+      const text = currentParagraph.join(' ');
+      elements.push(<p key={`p-${elements.length}`}>{renderInline(text)}</p>);
+      currentParagraph = [];
+    }
+  };
+
+  const flushList = () => {
+    if (currentList) {
+      if (currentList.type === 'ul') {
+        elements.push(
+          <ul key={`ul-${elements.length}`}>
+            {currentList.items.map((it, i) => <li key={i}>{renderInline(it)}</li>)}
+          </ul>
+        );
+      } else {
+        elements.push(
+          <ol key={`ol-${elements.length}`}>
+            {currentList.items.map((it, i) => <li key={i}>{renderInline(it)}</li>)}
+          </ol>
+        );
+      }
+      currentList = null;
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) {
+      flushParagraph();
+      flushList();
+      continue;
     }
 
-    // Check for image syntax: ![alt](url)
-    const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    // Headers
+    const hMatch = line.match(/^(#{1,6})\s+(.*)/);
+    if (hMatch) {
+      flushParagraph();
+      flushList();
+      const level = hMatch[1].length;
+      const text = hMatch[2];
+      const Tag = `h${level}` as any;
+      
+      const styles: Record<number, React.CSSProperties> = {
+        1: { fontSize: '2.5rem', marginBottom: '1.5rem', marginTop: '2.5rem', fontWeight: 800 },
+        2: {}, // Uses global CSS
+        3: { fontSize: '1.5rem', marginBottom: '1rem', marginTop: '2rem', fontWeight: 700 },
+        4: { fontSize: '1.25rem', marginBottom: '0.75rem', marginTop: '1.5rem', fontWeight: 600 },
+        5: { fontSize: '1.1rem', marginBottom: '0.5rem', marginTop: '1.25rem', fontWeight: 600 },
+        6: { fontSize: '1rem', marginBottom: '0.5rem', marginTop: '1rem', fontWeight: 600, textTransform: 'uppercase' as const }
+      };
+      
+      elements.push(<Tag key={`h-${elements.length}`} style={styles[level]}>{renderInline(text)}</Tag>);
+      continue;
+    }
+
+    // Images
+    const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
     if (imgMatch) {
-      return (
-        <div key={index} className="article-body-image" style={{ margin: '2.5rem 0', textAlign: 'center' }}>
+      flushParagraph();
+      flushList();
+      elements.push(
+        <div key={`img-${elements.length}`} className="article-body-image" style={{ margin: '2.5rem 0', textAlign: 'center' }}>
           <img 
             src={imgMatch[2]} 
             alt={imgMatch[1]} 
-            style={{ 
-              maxWidth: '100%', 
-              borderRadius: '8px', 
-              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-              display: 'block',
-              margin: '0 auto'
-            }} 
+            style={{ maxWidth: '100%', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'block', margin: '0 auto' }} 
           />
           {imgMatch[1] && (
-            <p style={{ 
-              fontSize: '0.9rem', 
-              color: 'var(--text-muted)', 
-              marginTop: '0.75rem', 
-              fontStyle: 'italic',
-              lineHeight: 1.4
-            }}>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.75rem', fontStyle: 'italic', lineHeight: 1.4 }}>
               {imgMatch[1]}
             </p>
           )}
         </div>
       );
+      continue;
     }
 
-    if (lines.every(line => line.trim().startsWith('- '))) {
-      return (
-        <ul key={index}>
-          {lines.map((line, lineIndex) => (
-            <li key={lineIndex}>{renderInline(line.trim().replace(/^-\s+/, ''))}</li>
-          ))}
-        </ul>
-      );
+    // Unordered list
+    if (line.startsWith('- ')) {
+      flushParagraph();
+      if (currentList && currentList.type !== 'ul') flushList();
+      if (!currentList) currentList = { type: 'ul', items: [] };
+      currentList.items.push(line.substring(2));
+      continue;
     }
 
-    if (lines.every(line => /^\d+\.\s+/.test(line.trim()))) {
-      return (
-        <ol key={index}>
-          {lines.map((line, lineIndex) => (
-            <li key={lineIndex}>{renderInline(line.trim().replace(/^\d+\.\s+/, ''))}</li>
-          ))}
-        </ol>
-      );
+    // Ordered list
+    if (/^\d+\.\s+/.test(line)) {
+      flushParagraph();
+      if (currentList && currentList.type !== 'ol') flushList();
+      if (!currentList) currentList = { type: 'ol', items: [] };
+      currentList.items.push(line.replace(/^\d+\.\s+/, ''));
+      continue;
     }
 
-    if (lines.every(line => line.trim().startsWith('> '))) {
-      return (
-        <blockquote key={index}>
-          {lines.map(line => line.trim().replace(/^>\s+/, '')).join(' ')}
-        </blockquote>
-      );
-    }
+    // Otherwise, it's text for a paragraph
+    flushList();
+    currentParagraph.push(line);
+  }
 
-    return <p key={index}>{renderInline(trimmed)}</p>;
-  });
+  flushParagraph();
+  flushList();
+
+  return <div className="article-content">{elements}</div>;
 }
 
 export default function ArticleDetailClient({ article }: { article: NewsArticle }) {
@@ -179,14 +243,14 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
           </div>
           
           {article.image_url?.trim() && (
-            <div style={{ position: 'relative', width: '100%', height: '500px', borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
               <Image
                 src={article.image_url}
                 alt={article.title}
                 fill
                 priority
                 className="article-hero-image"
-                sizes="100vw"
+                sizes="(max-width: 900px) 100vw, 900px"
                 style={{ objectFit: 'cover' }}
               />
             </div>
@@ -197,7 +261,7 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
 
         <div className="article-body" style={{ position: 'relative' }}>
           <div style={{ 
-            whiteSpace: 'pre-wrap',
+            whiteSpace: article.content.startsWith('<!-- FORMAT:HTML -->') ? 'normal' : 'pre-wrap',
             maxHeight: isExpanded ? 'none' : '400px',
             overflow: 'hidden',
             maskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',

@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import ArticleDetailClient from '../../components/ArticleDetailClient';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
 import { CATEGORIES, formatDate } from '../../types';
-import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading2, Quote, Link as LinkIcon, Eye, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages, fetchVisitorStats } = useNews();
@@ -14,6 +15,8 @@ export default function AdminDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentArticle, setCurrentArticle] = useState<Partial<NewsArticle>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [isHtmlMode, setIsHtmlMode] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<'write' | 'preview' | 'seo'>('write');
   const [activeTab, setActiveTab] = useState<'articles' | 'messages'>('articles');
   const [messages, setMessages] = useState<any[]>([]);
   const [visitorStats, setVisitorStats] = useState<VisitorStats>({
@@ -68,8 +71,15 @@ export default function AdminDashboard() {
     e.preventDefault();
     setSubmitting(true);
     let success = false;
+    
+    let finalContent = currentArticle.content || '';
+    if (isHtmlMode && !finalContent.startsWith('<!-- FORMAT:HTML -->')) {
+      finalContent = `<!-- FORMAT:HTML -->\n${finalContent}`;
+    }
+
     const articleToSave = {
       ...currentArticle,
+      content: finalContent,
       image_url: currentArticle.image_url?.trim() || '',
     };
     if (currentArticle.id) {
@@ -81,11 +91,20 @@ export default function AdminDashboard() {
     if (success) {
       setIsEditing(false);
       setCurrentArticle({});
+      setIsHtmlMode(false);
     }
   };
 
   const editArticle = (article: NewsArticle) => {
-    setCurrentArticle(article);
+    let content = article.content || '';
+    if (content.startsWith('<!-- FORMAT:HTML -->')) {
+      setIsHtmlMode(true);
+      content = content.replace('<!-- FORMAT:HTML -->\n', '').replace('<!-- FORMAT:HTML -->', '');
+    } else {
+      setIsHtmlMode(false);
+    }
+    setCurrentArticle({ ...article, content });
+    setActiveEditorTab('write');
     setIsEditing(true);
   };
 
@@ -164,6 +183,288 @@ export default function AdminDashboard() {
   ).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
   const visibleTopPages = topPagesExpanded ? visitorStats.topPages : visitorStats.topPages.slice(0, 3);
 
+  if (isEditing) {
+    return (
+      <div className="animate-fade-in stagger-1" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 200px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
+          <h3 style={{ fontSize: '1.75rem', margin: 0 }}>
+            {currentArticle.id ? 'Edit Story' : 'Compose Story'}
+          </h3>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button 
+              onClick={() => setActiveEditorTab('write')}
+              style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', fontWeight: activeEditorTab === 'write' ? 'bold' : 'normal', color: activeEditorTab === 'write' ? 'var(--accent-gold)' : 'var(--text-muted)' }}
+            >
+              Write
+            </button>
+            <button 
+              onClick={() => setActiveEditorTab('preview')}
+              style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', fontWeight: activeEditorTab === 'preview' ? 'bold' : 'normal', color: activeEditorTab === 'preview' ? 'var(--accent-gold)' : 'var(--text-muted)' }}
+            >
+              Preview
+            </button>
+            <button 
+              onClick={() => setActiveEditorTab('seo')}
+              style={{ background: 'none', border: 'none', padding: '0.5rem', cursor: 'pointer', fontWeight: activeEditorTab === 'seo' ? 'bold' : 'normal', color: activeEditorTab === 'seo' ? 'var(--accent-gold)' : 'var(--text-muted)' }}
+            >
+              SEO & Meta
+            </button>
+          </div>
+          <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <X size={24} />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+          <div style={{ flex: 1 }}>
+            {activeEditorTab === 'write' && (
+              <div className="animate-fade-in">
+                <div className="form-group">
+                  <label className="form-label">Headline</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontSize: '1.25rem', fontFamily: 'var(--font-display)', fontWeight: 600 }}
+                    value={currentArticle.title || ''}
+                    onChange={e => setCurrentArticle({...currentArticle, title: e.target.value})}
+                    required
+                    placeholder="Enter a compelling headline..."
+                  />
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Category</label>
+                    <select
+                      className="form-input"
+                      value={currentArticle.category || ''}
+                      onChange={e => setCurrentArticle({...currentArticle, category: e.target.value})}
+                      required
+                    >
+                      <option value="" disabled>Select a category...</option>
+                      {CATEGORIES.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Author Byline</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={currentArticle.author || ''}
+                      onChange={e => setCurrentArticle({...currentArticle, author: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Hero Image URL <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <input
+                    type="url"
+                    className="form-input"
+                    value={currentArticle.image_url || ''}
+                    onChange={e => setCurrentArticle({...currentArticle, image_url: e.target.value})}
+                    placeholder="https://images.unsplash.com/... or leave blank"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label className="form-label">Excerpt / Subtitle</label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    value={currentArticle.excerpt || ''}
+                    onChange={e => setCurrentArticle({...currentArticle, excerpt: e.target.value})}
+                    required
+                    placeholder="A brief summary that appears on cards..."
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <label className="form-label" style={{ margin: 0 }}>Article Body</label>
+                    <div style={{ display: 'flex', gap: '0.5rem', background: 'var(--bg-color)', padding: '0.25rem', borderRadius: 'var(--radius-sm)' }}>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsHtmlMode(false)}
+                        style={{ padding: '0.25rem 0.75rem', background: !isHtmlMode ? 'var(--surface-color)' : 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: !isHtmlMode ? 'bold' : 'normal', color: !isHtmlMode ? 'var(--text-color)' : 'var(--text-muted)', boxShadow: !isHtmlMode ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}
+                      >
+                        Plain Text (Markdown)
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsHtmlMode(true)}
+                        style={{ padding: '0.25rem 0.75rem', background: isHtmlMode ? 'var(--surface-color)' : 'transparent', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: isHtmlMode ? 'bold' : 'normal', color: isHtmlMode ? 'var(--text-color)' : 'var(--text-muted)', boxShadow: isHtmlMode ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}
+                      >
+                        HTML
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {!isHtmlMode && (
+                    <div className="editor-toolbar" aria-label="Article formatting tools">
+                    <button type="button" className="editor-tool" onClick={() => insertContent('**', '**', 'bold text')} title="Bold">
+                      <Bold size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertContent('*', '*', 'italic text')} title="Italic">
+                      <Italic size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('# ')} title="Heading 1">
+                      <Heading1 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('## ')} title="Heading 2">
+                      <Heading2 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('### ')} title="Heading 3">
+                      <Heading3 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('#### ')} title="Heading 4">
+                      <Heading4 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('##### ')} title="Heading 5">
+                      <Heading5 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('###### ')} title="Heading 6">
+                      <Heading6 size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('- ')} title="Bullet list">
+                      <List size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('1. ')} title="Numbered list">
+                      <ListOrdered size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertLinePrefix('> ')} title="Quote">
+                      <Quote size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertContent('[', '](https://example.com)', 'link text')} title="Link">
+                      <LinkIcon size={16} />
+                    </button>
+                    <button type="button" className="editor-tool" onClick={() => insertContent('![', '](https://images.unsplash.com/photo-...)', 'image caption')} title="Insert Inline Image">
+                      <ImageIcon size={16} />
+                    </button>
+                  </div>
+                  )}
+                  <textarea
+                    ref={contentRef}
+                    className="form-input"
+                    rows={16}
+                    style={{ lineHeight: 1.6, fontFamily: isHtmlMode ? 'monospace' : 'inherit' }}
+                    value={currentArticle.content || ''}
+                    onChange={e => setCurrentArticle({...currentArticle, content: e.target.value})}
+                    required
+                    placeholder={isHtmlMode ? "<h1>Write your HTML code here...</h1>\n<p>It will be rendered exactly as written.</p>" : "Write your story here..."}
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeEditorTab === 'preview' && (
+              <div className="animate-fade-in" style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <ArticleDetailClient 
+                    article={{
+                      ...currentArticle,
+                      id: currentArticle.id || 'preview-id',
+                      title: currentArticle.title || 'Untitled',
+                      excerpt: currentArticle.excerpt || 'No excerpt provided.',
+                      content: isHtmlMode 
+                        ? `<!-- FORMAT:HTML -->\n${currentArticle.content || ''}`
+                        : currentArticle.content || 'Start writing your story to see the preview.',
+                      category: currentArticle.category || CATEGORIES[0],
+                      author: currentArticle.author || 'Anonymous',
+                      image_url: currentArticle.image_url || '',
+                      created_at: currentArticle.created_at || new Date().toISOString(),
+                    } as NewsArticle} 
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeEditorTab === 'seo' && (
+              <div className="animate-fade-in" style={{ display: 'grid', gap: '1.5rem' }}>
+                <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Title Optimization (SEO Title)</h4>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Optimal length: 50-60 characters.</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ flex: 1, background: 'var(--bg-color)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        height: '100%', 
+                        width: `${Math.min(((currentArticle.title?.length || 0) / 60) * 100, 100)}%`, 
+                        background: (currentArticle.title?.length || 0) >= 50 && (currentArticle.title?.length || 0) <= 60 ? '#10b981' : (currentArticle.title?.length || 0) > 60 ? '#ef4444' : '#f59e0b'
+                      }} />
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{currentArticle.title?.length || 0} / 60 chars</span>
+                  </div>
+                  {(currentArticle.title?.length || 0) > 60 && (
+                    <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '0.5rem' }}>Your title is too long and may be truncated in search results.</p>
+                  )}
+                </div>
+
+                <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Excerpt Optimization (Meta Description)</h4>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Optimal length: 150-160 characters.</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ flex: 1, background: 'var(--bg-color)', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        height: '100%', 
+                        width: `${Math.min(((currentArticle.excerpt?.length || 0) / 160) * 100, 100)}%`, 
+                        background: (currentArticle.excerpt?.length || 0) >= 150 && (currentArticle.excerpt?.length || 0) <= 160 ? '#10b981' : (currentArticle.excerpt?.length || 0) > 160 ? '#ef4444' : '#f59e0b'
+                      }} />
+                    </div>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{currentArticle.excerpt?.length || 0} / 160 chars</span>
+                  </div>
+                </div>
+
+                <div style={{ background: 'var(--surface-color)', padding: '1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>Content Readability</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
+                      <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Word Count</p>
+                      <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                        {(currentArticle.content?.trim() || '').split(/\s+/).filter(Boolean).length}
+                      </p>
+                    </div>
+                    <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
+                      <p className="meta-text" style={{ marginBottom: '0.25rem' }}>Est. Reading Time</p>
+                      <p style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                        {Math.max(1, Math.ceil(((currentArticle.content?.trim() || '').split(/\s+/).filter(Boolean).length) / 200))} min
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      <strong style={{ color: 'var(--text-color)' }}>Keyword Check:</strong> Search engines look for your category ({currentArticle.category || 'None'}) as a primary keyword.
+                    </p>
+                    <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                      <li style={{ color: (currentArticle.title?.toLowerCase().includes((currentArticle.category || '').toLowerCase()) ? '#10b981' : '#f59e0b') }}>
+                        In Title: {currentArticle.title?.toLowerCase().includes((currentArticle.category || '').toLowerCase()) ? 'Yes' : 'No'}
+                      </li>
+                      <li style={{ color: (currentArticle.excerpt?.toLowerCase().includes((currentArticle.category || '').toLowerCase()) ? '#10b981' : '#f59e0b') }}>
+                        In Excerpt: {currentArticle.excerpt?.toLowerCase().includes((currentArticle.category || '').toLowerCase()) ? 'Yes' : 'No'}
+                      </li>
+                      <li style={{ color: ((currentArticle.content?.toLowerCase().includes((currentArticle.category || '').toLowerCase())) ? '#10b981' : '#f59e0b') }}>
+                        In Content: {currentArticle.content?.toLowerCase().includes((currentArticle.category || '').toLowerCase()) ? 'Yes' : 'No'}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', paddingTop: '2rem', marginTop: '2rem', borderTop: '1px solid var(--border-color)' }}>
+            <button type="button" className="btn btn-outline" onClick={() => setIsEditing(false)} disabled={submitting}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Publishing...' : 'Publish Story'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in stagger-1">
       <div className="dashboard-header">
@@ -175,6 +476,8 @@ export default function AdminDashboard() {
           className="btn btn-primary"
           onClick={() => {
             setCurrentArticle({ author: user.email, category: CATEGORIES[0] });
+            setIsHtmlMode(false);
+            setActiveEditorTab('write');
             setIsEditing(true);
           }}
         >
@@ -377,146 +680,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Editor Modal */}
-      {isEditing && (
-        <div className="modal-overlay modal-overlay-soft">
-          <div className="modal-content animate-fade-in" style={{ animationDuration: '0.2s' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-              <h3 style={{ fontSize: '1.75rem', margin: 0 }}>
-                {currentArticle.id ? 'Edit Story' : 'Compose Story'}
-              </h3>
-              <button onClick={() => setIsEditing(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                <X size={24} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSave}>
-              <div className="form-group">
-                <label className="form-label">Headline</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  style={{ fontSize: '1.25rem', fontFamily: 'var(--font-display)', fontWeight: 600 }}
-                  value={currentArticle.title || ''}
-                  onChange={e => setCurrentArticle({...currentArticle, title: e.target.value})}
-                  required
-                  placeholder="Enter a compelling headline..."
-                />
-              </div>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div className="form-group">
-                  <label className="form-label">Category</label>
-                  <select
-                    className="form-input"
-                    value={currentArticle.category || ''}
-                    onChange={e => setCurrentArticle({...currentArticle, category: e.target.value})}
-                    required
-                  >
-                    <option value="" disabled>Select a category...</option>
-                    {CATEGORIES.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Author Byline</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={currentArticle.author || ''}
-                    onChange={e => setCurrentArticle({...currentArticle, author: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Hero Image URL <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                <input
-                  type="url"
-                  className="form-input"
-                  value={currentArticle.image_url || ''}
-                  onChange={e => setCurrentArticle({...currentArticle, image_url: e.target.value})}
-                  placeholder="https://images.unsplash.com/... or leave blank"
-                />
-                {currentArticle.image_url && (
-                  <div style={{ marginTop: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', height: '150px', background: 'var(--bg-color)', position: 'relative' }}>
-                    <Image 
-                      src={currentArticle.image_url} 
-                      alt="Preview" 
-                      fill
-                      sizes="300px"
-                      style={{ objectFit: 'cover' }} 
-                      onError={(e) => (e.currentTarget.style.display = 'none')} 
-                      onLoad={(e) => (e.currentTarget.style.display = 'block')} 
-                    />
-                  </div>
-                )}
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Excerpt / Subtitle</label>
-                <textarea
-                  className="form-input"
-                  rows={2}
-                  value={currentArticle.excerpt || ''}
-                  onChange={e => setCurrentArticle({...currentArticle, excerpt: e.target.value})}
-                  required
-                  placeholder="A brief summary that appears on cards..."
-                />
-              </div>
-              
-              <div className="form-group">
-                <label className="form-label">Article Body</label>
-                <div className="editor-toolbar" aria-label="Article formatting tools">
-                  <button type="button" className="editor-tool" onClick={() => insertContent('**', '**', 'bold text')} title="Bold">
-                    <Bold size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertContent('*', '*', 'italic text')} title="Italic">
-                    <Italic size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('## ')} title="Heading">
-                    <Heading2 size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('- ')} title="Bullet list">
-                    <List size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('1. ')} title="Numbered list">
-                    <ListOrdered size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertLinePrefix('> ')} title="Quote">
-                    <Quote size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertContent('[', '](https://example.com)', 'link text')} title="Link">
-                    <LinkIcon size={16} />
-                  </button>
-                  <button type="button" className="editor-tool" onClick={() => insertContent('![', '](https://images.unsplash.com/photo-...)', 'image caption')} title="Insert Inline Image">
-                    <ImageIcon size={16} />
-                  </button>
-                </div>
-                <textarea
-                  ref={contentRef}
-                  className="form-input"
-                  rows={12}
-                  style={{ lineHeight: 1.6 }}
-                  value={currentArticle.content || ''}
-                  onChange={e => setCurrentArticle({...currentArticle, content: e.target.value})}
-                  required
-                  placeholder="Write your story here..."
-                />
-              </div>
-              
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-                <button type="button" className="btn btn-outline" onClick={() => setIsEditing(false)} disabled={submitting}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  {submitting ? 'Publishing...' : 'Publish Story'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
