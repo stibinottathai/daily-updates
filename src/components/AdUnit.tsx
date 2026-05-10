@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { ADSENSE_CLIENT_ID } from '../lib/seo';
 
 declare global {
   interface Window {
@@ -8,7 +9,7 @@ declare global {
   }
 }
 
-const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || '';
+const adsenseClient = ADSENSE_CLIENT_ID;
 
 type AdUnitProps = {
   slot: string;

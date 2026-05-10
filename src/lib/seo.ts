@@ -6,6 +6,7 @@ export const SITE_TAGLINE = 'Latest World News, Business, Tech, Health and Sport
 export const DEFAULT_DESCRIPTION =
   'Daily Updates brings you the latest world news, business, technology, health, sports and culture stories, curated fresh every day.';
 export const SITE_LOCALE = 'en_US';
+export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
 
 export const siteUrl = (() => {
   const configuredUrl =

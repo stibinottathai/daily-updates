@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
 import PopupAd from '../components/PopupAd';
-import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE } from '../lib/seo';
+import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, ADSENSE_CLIENT_ID } from '../lib/seo';
 import { CATEGORIES } from '../types';
 
 export const metadata: Metadata = {
@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dailyupdatesnews.online').replace(/\/$/, '');
-  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
+  const adsenseClient = ADSENSE_CLIENT_ID;
   const themeInitScript = `
     (() => {
       try {
