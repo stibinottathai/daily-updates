@@ -37,13 +37,7 @@ export default function AdUnit({ slot, label = 'Advertisement', className = '' }
   }, [isMounted, slot]);
 
   if (!isMounted || !adsenseClient || !slot) {
-    return (
-      <aside className={`ad-slot ad-slot-placeholder ${className}`.trim()} aria-label={label}>
-        <span className="ad-slot-label">{label}</span>
-        <strong>Configure AdSense to display this space.</strong>
-        <span>Add NEXT_PUBLIC_ADSENSE_CLIENT and a slot id in your environment.</span>
-      </aside>
-    );
+    return null;
   }
 
   return (

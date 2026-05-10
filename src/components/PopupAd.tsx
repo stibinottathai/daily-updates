@@ -28,7 +28,7 @@ export default function PopupAd() {
   }, []);
 
   useEffect(() => {
-    if (!isMounted || isExcludedRoute) {
+    if (!isMounted || isExcludedRoute || !adsenseClient || !popupSlot) {
       return;
     }
 
@@ -55,7 +55,7 @@ export default function PopupAd() {
     return () => window.clearTimeout(timer);
   }, [isMounted, isExcludedRoute]);
 
-  if (!isMounted || isExcludedRoute || !isOpen) {
+  if (!isMounted || isExcludedRoute || !isOpen || !adsenseClient || !popupSlot) {
     return null;
   }
 
@@ -73,21 +73,14 @@ export default function PopupAd() {
 
         <div className="popup-ad-label">Sponsored</div>
 
-        {adsenseClient && popupSlot ? (
-          <ins
-            className="adsbygoogle popup-ad-slot"
-            style={{ display: 'block' }}
-            data-ad-client={adsenseClient}
-            data-ad-slot={popupSlot}
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          />
-        ) : (
-          <div className="popup-ad-fallback">
-            <strong>Popup ad space</strong>
-            <span>Add `NEXT_PUBLIC_ADSENSE_CLIENT` and `NEXT_PUBLIC_ADSENSE_SLOT_POPUP` to show a live AdSense popup here.</span>
-          </div>
-        )}
+        <ins
+          className="adsbygoogle popup-ad-slot"
+          style={{ display: 'block' }}
+          data-ad-client={adsenseClient}
+          data-ad-slot={popupSlot}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
       </div>
     </div>
   );
