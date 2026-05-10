@@ -13,15 +13,6 @@ import { CATEGORIES } from '../types';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dailyupdatesnews.online'),
   applicationName: SITE_NAME,
-  keywords: [
-    'daily news',
-    'world news',
-    'business news',
-    'technology news',
-    'health news',
-    'sports news',
-    'latest headlines',
-  ],
   robots: {
     index: true,
     follow: true,

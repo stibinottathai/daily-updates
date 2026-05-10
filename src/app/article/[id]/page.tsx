@@ -54,13 +54,6 @@ export async function generateMetadata({ params }: Props) {
     ...metadata,
     authors: [{ name: article.author || SITE_NAME }],
     category: article.category,
-    keywords: [
-      article.category,
-      article.title,
-      'Daily Updates',
-      'latest news',
-      'breaking news',
-    ],
     openGraph: {
       ...metadata.openGraph,
       type: 'article',
