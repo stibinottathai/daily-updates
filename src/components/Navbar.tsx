@@ -108,7 +108,7 @@ export default function Navbar() {
         <div className="container masthead-inner">
           <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
             <span>Daily Updates</span>
-            <span className="logo-accent">Premium News</span>
+            <span className="logo-accent">Stories That Matter</span>
           </Link>
 
           <div className="navbar-search-shell">

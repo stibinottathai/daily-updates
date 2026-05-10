@@ -131,7 +131,7 @@ export default function RootLayout({
               <div className="footer-brand">
                 <a href="/" className="logo">
                   <span>Daily Updates</span>
-                  <span className="logo-accent">Premium News</span>
+                  <span className="logo-accent">Stories That Matter</span>
                 </a>
                 <p>
                   Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
