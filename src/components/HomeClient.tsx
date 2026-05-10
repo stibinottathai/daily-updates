@@ -120,9 +120,9 @@ export default function HomeClient({
               <article className="article-card featured-card animate-fade-in stagger-2">
                 {hasImage(featuredArticle.image_url) && (
                   <Link href={articlePath(featuredArticle)}>
-                    <div className="card-image-wrapper">
+                    <div className={`card-image-wrapper ${featuredArticle.image_url.trim().startsWith('<') ? 'is-html' : ''}`}>
                       {featuredArticle.image_url.trim().startsWith('<') ? (
-                        <div dangerouslySetInnerHTML={{ __html: featuredArticle.image_url.trim() }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                        <div dangerouslySetInnerHTML={{ __html: featuredArticle.image_url.trim() }} style={{ width: '100%' }} />
                       ) : (
                         <Image
                           src={featuredArticle.image_url}
@@ -131,7 +131,7 @@ export default function HomeClient({
                           priority
                           className="card-image"
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          style={{ objectFit: 'cover' }}
+                          style={{ objectFit: 'contain' }}
                         />
                       )}
                     </div>
@@ -199,9 +199,9 @@ export default function HomeClient({
                 <article key={article.id} className="article-card animate-fade-in stagger-3">
                   {hasImage(article.image_url) && (
                     <Link href={articlePath(article)}>
-                      <div className="card-image-wrapper">
+                      <div className={`card-image-wrapper ${article.image_url.trim().startsWith('<') ? 'is-html' : ''}`}>
                         {article.image_url.trim().startsWith('<') ? (
-                          <div dangerouslySetInnerHTML={{ __html: article.image_url.trim() }} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+                          <div dangerouslySetInnerHTML={{ __html: article.image_url.trim() }} style={{ width: '100%' }} />
                         ) : (
                           <Image
                             src={article.image_url}
@@ -209,7 +209,7 @@ export default function HomeClient({
                             fill
                             className="card-image"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'contain' }}
                           />
                         )}
                       </div>

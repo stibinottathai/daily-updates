@@ -71,11 +71,10 @@ export function getReadingTime(content: string): number {
 /** Format a date string to a readable format */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
-  // Using explicit UTC to prevent timezone based hydration errors
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC'
-  });
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Using manual UTC formatting to ensure perfect consistency between server and client
+  const month = months[date.getUTCMonth()];
+  const day = date.getUTCDate();
+  const year = date.getUTCFullYear();
+  return `${month} ${day}, ${year}`;
 }

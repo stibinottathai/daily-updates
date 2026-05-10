@@ -168,7 +168,7 @@ export default function RootLayout({
             </div>
 
             <div className="container footer-bottom">
-              <p>Copyright {new Date().getFullYear()} Daily Updates. All rights reserved.</p>
+              <p suppressHydrationWarning>Copyright {new Date().getFullYear()} Daily Updates. All rights reserved.</p>
               <div>
                 <a href="/robots.txt">Robots</a>
                 <a href="/sitemap.xml">Sitemap</a>

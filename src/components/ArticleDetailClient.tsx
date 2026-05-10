@@ -257,7 +257,7 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
                   priority
                   className="article-hero-image"
                   sizes="(max-width: 900px) 100vw, 900px"
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'contain' }}
                 />
               </div>
             )
