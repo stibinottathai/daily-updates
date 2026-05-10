@@ -10,8 +10,6 @@ export const SITE_LOCALE = 'en_US';
 export const siteUrl = (() => {
   const configuredUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_VERCEL_URL ||
-    process.env.VERCEL_URL ||
     'https://www.dailyupdatesnews.online';
 
   const withProtocol = configuredUrl.startsWith('http')
