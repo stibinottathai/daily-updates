@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dailyupdatesnews.online').replace(/\/$/, '');
-  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
   const themeInitScript = `
     (() => {
       try {
