@@ -51,7 +51,7 @@ export default function HomeClient({
   const itemsPerPage = useItemsPerPage();
   const searchTimerRef = useRef<number | null>(null);
   const selectedCategory = initialCategory;
-  const displayArticles = articles.length > 0 ? articles : liveArticles;
+  const displayArticles = articles.length > 0 ? articles : (selectedCategory ? [] : liveArticles);
   const isRecovering = serverLoadFailed && isLoading && displayArticles.length === 0;
 
   // Reset to page 1 when search or category changes
@@ -97,6 +97,11 @@ export default function HomeClient({
   let filteredArticles = selectedCategory
     ? displayArticles.filter(a => a.category === selectedCategory)
     : displayArticles;
+
+  // Add region/sub_category filtering
+  if (initialRegion) {
+    filteredArticles = filteredArticles.filter(a => a.sub_category === initialRegion);
+  }
 
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
