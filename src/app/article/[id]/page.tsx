@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
@@ -12,12 +13,14 @@ type Props = {
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-async function getArticleByParam(param: string): Promise<NewsArticle | null> {
-  if (uuidPattern.test(param)) {
+const getArticleByParam = cache(async (param: string): Promise<NewsArticle | null> => {
+  const decodedParam = decodeURIComponent(param);
+  
+  if (uuidPattern.test(decodedParam)) {
     const { data } = await supabase
       .from('articles')
       .select('*')
-      .eq('id', param)
+      .eq('id', decodedParam)
       .single();
 
     return (data as NewsArticle | null) || null;
@@ -28,8 +31,8 @@ async function getArticleByParam(param: string): Promise<NewsArticle | null> {
     .select('*')
     .order('created_at', { ascending: false });
 
-  return ((data as NewsArticle[] | null) || []).find(article => slugify(article.title) === param) || null;
-}
+  return ((data as NewsArticle[] | null) || []).find(article => slugify(article.title) === decodedParam) || null;
+});
 
 export async function generateMetadata({ params }: Props) {
   const { id } = await params;
@@ -100,11 +103,21 @@ export default async function ArticlePage({ params }: Props) {
     );
   }
 
-  if (id !== slugify(article.title)) {
-    redirect(articlePath(article));
+  // Record the actual view, URL might be UUID or slug
+  let shareImageValue = article.image_url;
+  if (!shareImageValue && article.content) {
+    const imgMatch = article.content.match(/!\[.*?\]\((.*?)\)/);
+    if (imgMatch && imgMatch[1]) {
+      shareImageValue = imgMatch[1];
+    } else {
+      const htmlImgMatch = article.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (htmlImgMatch && htmlImgMatch[1]) {
+        shareImageValue = htmlImgMatch[1];
+      }
+    }
   }
 
-  const shareImage = getShareImageUrl(article.image_url);
+  const shareImage = getShareImageUrl(shareImageValue);
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
