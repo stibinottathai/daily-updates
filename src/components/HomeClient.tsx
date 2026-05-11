@@ -122,7 +122,14 @@ export default function HomeClient({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const target = document.getElementById('news-grid-start');
+    if (target) {
+      const offset = 80; // Optional offset for fixed navbar
+      const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleShare = async (article: NewsArticle) => {
@@ -271,7 +278,7 @@ export default function HomeClient({
           )}
 
           {/* Divider */}
-          <div style={{ borderTop: '2px solid var(--border-color)', marginBottom: '2rem' }} />
+          <div id="news-grid-start" style={{ borderTop: '2px solid var(--border-color)', marginBottom: '2rem' }} />
 
           {/* Uniform 4-Column Grid */}
           {paginatedArticles.length > 0 && (
