@@ -10,6 +10,7 @@ create table public.articles (
   author text not null default '',
   author_id uuid references auth.users on delete set null,
   category text not null default 'World',
+  sub_category text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -42,6 +43,7 @@ alter publication supabase_realtime add table articles;
 
 -- Create an index for faster category filtering
 create index idx_articles_category on articles(category);
+create index idx_articles_sub_category on articles(sub_category);
 create index idx_articles_created_at on articles(created_at desc);
 
 -- Function to auto-update the updated_at timestamp

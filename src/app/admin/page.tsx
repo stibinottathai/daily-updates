@@ -6,7 +6,7 @@ import Image from 'next/image';
 import ArticleDetailClient from '../../components/ArticleDetailClient';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
-import { CATEGORIES, formatDate } from '../../types';
+import { CATEGORIES, NEWS_REGIONS, formatDate } from '../../types';
 import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -151,6 +151,9 @@ export default function AdminDashboard() {
       ...currentArticle,
       content: finalContent,
       image_url: currentArticle.image_url?.trim() || '',
+      sub_category: currentArticle.category === 'News'
+        ? currentArticle.sub_category?.trim() || null
+        : null,
     };
     if (currentArticle.id) {
       success = await updateArticle(currentArticle.id, articleToSave);
@@ -329,7 +332,14 @@ export default function AdminDashboard() {
                     <select
                       className="form-input"
                       value={currentArticle.category || ''}
-                      onChange={e => setCurrentArticle({...currentArticle, category: e.target.value})}
+                      onChange={e => {
+                        const nextCategory = e.target.value;
+                        setCurrentArticle({
+                          ...currentArticle,
+                          category: nextCategory,
+                          sub_category: nextCategory === 'News' ? currentArticle.sub_category || '' : null,
+                        });
+                      }}
                       required
                     >
                       <option value="" disabled>Select a category...</option>
@@ -338,6 +348,21 @@ export default function AdminDashboard() {
                       ))}
                     </select>
                   </div>
+                  {currentArticle.category === 'News' && (
+                    <div className="form-group">
+                      <label className="form-label">News Subcategory</label>
+                      <select
+                        className="form-input"
+                        value={currentArticle.sub_category || ''}
+                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
+                      >
+                        <option value="">All News</option>
+                        {NEWS_REGIONS.map(region => (
+                          <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div className="form-group">
                     <label className="form-label">Author Byline</label>
                     <input
@@ -585,6 +610,7 @@ export default function AdminDashboard() {
                         ? `<!-- FORMAT:HTML -->\n${currentArticle.content || ''}`
                         : currentArticle.content || 'Start writing your story to see the preview.',
                       category: currentArticle.category || CATEGORIES[0],
+                      sub_category: currentArticle.sub_category || null,
                       author: currentArticle.author || 'Anonymous',
                       image_url: currentArticle.image_url || '',
                       created_at: currentArticle.created_at || new Date().toISOString(),
@@ -827,7 +853,12 @@ export default function AdminDashboard() {
               articles.map(article => (
                 <tr key={article.id}>
                   <td style={{ fontWeight: '500', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{article.title}</td>
-                  <td><span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.category}</span></td>
+                  <td>
+                    <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.category}</span>
+                    {article.category === 'News' && article.sub_category && (
+                      <span style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{article.sub_category}</span>
+                    )}
+                  </td>
                   <td>{article.author}</td>
                   <td>{formatDate(article.created_at)}</td>
                   <td>

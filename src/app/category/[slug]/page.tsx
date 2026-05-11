@@ -12,6 +12,22 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
+function logCategoryFetchWarning(error: unknown, context: string) {
+  if (error && typeof error === 'object') {
+    const supabaseError = error as { code?: string; message?: string; details?: string; hint?: string };
+    console.warn('Category article fetch warning:', {
+      context,
+      code: supabaseError.code,
+      message: supabaseError.message,
+      details: supabaseError.details,
+      hint: supabaseError.hint,
+    });
+    return;
+  }
+
+  console.warn('Category article fetch warning:', { context, error });
+}
+
 export async function generateStaticParams() {
   return CATEGORIES.map(category => ({
     slug: categoryPath(category).split('/').pop()!,
@@ -58,23 +74,45 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     regionFilter = matched ?? null;
   }
 
-  let query = supabase
-    .from('articles')
-    .select('*')
-    .order('created_at', { ascending: false });
+  let data: NewsArticle[] | null = null;
+  let error: unknown = null;
 
   if (category === 'News' && regionFilter) {
-    // Articles tagged with their region as sub_category or in title/category
-    // For now filter by category = regionFilter OR category = 'News'
-    query = query.or(`category.eq.${category},category.eq.${regionFilter}`);
+    const regionResult = await supabase
+      .from('articles')
+      .select('*')
+      .eq('category', category)
+      .eq('sub_category', regionFilter)
+      .order('created_at', { ascending: false });
+
+    data = regionResult.data as NewsArticle[] | null;
+    error = regionResult.error;
+
+    if (error) {
+      logCategoryFetchWarning(error, `Falling back to all News articles for ${regionFilter}`);
+
+      const fallbackResult = await supabase
+        .from('articles')
+        .select('*')
+        .eq('category', category)
+        .order('created_at', { ascending: false });
+
+      data = fallbackResult.data as NewsArticle[] | null;
+      error = fallbackResult.error;
+    }
   } else {
-    query = query.eq('category', category);
+    const categoryResult = await supabase
+      .from('articles')
+      .select('*')
+      .eq('category', category)
+      .order('created_at', { ascending: false });
+
+    data = categoryResult.data as NewsArticle[] | null;
+    error = categoryResult.error;
   }
 
-  const { data, error } = await query;
-
   if (error) {
-    console.error('Error fetching category articles:', error);
+    logCategoryFetchWarning(error, `Unable to fetch articles for ${category}`);
     return (
       <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
         <HomeClient articles={[]} initialCategory={category} initialRegion={regionFilter} serverLoadFailed />

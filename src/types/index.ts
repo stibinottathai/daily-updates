@@ -7,6 +7,7 @@ export interface NewsArticle {
   author: string;
   author_id?: string;
   category: string;
+  sub_category?: string | null;
   created_at: string;
   updated_at?: string;
 }
