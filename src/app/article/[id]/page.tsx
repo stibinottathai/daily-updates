@@ -51,9 +51,15 @@ export async function generateMetadata({ params }: Props) {
     type: 'article',
   });
 
+  const tags = [article.category, 'news'];
+  if (article.sub_category) {
+    tags.push(article.sub_category);
+  }
+
   return {
     ...metadata,
     authors: [{ name: article.author || SITE_NAME }],
+    keywords: tags.join(', '),
     category: article.category,
     openGraph: {
       ...metadata.openGraph,
@@ -62,7 +68,7 @@ export async function generateMetadata({ params }: Props) {
       modifiedTime: article.updated_at || article.created_at,
       authors: [article.author || SITE_NAME],
       section: article.category,
-      tags: [article.category, 'news'],
+      tags: tags,
     },
   };
 }
