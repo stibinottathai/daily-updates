@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
-import { articlePath, absoluteUrl, baseMetadata, slugify, truncateDescription, SITE_NAME, defaultOgImage } from '../../../lib/seo';
+import { articlePath, absoluteUrl, baseMetadata, getShareImageUrl, slugify, truncateDescription, SITE_NAME } from '../../../lib/seo';
 
 export const revalidate = 60;
 
@@ -42,11 +42,12 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 
+  const shareImage = getShareImageUrl(article.image_url);
   const metadata = baseMetadata({
     title: article.title,
     description: truncateDescription(article.excerpt),
     path: articlePath(article),
-    image: article.image_url || defaultOgImage,
+    image: shareImage,
     type: 'article',
   });
 
@@ -84,12 +85,13 @@ export default async function ArticlePage({ params }: Props) {
     redirect(articlePath(article));
   }
 
+  const shareImage = getShareImageUrl(article.image_url);
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     headline: article.title,
     description: truncateDescription(article.excerpt),
-    image: [absoluteUrl(article.image_url || defaultOgImage)],
+    image: [absoluteUrl(shareImage)],
     datePublished: article.created_at,
     dateModified: article.updated_at || article.created_at,
     author: {

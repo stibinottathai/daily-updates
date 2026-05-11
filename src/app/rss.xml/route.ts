@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import type { NewsArticle } from '../../types';
-import { absoluteUrl, articlePath, DEFAULT_DESCRIPTION, escapeXml, SITE_NAME } from '../../lib/seo';
+import { absoluteUrl, articlePath, DEFAULT_DESCRIPTION, escapeXml, getShareImageUrl, SITE_NAME } from '../../lib/seo';
 
 export const revalidate = 1800;
 
@@ -12,7 +12,10 @@ export async function GET() {
     .limit(50);
 
   const articles = ((data as NewsArticle[] | null) || []);
-  const items = articles.map(article => `
+  const items = articles.map(article => {
+    const shareImage = getShareImageUrl(article.image_url);
+
+    return `
     <item>
       <title>${escapeXml(article.title)}</title>
       <link>${absoluteUrl(articlePath(article))}</link>
@@ -21,9 +24,10 @@ export async function GET() {
       <category>${escapeXml(article.category)}</category>
       <author>${escapeXml(article.author)}</author>
       <pubDate>${new Date(article.created_at).toUTCString()}</pubDate>
-      ${article.image_url ? `<enclosure url="${escapeXml(article.image_url)}" type="image/jpeg" />` : ''}
+      ${shareImage ? `<enclosure url="${escapeXml(absoluteUrl(shareImage))}" type="image/jpeg" />` : ''}
     </item>
-  `).join('');
+  `;
+  }).join('');
 
   const feed = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">

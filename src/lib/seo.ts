@@ -30,6 +30,21 @@ export function absoluteUrl(path: string): string {
   return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
+export function getShareImageUrl(imageValue?: string | null): string {
+  const image = imageValue?.trim();
+
+  if (!image) {
+    return defaultOgImage;
+  }
+
+  if (image.startsWith('<')) {
+    const src = image.match(/\bsrc=["']([^"']+)["']/i)?.[1]?.trim();
+    return src || defaultOgImage;
+  }
+
+  return image;
+}
+
 export function slugify(value: string): string {
   const slug = value
     .toLowerCase()
