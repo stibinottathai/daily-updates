@@ -34,10 +34,12 @@ function useItemsPerPage() {
 export default function HomeClient({
   articles,
   initialCategory,
+  initialRegion = null,
   serverLoadFailed = false,
 }: {
   articles: NewsArticle[];
   initialCategory: string | null;
+  initialRegion?: string | null;
   serverLoadFailed?: boolean;
 }) {
   const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked } = useNews();
@@ -118,7 +120,11 @@ export default function HomeClient({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const pageTitle = searchQuery ? 'Search Results' : selectedCategory || 'Home';
+  const pageTitle = searchQuery
+    ? 'Search Results'
+    : initialRegion
+    ? `${initialRegion} News`
+    : selectedCategory || 'Home';
 
   return (
     <div>

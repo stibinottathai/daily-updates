@@ -184,6 +184,48 @@ h1, h2, h3, h4, h5, h6 {
 
 .cat-link:hover, .cat-link.active { color: var(--accent-gold); }
 
+/* Region Sub-Nav (shown below category nav when News is active) */
+.region-subnav {
+  background: var(--surface-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.6rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 39;
+}
+
+.region-list {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.region-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  padding: 0.3rem 0.75rem;
+  border-radius: 2rem;
+  border: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.region-link:hover {
+  color: var(--accent-gold);
+  border-color: var(--border-color);
+  background: var(--surface-hover);
+}
+
+.region-link.active {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  background: rgba(232, 197, 71, 0.08);
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;

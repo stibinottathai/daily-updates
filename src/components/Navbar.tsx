@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, Moon, Sun, ChevronDown, Search } from 'lucide-react';
-import { CATEGORIES } from '../types';
+import { CATEGORIES, NEWS_REGIONS } from '../types';
 import { useNews } from '../context/NewsContext';
 import { categoryFromSlug, categoryPath } from '../lib/seo';
 import { supabase } from '../lib/supabase';
@@ -117,8 +117,9 @@ export default function Navbar() {
     setLoginLoading(false);
   };
 
-  const visibleCategories = CATEGORIES.slice(0, 9);
-  const hiddenCategories = CATEGORIES.slice(9);
+  const otherCategories = CATEGORIES.filter(c => c !== 'News');
+  const visibleCategories = otherCategories.slice(0, 9);
+  const hiddenCategories = otherCategories.slice(9);
   const themeLabel = mounted ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : 'Theme';
   const ThemeIcon = mounted ? (theme === 'dark' ? Sun : Moon) : null;
 
@@ -242,6 +243,13 @@ export default function Navbar() {
           <Link href="/" className={`cat-link ${!currentCategory ? 'active' : ''}`}>
             Home
           </Link>
+          <Link
+            href={categoryPath('News')}
+            className={`cat-link ${currentCategory === 'News' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            News
+          </Link>
           {visibleCategories.map(category => (
             <Link 
               key={category} 
@@ -349,6 +357,34 @@ export default function Navbar() {
           )}
         </div>
       </nav>
+
+      {/* News Region Sub-Nav — only visible when News category is active */}
+      {currentCategory === 'News' && (
+        <nav className="region-subnav" aria-label="News regions">
+          <div className="container region-list">
+            <Link
+              href={categoryPath('News')}
+              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
+            >
+              All News
+            </Link>
+            {NEWS_REGIONS.map(region => {
+              const slug = region.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const isActive = searchParams.get('region') === slug;
+              return (
+                <Link
+                  key={region}
+                  href={`${categoryPath('News')}?region=${slug}`}
+                  className={`region-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {region}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
       
       {/* Small hack for desktop actions visibility */}
       <style>{`

@@ -19,6 +19,7 @@ export interface ContactMessage {
 }
 
 export const CATEGORIES = [
+  'News',
   'World',
   'Business',
   'Technology',
@@ -35,6 +36,20 @@ export const CATEGORIES = [
   'Education',
   'Environment'
 ] as const;
+
+export const NEWS_REGIONS = [
+  'US & Canada',
+  'UK',
+  'India',
+  'Africa',
+  'Asia',
+  'Australia',
+  'Europe',
+  'Latin America',
+  'Middle East',
+] as const;
+
+export type NewsRegion = typeof NEWS_REGIONS[number];
 
 export type Category = typeof CATEGORIES[number];
 
