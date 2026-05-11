@@ -130,9 +130,8 @@ export default function RootLayout({
           <footer className="site-footer">
             <div className="container footer-grid">
               <div className="footer-brand">
-                <a href="/" className="logo">
-                  <span>Daily Updates</span>
-                  <span className="logo-accent">Stories That Matter</span>
+                  <a href="/">
+                    <img src="/logo.png" alt="Daily Updates Logo" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
                 </a>
                 <p>
                   Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
@@ -182,3 +181,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+

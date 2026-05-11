@@ -128,11 +128,9 @@ export default function Navbar() {
     <>
       <nav className="masthead">
         <div className="container masthead-inner">
-          <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-            <span>Daily Updates</span>
-            <span className="logo-accent">Stories That Matter</span>
-          </Link>
-
+            <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+              <img src="/logo.png" alt="Daily Updates Logo" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
+            </Link>
           <div className="navbar-search-shell">
             <button
               type="button"
