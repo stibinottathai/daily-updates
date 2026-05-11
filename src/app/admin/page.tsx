@@ -7,7 +7,7 @@ import ArticleDetailClient from '../../components/ArticleDetailClient';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
 import { CATEGORIES, NEWS_REGIONS, formatDate } from '../../types';
-import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AdminDashboard() {
   const { user, isLoading, articles, addArticle, deleteArticle, updateArticle, fetchContactMessages, deleteContactMessage, clearAllMessages, fetchVisitorStats } = useNews();
@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [isHtmlMode, setIsHtmlMode] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<'write' | 'preview' | 'seo'>('write');
   const [activeTab, setActiveTab] = useState<'articles' | 'messages'>('articles');
+  const [articlesPage, setArticlesPage] = useState(1);
   const [messages, setMessages] = useState<any[]>([]);
   const [visitorStats, setVisitorStats] = useState<VisitorStats>({
     totalVisits: 0,
@@ -113,6 +114,11 @@ export default function AdminDashboard() {
       router.push('/login');
     }
   }, [user, isLoading, router]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(articles.length / 10));
+    setArticlesPage(page => Math.min(page, maxPage));
+  }, [articles.length]);
 
   if (isLoading || !user.isAuthenticated) {
     return (
@@ -268,6 +274,14 @@ export default function AdminDashboard() {
 
   // Stats calculation
   const totalArticles = articles.length;
+  const articlesPerPage = 10;
+  const totalArticlePages = Math.max(1, Math.ceil(totalArticles / articlesPerPage));
+  const paginatedArticles = articles.slice(
+    (articlesPage - 1) * articlesPerPage,
+    articlesPage * articlesPerPage
+  );
+  const articleRangeStart = totalArticles === 0 ? 0 : (articlesPage - 1) * articlesPerPage + 1;
+  const articleRangeEnd = Math.min(articlesPage * articlesPerPage, totalArticles);
   const myArticles = articles.filter(a => a.author_id === user.id).length;
   const popularCategory = Object.entries(
     articles.reduce((acc, curr) => {
@@ -833,50 +847,82 @@ export default function AdminDashboard() {
       </div>
       
       {activeTab === 'articles' ? (
-        <div className="table-container">
-          <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Author</th>
-              <th>Published</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {articles.length === 0 ? (
+        <div>
+          <div className="table-container">
+            <table>
+            <thead>
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>No articles published yet.</td>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Published</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
-            ) : (
-              articles.map(article => (
-                <tr key={article.id}>
-                  <td style={{ fontWeight: '500', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{article.title}</td>
-                  <td>
-                    <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.category}</span>
-                    {article.category === 'News' && article.sub_category && (
-                      <span style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{article.sub_category}</span>
-                    )}
-                  </td>
-                  <td>{article.author}</td>
-                  <td>{formatDate(article.created_at)}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button className="btn btn-outline" style={{ padding: '0.4rem 0.6rem' }} onClick={() => editArticle(article)}>
-                        <Edit2 size={14} /> Edit
-                      </button>
-                      <button className="btn btn-destructive" style={{ padding: '0.4rem 0.6rem' }} onClick={() => handleDelete(article.id)}>
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
+            </thead>
+            <tbody>
+              {articles.length === 0 ? (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>No articles published yet.</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                paginatedArticles.map(article => (
+                  <tr key={article.id}>
+                    <td style={{ fontWeight: '500', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{article.title}</td>
+                    <td>
+                      <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.category}</span>
+                      {article.category === 'News' && article.sub_category && (
+                        <span style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{article.sub_category}</span>
+                      )}
+                    </td>
+                    <td>{article.author}</td>
+                    <td>{formatDate(article.created_at)}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button className="btn btn-outline" style={{ padding: '0.4rem 0.6rem' }} onClick={() => editArticle(article)}>
+                          <Edit2 size={14} /> Edit
+                        </button>
+                        <button className="btn btn-destructive" style={{ padding: '0.4rem 0.6rem' }} onClick={() => handleDelete(article.id)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+          {totalArticles > articlesPerPage && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+              <span className="meta-text">
+                Showing {articleRangeStart}-{articleRangeEnd} of {totalArticles}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{ padding: '0.45rem 0.7rem' }}
+                  onClick={() => setArticlesPage(page => Math.max(1, page - 1))}
+                  disabled={articlesPage === 1}
+                >
+                  <ChevronLeft size={16} /> Previous
+                </button>
+                <span className="meta-text" style={{ minWidth: '6rem', textAlign: 'center' }}>
+                  Page {articlesPage} of {totalArticlePages}
+                </span>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{ padding: '0.45rem 0.7rem' }}
+                  onClick={() => setArticlesPage(page => Math.min(totalArticlePages, page + 1))}
+                  disabled={articlesPage === totalArticlePages}
+                >
+                  Next <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div>
           {messages.length > 0 && (
