@@ -192,9 +192,26 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    addToast('Link copied to clipboard', 'success');
+  const handleShare = async () => {
+    const shareData = {
+      title: article.title,
+      text: article.excerpt,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(window.location.href);
+      addToast('Link copied to clipboard', 'success');
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        addToast('Could not share this article', 'error');
+      }
+    }
   };
 
   return (

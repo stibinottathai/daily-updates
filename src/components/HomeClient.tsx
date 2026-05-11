@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useNews } from '../context/NewsContext';
-import { Bookmark, Search, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bookmark, Search, Clock, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
 import AdUnit from './AdUnit';
@@ -42,7 +42,7 @@ export default function HomeClient({
   initialRegion?: string | null;
   serverLoadFailed?: boolean;
 }) {
-  const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked } = useNews();
+  const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked, addToast } = useNews();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -125,6 +125,29 @@ export default function HomeClient({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleShare = async (article: NewsArticle) => {
+    const url = `${window.location.origin}${articlePath(article)}`;
+    const shareData = {
+      title: article.title,
+      text: article.excerpt,
+      url,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      await navigator.clipboard.writeText(url);
+      addToast('Article link copied', 'success');
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        addToast('Could not share this article', 'error');
+      }
+    }
+  };
+
   const pageTitle = searchQuery
     ? 'Search Results'
     : initialRegion
@@ -189,12 +212,26 @@ export default function HomeClient({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="card-category">{featuredArticle.category}</span>
-                    <button
-                      onClick={(e) => { e.preventDefault(); toggleBookmark(featuredArticle.id); }}
-                      style={{ background: 'none', border: 'none', color: isBookmarked(featuredArticle.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer' }}
-                    >
-                      <Bookmark size={20} fill={isBookmarked(featuredArticle.id) ? "currentColor" : "none"} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <button
+                        type="button"
+                        onClick={() => toggleBookmark(featuredArticle.id)}
+                        style={{ background: 'none', border: 'none', color: isBookmarked(featuredArticle.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                        title="Bookmark"
+                        aria-label="Bookmark article"
+                      >
+                        <Bookmark size={20} fill={isBookmarked(featuredArticle.id) ? "currentColor" : "none"} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleShare(featuredArticle)}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                        title="Share"
+                        aria-label="Share article"
+                      >
+                        <Share2 size={19} />
+                      </button>
+                    </div>
                   </div>
                   <Link href={articlePath(featuredArticle)}>
                     <h2 className="card-title">{featuredArticle.title}</h2>
@@ -261,12 +298,26 @@ export default function HomeClient({
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                       <span className="card-category">{article.category}</span>
-                      <button
-                        onClick={(e) => { e.preventDefault(); toggleBookmark(article.id); }}
-                        style={{ background: 'none', border: 'none', color: isBookmarked(article.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer', padding: 0 }}
-                      >
-                        <Bookmark size={15} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => toggleBookmark(article.id)}
+                          style={{ background: 'none', border: 'none', color: isBookmarked(article.id) ? 'var(--accent-gold)' : 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                          title="Bookmark"
+                          aria-label="Bookmark article"
+                        >
+                          <Bookmark size={15} fill={isBookmarked(article.id) ? "currentColor" : "none"} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleShare(article)}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                          title="Share"
+                          aria-label="Share article"
+                        >
+                          <Share2 size={15} />
+                        </button>
+                      </div>
                     </div>
                     <Link href={articlePath(article)}>
                       <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{article.title}</h3>
