@@ -157,7 +157,7 @@ export default function AdminDashboard() {
       ...currentArticle,
       content: finalContent,
       image_url: currentArticle.image_url?.trim() || '',
-      sub_category: currentArticle.category === 'News'
+      sub_category: (currentArticle.category === 'News' || currentArticle.category === 'India' || currentArticle.category === 'Sports')
         ? currentArticle.sub_category?.trim() || null
         : null,
     };
@@ -351,7 +351,7 @@ export default function AdminDashboard() {
                         setCurrentArticle({
                           ...currentArticle,
                           category: nextCategory,
-                          sub_category: nextCategory === 'News' ? currentArticle.sub_category || '' : null,
+                          sub_category: (nextCategory === 'News' || nextCategory === 'India' || nextCategory === 'Sports') ? currentArticle.sub_category || '' : null,
                         });
                       }}
                       required
@@ -1002,3 +1002,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
