@@ -28,12 +28,32 @@ export default function Navbar() {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
   const searchQuery = searchParams.get('q') ?? '';
   const searchTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Close More dropdown on outside click (important for mobile)
+  useEffect(() => {
+    if (!moreDropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      const clickedButton = moreButtonRef.current?.contains(e.target as Node);
+      const clickedDropdown = dropdownRef.current?.contains(e.target as Node);
+      if (!clickedButton && !clickedDropdown) {
+        setMoreDropdownOpen(false);
+      }
+    };
+    // Use mousedown/pointerdown but NOT touchstart — touchstart fires before click and kills navigation
+    document.addEventListener('pointerdown', handler);
+    return () => {
+      document.removeEventListener('pointerdown', handler);
+    };
+  }, [moreDropdownOpen]);
 
   useEffect(() => {
     setSearchDraft(searchParams.get('q') ?? '');
@@ -220,7 +240,7 @@ export default function Navbar() {
       <nav className="category-nav">
         <div className="container category-list">
           <Link href="/" className={`cat-link ${!currentCategory ? 'active' : ''}`}>
-            Latest
+            Home
           </Link>
           {visibleCategories.map(category => (
             <Link 
@@ -233,21 +253,49 @@ export default function Navbar() {
             </Link>
           ))}
           {hiddenCategories.length > 0 && (
-            <div 
+            <div
               style={{ position: 'relative' }}
-              onMouseEnter={() => setMoreDropdownOpen(true)}
-              onMouseLeave={() => setMoreDropdownOpen(false)}
+              onMouseEnter={() => {
+                if (window.innerWidth >= 768) {
+                  setMoreDropdownOpen(true);
+                  if (moreButtonRef.current) {
+                    const r = moreButtonRef.current.getBoundingClientRect();
+                    setDropdownPos({ top: r.bottom + 4, left: r.left });
+                  }
+                }
+              }}
+              onMouseLeave={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(false); }}
             >
-              <button 
+              <button
+                ref={moreButtonRef}
                 className={`cat-link ${hiddenCategories.includes(currentCategory as any) ? 'active' : ''}`}
                 style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', outline: 'none' }}
-                onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                onClick={() => {
+                  const next = !moreDropdownOpen;
+                  setMoreDropdownOpen(next);
+                  if (next && moreButtonRef.current) {
+                    const r = moreButtonRef.current.getBoundingClientRect();
+                    setDropdownPos({ top: r.bottom + 4, left: r.left });
+                  }
+                }}
               >
                 More <ChevronDown size={14} style={{ transition: 'transform 0.2s', transform: moreDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
               </button>
               
-              {moreDropdownOpen && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, paddingTop: '8px', zIndex: 100, minWidth: '220px' }}>
+              {moreDropdownOpen && dropdownPos && (
+                <div
+                  ref={dropdownRef}
+                  style={{
+                    position: 'fixed',
+                    top: dropdownPos.top,
+                    left: Math.min(dropdownPos.left, window.innerWidth - 240),
+                    zIndex: 9999,
+                    minWidth: '220px',
+                    paddingTop: '4px',
+                  }}
+                  onMouseEnter={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(true); }}
+                  onMouseLeave={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(false); }}
+                >
                 <div 
                   style={{ 
                     background: 'var(--surface-color)', 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { NewsArticle, User, Toast, VisitorStats } from '../types';
 import { supabase } from '../lib/supabase';
@@ -62,8 +62,10 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
+  const toastIdRef = useRef(0);
+
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = String(++toastIdRef.current);
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));

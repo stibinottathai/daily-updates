@@ -70,19 +70,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
-        {adsenseClient && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-            crossOrigin="anonymous"
-          />
-        )}
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <NewsProvider>
           <React.Suspense fallback={<div style={{ height: '60px' }}>Loading...</div>}>
             <Navbar />
@@ -91,6 +84,14 @@ export default function RootLayout({
             <VisitorTracker />
           </React.Suspense>
           <PopupAd />
+          {adsenseClient && (
+            <Script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+              crossOrigin="anonymous"
+              strategy="afterInteractive"
+            />
+          )}
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
