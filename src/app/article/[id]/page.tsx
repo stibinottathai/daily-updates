@@ -42,7 +42,20 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 
-  const shareImage = getShareImageUrl(article.image_url);
+  let shareImageValue = article.image_url;
+  if (!shareImageValue && article.content) {
+    const imgMatch = article.content.match(/!\[.*?\]\((.*?)\)/);
+    if (imgMatch && imgMatch[1]) {
+      shareImageValue = imgMatch[1];
+    } else {
+      const htmlImgMatch = article.content.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (htmlImgMatch && htmlImgMatch[1]) {
+        shareImageValue = htmlImgMatch[1];
+      }
+    }
+  }
+
+  const shareImage = getShareImageUrl(shareImageValue);
   const metadata = baseMetadata({
     title: article.title,
     description: truncateDescription(article.excerpt),

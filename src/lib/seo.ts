@@ -26,6 +26,10 @@ export function absoluteUrl(path: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
+  
+  if (path.startsWith('//')) {
+    return `https:${path}`;
+  }
 
   return `${siteUrl}${path.startsWith('/') ? path : `/${path}`}`;
 }
@@ -37,12 +41,12 @@ export function getShareImageUrl(imageValue?: string | null): string {
     return defaultOgImage;
   }
 
+  let src = image;
   if (image.startsWith('<')) {
-    const src = image.match(/\bsrc=["']([^"']+)["']/i)?.[1]?.trim();
-    return src || defaultOgImage;
+    src = image.match(/\bsrc=["']([^"']+)["']/i)?.[1]?.trim() || defaultOgImage;
   }
 
-  return image;
+  return encodeURI(src);
 }
 
 export function slugify(value: string): string {
@@ -117,8 +121,6 @@ export function baseMetadata({
       images: [
         {
           url: imageUrl,
-          width: 1200,
-          height: 630,
           alt: title,
         },
       ],
