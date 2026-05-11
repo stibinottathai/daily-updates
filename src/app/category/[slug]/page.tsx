@@ -2,7 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import HomeClient from '../../../components/HomeClient';
-import { CATEGORIES, NEWS_REGIONS, type NewsArticle } from '../../../types';
+import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES, type NewsArticle } from '../../../types';
 import { baseMetadata, categoryFromSlug, categoryPath, truncateDescription } from '../../../lib/seo';
 
 export const revalidate = 60;
@@ -65,10 +65,20 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   // For the News category, support optional region filtering
   const regionParam = typeof resolvedSearch.region === 'string' ? resolvedSearch.region : null;
 
-  // Resolve region slug back to a display name (e.g. 'us-canada' → 'US & Canada')
+  // Resolve region slug back to a display name
   let regionFilter: string | null = null;
   if (category === 'News' && regionParam) {
     const matched = NEWS_REGIONS.find(
+      r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
+    );
+    regionFilter = matched ?? null;
+  } else if (category === 'India' && regionParam) {
+    const matched = INDIA_REGIONS.find(
+      r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
+    );
+    regionFilter = matched ?? null;
+  } else if (category === 'Sports' && regionParam) {
+    const matched = SPORTS_TYPES.find(
       r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
     );
     regionFilter = matched ?? null;
@@ -77,7 +87,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   let data: NewsArticle[] | null = null;
   let error: unknown = null;
 
-  if (category === 'News' && regionFilter) {
+  if ((category === 'News' || category === 'India' || category === 'Sports') && regionFilter) {
     const regionResult = await supabase
       .from('articles')
       .select('*')
@@ -89,7 +99,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     error = regionResult.error;
 
     if (error) {
-      logCategoryFetchWarning(error, `Falling back to all News articles for ${regionFilter}`);
+      logCategoryFetchWarning(error, `Falling back to all ${category} articles for ${regionFilter}`);
 
       const fallbackResult = await supabase
         .from('articles')

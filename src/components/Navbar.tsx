@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, Moon, Sun, ChevronDown, Search } from 'lucide-react';
-import { CATEGORIES, NEWS_REGIONS } from '../types';
+import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES } from '../types';
 import { useNews } from '../context/NewsContext';
 import { categoryFromSlug, categoryPath } from '../lib/seo';
 import { supabase } from '../lib/supabase';
@@ -33,6 +33,7 @@ export default function Navbar() {
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
   const searchQuery = searchParams.get('q') ?? '';
   const searchTimerRef = useRef<number | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -265,14 +266,24 @@ export default function Navbar() {
               style={{ position: 'relative' }}
               onMouseEnter={() => {
                 if (window.innerWidth >= 768) {
+                  if (dropdownTimeoutRef.current) {
+                    clearTimeout(dropdownTimeoutRef.current);
+                    dropdownTimeoutRef.current = null;
+                  }
                   setMoreDropdownOpen(true);
                   if (moreButtonRef.current) {
                     const r = moreButtonRef.current.getBoundingClientRect();
-                    setDropdownPos({ top: r.bottom + 4, left: r.left });
+                    setDropdownPos({ top: r.bottom, left: r.left });
                   }
                 }
               }}
-              onMouseLeave={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(false); }}
+              onMouseLeave={() => {
+                if (window.innerWidth >= 768) {
+                  dropdownTimeoutRef.current = setTimeout(() => {
+                    setMoreDropdownOpen(false);
+                  }, 500); // Increased to 500ms for stability
+                }
+              }}
             >
               <button
                 ref={moreButtonRef}
@@ -283,7 +294,7 @@ export default function Navbar() {
                   setMoreDropdownOpen(next);
                   if (next && moreButtonRef.current) {
                     const r = moreButtonRef.current.getBoundingClientRect();
-                    setDropdownPos({ top: r.bottom + 4, left: r.left });
+                    setDropdownPos({ top: r.bottom, left: r.left });
                   }
                 }}
               >
@@ -299,19 +310,32 @@ export default function Navbar() {
                     left: Math.min(dropdownPos.left, window.innerWidth - 240),
                     zIndex: 9999,
                     minWidth: '220px',
-                    paddingTop: '4px',
+                    paddingTop: '8px', // Acts as a bridge between button and menu
+                    marginTop: '-4px' // Overlap slightly to ensure no gap
                   }}
-                  onMouseEnter={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(true); }}
-                  onMouseLeave={() => { if (window.innerWidth >= 768) setMoreDropdownOpen(false); }}
+                  onMouseEnter={() => {
+                    if (dropdownTimeoutRef.current) {
+                      clearTimeout(dropdownTimeoutRef.current);
+                      dropdownTimeoutRef.current = null;
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (window.innerWidth >= 768) {
+                      dropdownTimeoutRef.current = setTimeout(() => {
+                        setMoreDropdownOpen(false);
+                      }, 500);
+                    }
+                  }}
                 >
-                <div 
-                  style={{ 
-                    background: 'var(--surface-color)', 
-                    border: '1px solid var(--border-color)', 
-                    borderRadius: '12px',
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04)',
-                    overflow: 'hidden',
-                    animation: 'fadeInUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) both',
+                <div style={{ 
+                    zIndex: 9999,
+                    backgroundColor: 'var(--surface-color)',
+                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
+                    borderRadius: 'var(--radius-lg)',
+                    minWidth: '200px',
+                    padding: '0.5rem 0',
+                    border: '1px solid var(--border-color)',
+                    animation: 'dropdown-slide-up 0.2s ease-out'
                   }}
                 >
                   {/* Header */}
@@ -379,6 +403,60 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {region}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+
+      {currentCategory === 'India' && (
+        <nav className="region-subnav" aria-label="India regions">
+          <div className="container region-list">
+            <Link
+              href={categoryPath('India')}
+              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
+            >
+              All India
+            </Link>
+            {INDIA_REGIONS.map(region => {
+              const slug = region.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const isActive = searchParams.get('region') === slug;
+              return (
+                <Link
+                  key={region}
+                  href={`${categoryPath('India')}?region=${slug}`}
+                  className={`region-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {region}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+
+      {currentCategory === 'Sports' && (
+        <nav className="region-subnav" aria-label="Sports types">
+          <div className="container region-list">
+            <Link
+              href={categoryPath('Sports')}
+              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
+            >
+              All Sports
+            </Link>
+            {SPORTS_TYPES.map(sport => {
+              const slug = sport.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const isActive = searchParams.get('region') === slug;
+              return (
+                <Link
+                  key={sport}
+                  href={`${categoryPath('Sports')}?region=${slug}`}
+                  className={`region-link ${isActive ? 'active' : ''}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {sport}
                 </Link>
               );
             })}

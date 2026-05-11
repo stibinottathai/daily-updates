@@ -6,7 +6,7 @@ import Image from 'next/image';
 import ArticleDetailClient from '../../components/ArticleDetailClient';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
-import { CATEGORIES, NEWS_REGIONS, formatDate } from '../../types';
+import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES, formatDate } from '../../types';
 import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -373,6 +373,36 @@ export default function AdminDashboard() {
                         <option value="">All News</option>
                         {NEWS_REGIONS.map(region => (
                           <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {currentArticle.category === 'India' && (
+                    <div className="form-group">
+                      <label className="form-label">India Subcategory</label>
+                      <select
+                        className="form-input"
+                        value={currentArticle.sub_category || ''}
+                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
+                      >
+                        <option value="">All India</option>
+                        {INDIA_REGIONS.map(region => (
+                          <option key={region} value={region}>{region}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {currentArticle.category === 'Sports' && (
+                    <div className="form-group">
+                      <label className="form-label">Sports Subcategory</label>
+                      <select
+                        className="form-input"
+                        value={currentArticle.sub_category || ''}
+                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
+                      >
+                        <option value="">All Sports</option>
+                        {SPORTS_TYPES.map(sport => (
+                          <option key={sport} value={sport}>{sport}</option>
                         ))}
                       </select>
                     </div>
