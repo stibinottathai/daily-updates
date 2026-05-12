@@ -30,6 +30,28 @@ interface NewsContextType {
 
 const NewsContext = createContext<NewsContextType | undefined>(undefined);
 
+const getInitialTheme = (): 'dark' | 'light' => {
+  if (typeof document !== 'undefined') {
+    const documentTheme = document.documentElement.getAttribute('data-theme');
+    if (documentTheme === 'light' || documentTheme === 'dark') {
+      return documentTheme;
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        return savedTheme;
+      }
+
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    } catch (error) {}
+  }
+
+  return 'dark';
+};
+
 export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [user, setUser] = useState<User>({ email: '', isAuthenticated: false });
@@ -37,30 +59,51 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-
-  // Prevent hydration mismatch by using a mounted state
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
+    const initialTheme = getInitialTheme();
+    setTheme(initialTheme);
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    document.documentElement.style.colorScheme = initialTheme;
   }, []);
 
-  // Use a stable default during SSR and initial hydration
-  const currentTheme = mounted ? theme : 'dark';
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.colorScheme = theme;
+  }, [mounted, theme]);
+
+  useEffect(() => {
+    const syncTheme = (event: StorageEvent) => {
+      if (event.key === 'theme' && (event.newValue === 'light' || event.newValue === 'dark')) {
+        setTheme(event.newValue);
+      }
+    };
+
+    window.addEventListener('storage', syncTheme);
+    return () => {
+      window.removeEventListener('storage', syncTheme);
+    }
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => {
       const newTheme = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', newTheme);
+      try {
+        localStorage.setItem('theme', newTheme);
+      } catch (error) {}
       document.documentElement.setAttribute('data-theme', newTheme);
+      document.documentElement.style.colorScheme = newTheme;
       return newTheme;
     });
   }, []);
+
+  const currentTheme = mounted ? theme : 'dark';
 
   const toastIdRef = useRef(0);
 

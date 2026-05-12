@@ -56,7 +56,10 @@ export default function RootLayout({
   const themeInitScript = `
     (() => {
       try {
-        const savedTheme = localStorage.getItem('theme');
+        let savedTheme = null;
+        try {
+          savedTheme = localStorage.getItem('theme');
+        } catch (error) {}
         const systemPrefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
         const initialTheme = savedTheme === 'light' || savedTheme === 'dark'
           ? savedTheme
@@ -72,9 +75,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Theme init must run before first paint to prevent flash-of-wrong-theme */}
-        <Script
+        <script
           id="theme-init"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -189,5 +191,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-

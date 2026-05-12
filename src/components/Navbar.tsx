@@ -20,7 +20,6 @@ export default function Navbar() {
     ? categoryFromSlug(pathCategorySlug, CATEGORIES)
     : searchParams.get('category');
   
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(Boolean(searchParams.get('q')));
@@ -35,10 +34,6 @@ export default function Navbar() {
   const searchQuery = searchParams.get('q') ?? '';
   const searchTimerRef = useRef<number | null>(null);
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close More dropdown on outside click (important for mobile)
   useEffect(() => {
@@ -122,8 +117,8 @@ export default function Navbar() {
   const otherCategories = CATEGORIES.filter(c => c !== 'News');
   const visibleCategories = otherCategories.slice(0, 9);
   const hiddenCategories = otherCategories.slice(9);
-  const themeLabel = mounted ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : 'Theme';
-  const ThemeIcon = mounted ? (theme === 'dark' ? Sun : Moon) : null;
+  const themeLabel = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+  const ThemeIcon = theme === 'dark' ? Sun : Moon;
 
   return (
     <>
@@ -165,8 +160,8 @@ export default function Navbar() {
           </div>
           
           <div className="nav-actions" style={{ display: 'none' }} id="desktop-actions">
-            <button onClick={toggleTheme} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
-              {ThemeIcon ? <ThemeIcon size={16} /> : <span style={{ display: 'inline-block', width: '16px', height: '16px' }} />} 
+            <button onClick={toggleTheme} aria-label={themeLabel} title={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
+              <ThemeIcon size={16} />
             </button>
             {user.isAuthenticated ? (
               <>
@@ -207,8 +202,8 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div style={{ padding: '1rem', background: 'var(--surface-color)', borderBottom: '1px solid var(--border-color)', position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 }}>
             <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-              <button onClick={() => { toggleTheme(); setMobileMenuOpen(false); }} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {ThemeIcon ? <ThemeIcon size={16} /> : <span style={{ display: 'inline-block', width: '16px', height: '16px' }} />} 
+              <button onClick={() => { toggleTheme(); setMobileMenuOpen(false); }} aria-label={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ThemeIcon size={16} />
                 {themeLabel}
               </button>
             </div>
