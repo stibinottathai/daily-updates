@@ -30,7 +30,8 @@ export const siteUrl = (() => {
   return withProtocol.replace(/\/$/, '');
 })();
 
-export const defaultOgImage = `${siteUrl}/og-image.svg`;
+// PNG is required — LinkedIn, WhatsApp, and most crawlers reject SVG for OG images.
+export const defaultOgImage = `${siteUrl}/og-image.png`;
 
 export function absoluteUrl(path: string): string {
   if (path.startsWith('http://') || path.startsWith('https://')) {
