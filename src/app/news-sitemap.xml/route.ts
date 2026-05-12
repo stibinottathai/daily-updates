@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase';
 import type { NewsArticle } from '../../types';
-import { absoluteUrl, articlePath, escapeXml, SITE_NAME } from '../../lib/seo';
+import { absoluteUrl, articlePath, detectArticleLanguage, escapeXml, SITE_NAME } from '../../lib/seo';
 
 export const revalidate = 1800;
 
@@ -20,7 +20,7 @@ export async function GET() {
     <news:news>
       <news:publication>
         <news:name>${escapeXml(SITE_NAME)}</news:name>
-        <news:language>en</news:language>
+        <news:language>${detectArticleLanguage(article)}</news:language>
       </news:publication>
       <news:publication_date>${new Date(article.created_at).toISOString()}</news:publication_date>
       <news:title>${escapeXml(article.title)}</news:title>

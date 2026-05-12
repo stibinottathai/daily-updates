@@ -7,6 +7,9 @@ export const DEFAULT_DESCRIPTION =
   'Daily Updates brings you the latest world news, business, technology, health, sports and culture stories, curated fresh every day.';
 export const SITE_LOCALE = 'en_US';
 export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
+export const MALAYALAM_LOCALE = 'ml_IN';
+
+const MALAYALAM_TEXT_PATTERN = /[\u0D00-\u0D7F]/u;
 
 /**
  * Single source of truth for the production domain.
@@ -74,6 +77,15 @@ export function slugify(value: string): string {
   return slug;
 }
 
+export function detectArticleLanguage(article: Pick<NewsArticle, 'title' | 'excerpt' | 'content'>): 'en' | 'ml' {
+  const articleText = `${article.title}\n${article.excerpt}\n${article.content}`;
+  return MALAYALAM_TEXT_PATTERN.test(articleText) ? 'ml' : 'en';
+}
+
+export function getLocaleForLanguage(language: 'en' | 'ml'): string {
+  return language === 'ml' ? MALAYALAM_LOCALE : SITE_LOCALE;
+}
+
 export function categoryPath(category: string): string {
   return `/category/${slugify(category)}`;
 }
@@ -106,12 +118,14 @@ export function baseMetadata({
   path = '/',
   image = defaultOgImage,
   type = 'website',
+  locale = SITE_LOCALE,
 }: {
   title: string;
   description?: string;
   path?: string;
   image?: string;
   type?: 'website' | 'article';
+  locale?: string;
 }): Metadata {
   const resolvedTitle = title === SITE_NAME ? SITE_NAME : `${title} | ${SITE_NAME}`;
   const canonicalUrl = absoluteUrl(path);
@@ -128,7 +142,7 @@ export function baseMetadata({
     },
     openGraph: {
       type,
-      locale: SITE_LOCALE,
+      locale,
       siteName: SITE_NAME,
       title: resolvedTitle,
       description,

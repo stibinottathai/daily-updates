@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
-import { articlePath, absoluteUrl, baseMetadata, getShareImageUrl, slugify, truncateDescription, SITE_NAME } from '../../../lib/seo';
+import { articlePath, absoluteUrl, baseMetadata, detectArticleLanguage, getLocaleForLanguage, getShareImageUrl, slugify, truncateDescription, SITE_NAME } from '../../../lib/seo';
 
 export const revalidate = 60;
 
@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: Props) {
     };
   }
 
+  const language = detectArticleLanguage(article);
   let shareImageValue = article.image_url;
   if (!shareImageValue && article.content) {
     const imgMatch = article.content.match(/!\[.*?\]\((.*?)\)/);
@@ -66,6 +67,7 @@ export async function generateMetadata({ params }: Props) {
     path: articlePath(article),
     image: shareImage,
     type: 'article',
+    locale: getLocaleForLanguage(language),
   });
 
   const tags = [article.category, 'news'];
@@ -75,6 +77,12 @@ export async function generateMetadata({ params }: Props) {
 
   return {
     ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      languages: {
+        [language]: absoluteUrl(articlePath(article)),
+      },
+    },
     authors: [{ name: article.author || SITE_NAME }],
     keywords: tags.join(', '),
     category: article.category,
@@ -104,6 +112,7 @@ export default async function ArticlePage({ params }: Props) {
     );
   }
 
+  const language = detectArticleLanguage(article);
   // Record the actual view, URL might be UUID or slug
   let shareImageValue = article.image_url;
   if (!shareImageValue && article.content) {
@@ -156,7 +165,7 @@ export default async function ArticlePage({ params }: Props) {
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <ArticleDetailClient article={article} />
+      <ArticleDetailClient article={article} language={language} />
     </>
   );
 }
