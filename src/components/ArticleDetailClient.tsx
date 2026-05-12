@@ -7,6 +7,8 @@ import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
+import { SITE_NAME } from '../lib/seo';
+import { sanitizeHtml } from '../lib/sanitizeHtml';
 
 const articleAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE || '';
 const articleBottomAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM || '';
@@ -57,7 +59,7 @@ function renderInline(text: string) {
 function renderArticleContent(content: string) {
   if (content.startsWith('<!-- FORMAT:HTML -->')) {
     const htmlContent = content.replace('<!-- FORMAT:HTML -->\n', '').replace('<!-- FORMAT:HTML -->', '');
-    return <div className="article-content html-mode" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+    return <div className="article-content html-mode" dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }} />;
   }
 
   const lines = content.split('\n');
@@ -263,7 +265,7 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             article.image_url.trim().startsWith('<') ? (
               <div 
                 style={{ width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', borderRadius: '12px', overflow: 'hidden' }}
-                dangerouslySetInnerHTML={{ __html: article.image_url.trim() }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.image_url.trim()) }}
               />
             ) : (
               <div style={{ position: 'relative', width: '100%', maxWidth: '900px', margin: '0 auto 2rem auto', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden' }}>
@@ -293,6 +295,42 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             transition: 'max-height 0.3s ease-out'
           }}>
             {renderArticleContent(article.content)}
+          </div>
+
+          <div 
+            className="author-bio-card"
+            style={{ 
+              marginTop: '4rem', 
+              padding: '2rem', 
+              background: 'var(--surface-color)', 
+              borderRadius: '12px', 
+              borderLeft: '4px solid var(--accent-gold)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1.5rem',
+            }}
+          >
+            <div style={{ 
+              width: '60px', 
+              height: '60px', 
+              borderRadius: '50%', 
+              background: 'var(--accent-gold)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#000',
+              fontSize: '1.5rem',
+              fontWeight: 800,
+              flexShrink: 0
+            }}>
+              {article.author.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{article.author}</h3>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Staff Writer at {SITE_NAME}. Specializing in delivering timely updates and in-depth analysis on {article.category.toLowerCase()} and trending global stories.
+              </p>
+            </div>
           </div>
           
           {!isExpanded && (

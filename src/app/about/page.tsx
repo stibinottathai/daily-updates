@@ -59,6 +59,27 @@ export default function AboutPage() {
           </section>
 
           <section>
+            <h2>Our Editorial Team</h2>
+            <p>
+              {SITE_NAME} is powered by a dedicated team of journalists and content creators who are passionate about
+              reporting the news that matters. Our team includes experienced staff writers and subject matter experts
+              committed to the highest standards of journalistic integrity.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--accent-gold)', margin: '0 auto 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 800 }}>DU</div>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Editorial Desk</h3>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Daily News Operations</p>
+              </div>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--accent-gold)', margin: '0 auto 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 800 }}>ST</div>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Staff Writers</h3>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Global Correspondents</p>
+              </div>
+            </div>
+          </section>
+
+          <section>
             <h2>Contact Us</h2>
             <p>If you have any questions, suggestions, or business inquiries, feel free to contact us:</p>
             <ul>

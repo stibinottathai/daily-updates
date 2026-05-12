@@ -8,6 +8,7 @@ import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
+import { sanitizeHtml } from '../lib/sanitizeHtml';
 import AdUnit from './AdUnit';
 import SearchParamsSync from './SearchParamsSync';
 
@@ -216,7 +217,7 @@ export default function HomeClient({
                   <Link href={articlePath(featuredArticle)}>
                     <div className={`card-image-wrapper ${featuredArticle.image_url.trim().startsWith('<') ? 'is-html' : ''}`}>
                       {featuredArticle.image_url.trim().startsWith('<') ? (
-                        <div dangerouslySetInnerHTML={{ __html: featuredArticle.image_url.trim() }} style={{ width: '100%' }} />
+                        <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(featuredArticle.image_url.trim()) }} style={{ width: '100%' }} />
                       ) : (
                         <Image
                           src={featuredArticle.image_url}
@@ -261,6 +262,8 @@ export default function HomeClient({
                     <p className="card-excerpt" style={{ fontSize: '1.05rem' }}>{featuredArticle.excerpt}</p>
                   </Link>
                   <div className="meta-text">
+                    <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{featuredArticle.author}</span>
+                    <span>•</span>
                     <span>{formatDate(featuredArticle.created_at)}</span>
                     <span>•</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {getReadingTime(featuredArticle.content)} min read</span>
@@ -304,7 +307,7 @@ export default function HomeClient({
                     <Link href={articlePath(article)}>
                       <div className={`card-image-wrapper ${article.image_url.trim().startsWith('<') ? 'is-html' : ''}`}>
                         {article.image_url.trim().startsWith('<') ? (
-                          <div dangerouslySetInnerHTML={{ __html: article.image_url.trim() }} style={{ width: '100%' }} />
+                          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.image_url.trim()) }} style={{ width: '100%' }} />
                         ) : (
                           <Image
                             src={article.image_url}
@@ -345,7 +348,9 @@ export default function HomeClient({
                     <Link href={articlePath(article)}>
                       <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{article.title}</h3>
                     </Link>
-                    <div className="meta-text" style={{ marginTop: '0.5rem' }}>
+                    <div className="meta-text" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{article.author}</span>
+                      <span>•</span>
                       <span>{formatDate(article.created_at)}</span>
                     </div>
                   </div>

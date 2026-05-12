@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
+import Script from 'next/script';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
@@ -149,8 +150,10 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <>
-      <script
+      <Script
+        id={`ld-article-${article.id}`}
         type="application/ld+json"
+        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <ArticleDetailClient article={article} />
