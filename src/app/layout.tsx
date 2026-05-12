@@ -164,6 +164,7 @@ export default function RootLayout({
                   <h3>Company</h3>
                   <div className="footer-links">
                     <a href="/about">About this page</a>
+                    <a href="/editorial-team">Editorial Team</a>
                     <a href="/contact">Contact Us</a>
                     <a href="/privacy-policy">Privacy Policy</a>
                     <CookiePreferencesButton />

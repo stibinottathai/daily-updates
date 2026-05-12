@@ -53,6 +53,9 @@ export default function AboutPage() {
               {SITE_NAME} is run by a small editorial team that combines reporting, editing, and technical maintenance.
               That keeps decisions close to the content and makes corrections easier to move quickly.
             </p>
+            <p style={{ marginTop: 0 }}>
+              Meet the team and read our attribution policy on the <a href="/editorial-team" style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>Editorial Team page</a>.
+            </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
               <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Editorial Desk</h3>

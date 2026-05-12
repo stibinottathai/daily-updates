@@ -338,6 +338,9 @@ export default function HomeClient({
                     <Link href={articlePath(article)}>
                       <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{article.title}</h3>
                     </Link>
+                    <div style={{ marginTop: '0.35rem', fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      By {article.author?.trim() || 'Daily Updates Editorial Desk'}
+                    </div>
                     <div className="meta-text" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <span>{formatDate(article.created_at)}</span>
                     </div>

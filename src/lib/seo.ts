@@ -95,7 +95,7 @@ export function articlePath(article: Pick<NewsArticle, 'title' | 'id'>): string 
   if (!slug) {
     return `/article/${article.id}`;
   }
-  return `/article/${slug}`;
+  return `/article/${slug}-${article.id}`;
 }
 
 export function categoryFromSlug(slug: string, categories: readonly string[]): string | null {

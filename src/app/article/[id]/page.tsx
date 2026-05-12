@@ -12,10 +12,11 @@ type Props = {
 };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const slugWithUuidPattern = /^(.*)-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
 
 const getArticleByParam = cache(async (param: string): Promise<NewsArticle | null> => {
   const decodedParam = decodeURIComponent(param);
-  
+
   if (uuidPattern.test(decodedParam)) {
     const { data } = await supabase
       .from('articles')
@@ -24,6 +25,21 @@ const getArticleByParam = cache(async (param: string): Promise<NewsArticle | nul
       .single();
 
     return (data as NewsArticle | null) || null;
+  }
+
+  const suffixedMatch = decodedParam.match(slugWithUuidPattern);
+  if (suffixedMatch) {
+    const articleId = suffixedMatch[2];
+
+    const { data } = await supabase
+      .from('articles')
+      .select('*')
+      .eq('id', articleId)
+      .single();
+
+    if (data) {
+      return data as NewsArticle;
+    }
   }
 
   const { data } = await supabase
@@ -125,26 +141,38 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   const shareImage = getShareImageUrl(shareImageValue);
+  const canonicalUrl = absoluteUrl(articlePath(article));
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
+    url: canonicalUrl,
     headline: article.title,
     description: truncateDescription(article.excerpt),
     image: [absoluteUrl(shareImage)],
     datePublished: article.created_at,
     dateModified: article.updated_at || article.created_at,
+    inLanguage: language,
+    isAccessibleForFree: true,
+    wordCount: article.content.trim().split(/\s+/).length,
+    author: {
+      '@type': 'Person',
+      name: article.author?.trim() || 'Daily Updates Editorial Desk',
+    },
     publisher: {
       '@type': 'Organization',
       '@id': `${absoluteUrl('/')}#organization`,
       name: SITE_NAME,
+      url: absoluteUrl('/'),
       logo: {
         '@type': 'ImageObject',
         url: absoluteUrl('/favicon.svg'),
+        width: 512,
+        height: 512,
       },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': absoluteUrl(articlePath(article)),
+      '@id': canonicalUrl,
     },
     articleSection: article.category,
     keywords: [article.category, 'latest news', 'breaking news'].join(', '),

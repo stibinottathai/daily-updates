@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
-import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
+import { Clock, ArrowLeft, Bookmark, Share2, UserRound } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
@@ -181,6 +181,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const byline = article.author?.trim() || 'Daily Updates Editorial Desk';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -233,6 +234,13 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
           <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '800px', marginBottom: '2rem', lineHeight: 1.6 }}>
             {article.excerpt}
           </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-main)', textTransform: 'none', letterSpacing: 0, fontSize: '1rem', fontWeight: 600 }}>
+              <UserRound size={16} /> {byline}
+            </span>
+            <span>Byline</span>
+          </div>
           
           <div className="article-hero-meta">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
