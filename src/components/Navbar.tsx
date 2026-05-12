@@ -8,6 +8,7 @@ import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES } from '../types'
 import { useNews } from '../context/NewsContext';
 import { categoryFromSlug, categoryPath } from '../lib/seo';
 import { supabase } from '../lib/supabase';
+import Logo from './Logo';
 
 export default function Navbar() {
   const { user, logout, theme, toggleTheme, addToast, refreshAuth } = useNews();
@@ -129,7 +130,7 @@ export default function Navbar() {
       <nav className="masthead">
         <div className="container masthead-inner">
             <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
-              <img src="/logo.png" alt="Daily Updates Logo" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
+              <Logo />
             </Link>
           <div className="navbar-search-shell">
             <button

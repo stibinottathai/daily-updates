@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
 import PopupAd from '../components/PopupAd';
+import Logo from '../components/Logo';
 import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, ADSENSE_CLIENT_ID } from '../lib/seo';
 import { CATEGORIES } from '../types';
 
@@ -131,7 +132,7 @@ export default function RootLayout({
             <div className="container footer-grid">
               <div className="footer-brand">
                   <a href="/">
-                    <img src="/logo.png" alt="Daily Updates Logo" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
+                    <Logo />
                 </a>
                 <p>
                   Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
