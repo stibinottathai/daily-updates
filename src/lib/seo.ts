@@ -8,14 +8,24 @@ export const DEFAULT_DESCRIPTION =
 export const SITE_LOCALE = 'en_US';
 export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
 
-export const siteUrl = (() => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    'https://www.dailyupdatesnews.online';
+/**
+ * Single source of truth for the production domain.
+ * Only reads NEXT_PUBLIC_SITE_URL — never VERCEL_URL or any Vercel-injected
+ * variable — so sitemap / canonical URLs always point to the live domain,
+ * even on preview deployments.
+ */
+export const PRODUCTION_DOMAIN = 'https://www.dailyupdatesnews.online';
 
-  const withProtocol = configuredUrl.startsWith('http')
-    ? configuredUrl
-    : `https://${configuredUrl}`;
+export const siteUrl = (() => {
+  // Deliberately ignore VERCEL_URL: it changes per deployment and would
+  // send crawlers to staging domains instead of the live site.
+  const configured = (process.env.NEXT_PUBLIC_SITE_URL ?? '').trim();
+
+  if (!configured) return PRODUCTION_DOMAIN;
+
+  const withProtocol = configured.startsWith('http')
+    ? configured
+    : `https://${configured}`;
 
   return withProtocol.replace(/\/$/, '');
 })();
