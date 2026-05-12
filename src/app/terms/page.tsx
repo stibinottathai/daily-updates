@@ -14,7 +14,7 @@ export default function TermsPage() {
         <div style={{ marginBottom: '2rem' }}>
           <span className="card-category">Legal</span>
           <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem' }}>Terms and Conditions</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Last Updated: May 8, 2026</p>
+          <p style={{ color: 'var(--text-muted)' }}>Last Updated: May 12, 2026</p>
         </div>
 
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
@@ -87,9 +87,31 @@ export default function TermsPage() {
           <section>
             <h2>Changes to Terms</h2>
             <p>
-              We reserve the right to modify or update these Terms and Conditions at any time without prior notice.
+              We may update these Terms and Conditions from time to time.
             </p>
-            <p>Any changes will be effective immediately upon posting on this page.</p>
+            <p>
+              For material changes, we will provide at least 30 days' notice by posting the revised terms on this page and
+              updating the Last Updated date above. Non-material changes may take effect when posted.
+            </p>
+          </section>
+
+          <section>
+            <h2>Version History</h2>
+            <p>We keep a simple public record of meaningful Terms updates so readers can see what changed.</p>
+            <ul>
+              <li><strong>May 12, 2026:</strong> Added advance notice language for material changes and a version history section.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Governing Law and Jurisdiction</h2>
+            <p>
+              These Terms and Conditions are governed by and construed in accordance with the laws of India.
+            </p>
+            <p>
+              Any dispute arising out of or relating to these Terms or your use of this website will be subject to the
+              exclusive jurisdiction of the competent courts in India, to the extent permitted by applicable law.
+            </p>
           </section>
 
           <section>
