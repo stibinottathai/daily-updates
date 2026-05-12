@@ -65,20 +65,24 @@ export function slugify(value: string): string {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 90)
     .replace(/^-+|-+$/g, '');
 
-  return slug || 'story';
+  return slug;
 }
 
 export function categoryPath(category: string): string {
   return `/category/${slugify(category)}`;
 }
 
-export function articlePath(article: Pick<NewsArticle, 'title'>): string {
-  return `/article/${slugify(article.title)}`;
+export function articlePath(article: Pick<NewsArticle, 'title' | 'id'>): string {
+  const slug = slugify(article.title);
+  if (!slug) {
+    return `/article/${article.id}`;
+  }
+  return `/article/${slug}`;
 }
 
 export function categoryFromSlug(slug: string, categories: readonly string[]): string | null {
