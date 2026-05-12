@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
 import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
-import { getReadingTime, formatDate, type NewsArticle } from '../types';
+import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
 
@@ -227,7 +227,7 @@ export default function ArticleDetailClient({ article }: { article: NewsArticle 
             <ArrowLeft size={16} /> Back
           </button>
           
-          <span className="article-hero-category">{article.category}</span>
+          <span className="article-hero-category">{getDisplayCategory(article)}</span>
           <h1 className="article-hero-title">{article.title}</h1>
           <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '800px', marginBottom: '2rem', lineHeight: 1.6 }}>
             {article.excerpt}

@@ -117,3 +117,12 @@ export function formatDate(dateStr: string): string {
   const year = date.getUTCFullYear();
   return `${month} ${day}, ${year}`;
 }
+
+/** 
+ * Returns the category to display for an article.
+ * For News, India, and Sports, it returns the sub_category if present.
+ */
+export function getDisplayCategory(article: NewsArticle): string {
+  const needsSub = ['News', 'India', 'Sports'].includes(article.category);
+  return (needsSub && article.sub_category) ? article.sub_category : article.category;
+}

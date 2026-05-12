@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
-import { getReadingTime, formatDate, type NewsArticle } from '../types';
+import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
 import AdUnit from './AdUnit';
 
@@ -219,7 +219,7 @@ export default function HomeClient({
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="card-category">{featuredArticle.category}</span>
+                    <span className="card-category">{getDisplayCategory(featuredArticle)}</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                       <button
                         type="button"
@@ -264,7 +264,7 @@ export default function HomeClient({
                     <li key={article.id} className="trending-item">
                       <span className="trending-number">{String(idx + 1).padStart(2, '0')}</span>
                       <div className="trending-content">
-                        <span className="card-category" style={{ fontSize: '0.65rem' }}>{article.category}</span>
+                        <span className="card-category" style={{ fontSize: '0.65rem' }}>{getDisplayCategory(article)}</span>
                         <Link href={articlePath(article)} className="trending-link">
                           {article.title}
                         </Link>
@@ -305,7 +305,7 @@ export default function HomeClient({
                   )}
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                      <span className="card-category">{article.category}</span>
+                      <span className="card-category">{getDisplayCategory(article)}</span>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <button
                           type="button"
