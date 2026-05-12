@@ -27,8 +27,8 @@ export default function Logo({ className, style }: LogoProps) {
       alt="Daily Updates Logo" 
       className={className}
       style={{ 
-        height: '45px', 
-        width: '160px', 
+        height: '55px', 
+        width: '190px', 
         objectFit: 'contain',
         objectPosition: 'left center',
         ...style 
