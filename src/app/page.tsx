@@ -1,4 +1,3 @@
-import React from 'react';
 import { redirect } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import HomeClient from '../components/HomeClient';
@@ -16,11 +15,12 @@ export const metadata = baseMetadata({
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const categoryParam = resolvedSearchParams.category;
   const initialCategory = typeof categoryParam === 'string' ? categoryParam : null;
+  const initialSearchQuery = typeof resolvedSearchParams.q === 'string' ? resolvedSearchParams.q : '';
 
   if (initialCategory && CATEGORIES.includes(initialCategory as typeof CATEGORIES[number])) {
     redirect(categoryPath(initialCategory));
@@ -34,15 +34,20 @@ export default async function Page({
   if (error) {
     console.error('Error fetching articles:', error);
     return (
-      <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
-        <HomeClient articles={[]} initialCategory={initialCategory} serverLoadFailed />
-      </React.Suspense>
+      <HomeClient
+        articles={[]}
+        initialCategory={initialCategory}
+        initialSearchQuery={initialSearchQuery}
+        serverLoadFailed
+      />
     );
   }
 
   return (
-    <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
-      <HomeClient articles={data as NewsArticle[]} initialCategory={initialCategory} />
-    </React.Suspense>
+    <HomeClient
+      articles={data as NewsArticle[]}
+      initialCategory={initialCategory}
+      initialSearchQuery={initialSearchQuery}
+    />
   );
 }

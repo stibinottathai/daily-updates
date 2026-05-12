@@ -1,4 +1,3 @@
-import React from 'react';
 import { notFound } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import HomeClient from '../../../components/HomeClient';
@@ -57,6 +56,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const resolvedSearch = await searchParams;
   const category = categoryFromSlug(slug, CATEGORIES);
+  const initialSearchQuery = typeof resolvedSearch.q === 'string' ? resolvedSearch.q : '';
 
   if (!category) {
     notFound();
@@ -124,15 +124,11 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (error) {
     logCategoryFetchWarning(error, `Unable to fetch articles for ${category}`);
     return (
-      <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
-        <HomeClient articles={[]} initialCategory={category} initialRegion={regionFilter} serverLoadFailed />
-      </React.Suspense>
+      <HomeClient articles={[]} initialCategory={category} initialRegion={regionFilter} initialSearchQuery={initialSearchQuery} serverLoadFailed />
     );
   }
 
   return (
-    <React.Suspense fallback={<div style={{ minHeight: '60vh' }}>Loading...</div>}>
-      <HomeClient articles={data as NewsArticle[]} initialCategory={category} initialRegion={regionFilter} />
-    </React.Suspense>
+    <HomeClient articles={data as NewsArticle[]} initialCategory={category} initialRegion={regionFilter} initialSearchQuery={initialSearchQuery} />
   );
 }

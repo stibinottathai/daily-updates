@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useNews } from '../context/NewsContext';
 import { Bookmark, Search, Clock, ChevronLeft, ChevronRight, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { articlePath } from '../lib/seo';
 import AdUnit from './AdUnit';
+import SearchParamsSync from './SearchParamsSync';
 
 const homeAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME || '';
 
@@ -35,18 +36,21 @@ export default function HomeClient({
   articles,
   initialCategory,
   initialRegion = null,
+  initialSearchQuery = '',
   serverLoadFailed = false,
 }: {
   articles: NewsArticle[];
   initialCategory: string | null;
   initialRegion?: string | null;
+  initialSearchQuery?: string;
   serverLoadFailed?: boolean;
 }) {
   const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked, addToast } = useNews();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
+
+  // searchQuery state initialised from server-side searchParams — no Suspense needed here
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = useItemsPerPage();
   const searchTimerRef = useRef<number | null>(null);
@@ -54,22 +58,24 @@ export default function HomeClient({
   const displayArticles = articles.length > 0 ? articles : (selectedCategory ? [] : liveArticles);
   const isRecovering = serverLoadFailed && isLoading && displayArticles.length === 0;
 
+  // Keep searchQuery in sync when URL search params change on the client
+  const handleParamsSync = useCallback((q: string) => {
+    setSearchQuery(q);
+  }, []);
+
   // Reset to page 1 when search or category changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedCategory]);
 
-  useEffect(() => {
-    setSearchQuery(searchParams.get('q') ?? '');
-  }, [searchParams]);
-
+  // Debounced URL update when user types in the search box
   useEffect(() => {
     if (searchTimerRef.current) {
       window.clearTimeout(searchTimerRef.current);
     }
 
     searchTimerRef.current = window.setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
       const trimmedQuery = searchQuery.trim();
 
       if (trimmedQuery) {
@@ -79,7 +85,7 @@ export default function HomeClient({
       }
 
       const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-      const currentUrl = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
+      const currentUrl = pathname + (window.location.search || '');
 
       if (nextUrl !== currentUrl) {
         router.replace(nextUrl, { scroll: false });
@@ -91,7 +97,7 @@ export default function HomeClient({
         window.clearTimeout(searchTimerRef.current);
       }
     };
-  }, [pathname, router, searchParams, searchQuery]);
+  }, [pathname, router, searchQuery]);
 
   // Filter logic
   let filteredArticles = selectedCategory
@@ -124,7 +130,7 @@ export default function HomeClient({
     setCurrentPage(page);
     const target = document.getElementById('news-grid-start');
     if (target) {
-      const offset = 80; // Optional offset for fixed navbar
+      const offset = 80;
       const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
       window.scrollTo({ top: y, behavior: 'smooth' });
     } else {
@@ -163,6 +169,15 @@ export default function HomeClient({
 
   return (
     <div>
+      {/*
+        SearchParamsSync is the ONLY component calling useSearchParams().
+        It is wrapped in a narrow Suspense with an invisible fallback so
+        the article grid above is never blocked from server rendering.
+      */}
+      <Suspense fallback={null}>
+        <SearchParamsSync onSync={handleParamsSync} />
+      </Suspense>
+
       {/* Header Row */}
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', margin: '2rem 0' }}>
         <h1 style={{ fontSize: '2rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }} className="animate-fade-in stagger-1">
@@ -355,7 +370,6 @@ export default function HomeClient({
               </button>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
-                // Show first, last, current and neighbours; ellipsis otherwise
                 const show = page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
                 const isEllipsisBefore = page === 2 && currentPage > 4;
                 const isEllipsisAfter = page === totalPages - 1 && currentPage < totalPages - 3;
