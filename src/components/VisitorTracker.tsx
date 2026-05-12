@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { supabase } from '../lib/supabase';
+import { useCookieConsent } from './CookieConsent';
 
 const VISITOR_ID_KEY = 'daily_updates_visitor_id';
 const IGNORED_PREFIXES = ['/login', '/manage-users'];
@@ -22,9 +23,10 @@ function getVisitorId() {
 export default function VisitorTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { hasConsent } = useCookieConsent();
 
   useEffect(() => {
-    if (!pathname || IGNORED_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
+    if (!hasConsent || !pathname || IGNORED_PREFIXES.some(prefix => pathname.startsWith(prefix))) {
       return;
     }
 
@@ -42,7 +44,7 @@ export default function VisitorTracker() {
           console.warn('Visitor tracking failed:', error.message);
         }
       });
-  }, [pathname, searchParams]);
+  }, [hasConsent, pathname, searchParams]);
 
   return null;
 }

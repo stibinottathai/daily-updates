@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { ADSENSE_CLIENT_ID } from '../lib/seo';
+import { useCookieConsent } from './CookieConsent';
 
 const adsenseClient = ADSENSE_CLIENT_ID;
 const popupSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_POPUP || '';
@@ -19,6 +20,7 @@ declare global {
 export default function PopupAd() {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { hasConsent, adsenseReady } = useCookieConsent();
   const pathname = usePathname();
   const excludedRoutes = ['/login', '/admin', '/manage-users'];
   const isExcludedRoute = excludedRoutes.some(route => pathname.startsWith(route));
@@ -28,7 +30,7 @@ export default function PopupAd() {
   }, []);
 
   useEffect(() => {
-    if (!isMounted || isExcludedRoute || !adsenseClient || !popupSlot) {
+    if (!isMounted || isExcludedRoute || !hasConsent || !adsenseReady || !adsenseClient || !popupSlot) {
       return;
     }
 
@@ -53,9 +55,9 @@ export default function PopupAd() {
     }, popupDelayMs);
 
     return () => window.clearTimeout(timer);
-  }, [isMounted, isExcludedRoute]);
+  }, [adsenseReady, hasConsent, isExcludedRoute, isMounted]);
 
-  if (!isMounted || isExcludedRoute || !isOpen || !adsenseClient || !popupSlot) {
+  if (!isMounted || isExcludedRoute || !hasConsent || !adsenseReady || !isOpen || !adsenseClient || !popupSlot) {
     return null;
   }
 

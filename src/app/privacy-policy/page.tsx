@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
         <div style={{ marginBottom: '2rem' }}>
           <span className="card-category">Legal</span>
           <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem' }}>Privacy Policy</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Last Updated: May 8, 2026</p>
+          <p style={{ color: 'var(--text-muted)' }}>Last Updated: May 12, 2026</p>
         </div>
 
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
@@ -23,7 +23,10 @@ export default function PrivacyPolicyPage() {
               Welcome to {SITE_NAME}. Your privacy is important to us. This Privacy Policy explains how we collect,
               use, and protect your information when you visit our website.
             </p>
-            <p>By using our website, you agree to the terms outlined in this Privacy Policy.</p>
+            <p>
+              By using our website, you agree to the terms outlined in this Privacy Policy. Where required by law, we ask
+              for your consent before loading non-essential cookies or advertising technologies.
+            </p>
           </section>
 
           <section>
@@ -41,15 +44,118 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2>Cookies and Web Technologies</h2>
-            <p>Our website uses cookies and similar technologies to:</p>
-            <ul>
-              <li>Improve website performance</li>
-              <li>Analyze traffic and user behavior</li>
-              <li>Personalize user experience</li>
-              <li>Display relevant advertisements</li>
-            </ul>
-            <p>You can disable cookies through your browser settings if you prefer.</p>
+            <h2>Data Retention</h2>
+            <p>
+              We keep personal data only for as long as we need it for the purposes described in this policy, unless a
+              longer retention period is required by law, dispute resolution, or security needs.
+            </p>
+
+            <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>Data</th>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Retention period</th>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>IP address, browser type, device info, page visits, and referral sources</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Up to 30 days in server or security logs, then deleted or anonymized.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Used for security, abuse prevention, and basic diagnostics.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>Visitor analytics records</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Until they are deleted or anonymized by us, typically reviewed on an ongoing basis.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Includes page path, visitor ID, and user agent data used for reporting.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>Contact form messages and email address</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Until we no longer need the message, or until it is deleted by an administrator; generally up to 24 months.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Kept to respond to enquiries and maintain records of support requests.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>Theme, bookmarks, cookie consent, and popup frequency storage</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Until you clear browser storage or change the setting.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Stored locally on your device.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem 0.75rem 0' }}>Google AdSense cookies</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>Varies by cookie and Google settings.</td>
+                    <td style={{ padding: '0.75rem 0 0.75rem 0.5rem' }}>Controlled by Google; see Google’s privacy and cookie documentation.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h2>Cookies and Similar Technologies</h2>
+            <p>
+              Our website uses cookies and similar technologies, including browser storage such as localStorage, to keep the
+              site functional, remember preferences, support analytics, and display advertising after consent where required.
+            </p>
+            <p>
+              Some of these items are essential for the site to work. Others are non-essential and are only used after you
+              accept them through the cookie banner.
+            </p>
+
+            <div style={{ overflowX: 'auto', marginTop: '1rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.95rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>Name</th>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Provider</th>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Purpose</th>
+                    <th style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Retention</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>theme</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Remembers your light/dark mode preference.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>bookmarks</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Stores saved articles on your device.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_cookie_consent</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Stores your cookie consent choice.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you change or clear your preference.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_visitor_id</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Helps count unique visitors in site analytics.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_popup_ad_last_shown</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Prevents the popup ad from showing too often.</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.75rem 0.5rem 0.75rem 0' }}>Google AdSense cookies</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>Google</td>
+                    <td style={{ padding: '0.75rem 0.5rem' }}>Delivers, measures, personalizes, and secures advertising.</td>
+                    <td style={{ padding: '0.75rem 0 0.75rem 0.5rem' }}>Varies by cookie and Google settings; controlled by Google.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p style={{ marginTop: '1rem' }}>
+              You can disable or remove cookies and browser storage through your browser settings, and you can change your
+              non-essential cookie choice at any time using the Cookie Preferences link in the footer.
+            </p>
           </section>
 
           <section>
@@ -69,6 +175,19 @@ export default function PrivacyPolicyPage() {
             </p>
             <p>
               For more information about how Google uses data, visit: Google Privacy & Terms.
+            </p>
+          </section>
+
+          <section>
+            <h2>Cookie Preferences and Consent</h2>
+            <p>
+              We show a cookie preference banner for visitors in jurisdictions where consent is required, including the EU
+              and California. Essential cookies remain in use to keep the site functional, but Google AdSense, visitor
+              analytics, and similar non-essential tools are only activated after you choose to accept them.
+            </p>
+            <p>
+              You can change your choice at any time using the Cookie Preferences link in the footer. If you reject
+              non-essential cookies, those services will stay disabled unless you later change your preference.
             </p>
           </section>
 
@@ -107,6 +226,17 @@ export default function PrivacyPolicyPage() {
             <h2>Changes to This Privacy Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. Any updates will be posted on this page with the revised date.
+            </p>
+          </section>
+
+          <section>
+            <h2>Governing Law and Jurisdiction</h2>
+            <p>
+              This Privacy Policy is governed by and construed in accordance with the laws of India.
+            </p>
+            <p>
+              Any dispute arising out of or relating to this Privacy Policy will be subject to the exclusive jurisdiction
+              of the competent courts in India, to the extent permitted by applicable law.
             </p>
           </section>
 

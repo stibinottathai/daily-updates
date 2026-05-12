@@ -8,7 +8,8 @@ import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
 import PopupAd from '../components/PopupAd';
 import Logo from '../components/Logo';
-import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE, ADSENSE_CLIENT_ID } from '../lib/seo';
+import { CookieConsentProvider, CookiePreferencesButton } from '../components/CookieConsent';
+import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE } from '../lib/seo';
 import { CATEGORIES } from '../types';
 
 export const metadata: Metadata = {
@@ -52,7 +53,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.dailyupdatesnews.online').replace(/\/$/, '');
-  const adsenseClient = ADSENSE_CLIENT_ID;
   const themeInitScript = `
     (() => {
       try {
@@ -85,107 +85,102 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <NewsProvider>
-          <React.Suspense fallback={<div style={{ height: '60px' }}>Loading...</div>}>
-            <Navbar />
-          </React.Suspense>
-          <React.Suspense fallback={null}>
-            <VisitorTracker />
-          </React.Suspense>
-          <PopupAd />
-          {adsenseClient && (
+          <CookieConsentProvider>
+            <React.Suspense fallback={<div style={{ height: '60px' }}>Loading...</div>}>
+              <Navbar />
+            </React.Suspense>
+            <React.Suspense fallback={null}>
+              <VisitorTracker />
+            </React.Suspense>
+            <PopupAd />
             <Script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-              crossOrigin="anonymous"
-              strategy="afterInteractive"
-            />
-          )}
-          <Script
-            id="json-ld-site"
-            type="application/ld+json"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@graph': [
-                  {
-                    '@type': 'Organization',
-                    '@id': `${siteUrl}/#organization`,
-                    name: SITE_NAME,
-                    url: siteUrl,
-                    logo: `${siteUrl}/favicon.svg`,
-                  },
-                  {
-                    '@type': 'WebSite',
-                    '@id': `${siteUrl}/#website`,
-                    url: siteUrl,
-                    name: SITE_NAME,
-                    description: DEFAULT_DESCRIPTION,
-                    publisher: {
+              id="json-ld-site"
+              type="application/ld+json"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@graph': [
+                    {
+                      '@type': 'Organization',
                       '@id': `${siteUrl}/#organization`,
+                      name: SITE_NAME,
+                      url: siteUrl,
+                      logo: `${siteUrl}/favicon.svg`,
                     },
-                    potentialAction: {
-                      '@type': 'SearchAction',
-                      target: `${siteUrl}/?q={search_term_string}`,
-                      'query-input': 'required name=search_term_string',
+                    {
+                      '@type': 'WebSite',
+                      '@id': `${siteUrl}/#website`,
+                      url: siteUrl,
+                      name: SITE_NAME,
+                      description: DEFAULT_DESCRIPTION,
+                      publisher: {
+                        '@id': `${siteUrl}/#organization`,
+                      },
+                      potentialAction: {
+                        '@type': 'SearchAction',
+                        target: `${siteUrl}/?q={search_term_string}`,
+                        'query-input': 'required name=search_term_string',
+                      },
                     },
-                  },
-                ],
-              }),
-            }}
-          />
-          <main className="container" style={{ minHeight: '80vh' }}>
-            {children}
-          </main>
-          <footer className="site-footer">
-            <div className="container footer-grid">
-              <div className="footer-brand">
-                  <a href="/">
-                    <Logo />
-                </a>
-                <p>
-                  Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
-                </p>
-              </div>
+                  ],
+                }),
+              }}
+            />
+            <main className="container" style={{ minHeight: '80vh' }}>
+              {children}
+            </main>
+            <footer className="site-footer">
+              <div className="container footer-grid">
+                <div className="footer-brand">
+                    <a href="/">
+                      <Logo />
+                  </a>
+                  <p>
+                    Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
+                  </p>
+                </div>
 
-              <div className="footer-column">
-                <h3>Sections</h3>
-                <div className="footer-links">
-                  {CATEGORIES.slice(0, 6).map(category => (
-                    <a key={category} href={categoryPath(category)}>{category}</a>
-                  ))}
+                <div className="footer-column">
+                  <h3>Sections</h3>
+                  <div className="footer-links">
+                    {CATEGORIES.slice(0, 6).map(category => (
+                      <a key={category} href={categoryPath(category)}>{category}</a>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="footer-column">
+                  <h3>More News</h3>
+                  <div className="footer-links">
+                    {CATEGORIES.slice(6).map(category => (
+                      <a key={category} href={categoryPath(category)}>{category}</a>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="footer-column">
+                  <h3>Company</h3>
+                  <div className="footer-links">
+                    <a href="/about">About this page</a>
+                    <a href="/contact">Contact Us</a>
+                    <a href="/privacy-policy">Privacy Policy</a>
+                    <CookiePreferencesButton />
+                    <a href="/terms">Terms</a>
+                  </div>
                 </div>
               </div>
 
-              <div className="footer-column">
-                <h3>More News</h3>
-                <div className="footer-links">
-                  {CATEGORIES.slice(6).map(category => (
-                    <a key={category} href={categoryPath(category)}>{category}</a>
-                  ))}
+              <div className="container footer-bottom">
+                <p suppressHydrationWarning>Copyright {new Date().getFullYear()} Daily Updates. All rights reserved.</p>
+                <div>
+                  <a href="/robots.txt">Robots</a>
+                  <a href="/sitemap.xml">Sitemap</a>
                 </div>
               </div>
-
-              <div className="footer-column">
-                <h3>Company</h3>
-                <div className="footer-links">
-                  <a href="/about">About this page</a>
-                  <a href="/contact">Contact Us</a>
-                  <a href="/privacy-policy">Privacy Policy</a>
-                  <a href="/terms">Terms</a>
-                </div>
-              </div>
-            </div>
-
-            <div className="container footer-bottom">
-              <p suppressHydrationWarning>Copyright {new Date().getFullYear()} Daily Updates. All rights reserved.</p>
-              <div>
-                <a href="/robots.txt">Robots</a>
-                <a href="/sitemap.xml">Sitemap</a>
-              </div>
-            </div>
-          </footer>
-          <ToastContainer />
+            </footer>
+            <ToastContainer />
+          </CookieConsentProvider>
         </NewsProvider>
       </body>
     </html>

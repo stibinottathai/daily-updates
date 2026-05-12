@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ADSENSE_CLIENT_ID } from '../lib/seo';
+import { useCookieConsent } from './CookieConsent';
 
 declare global {
   interface Window {
@@ -19,13 +20,14 @@ type AdUnitProps = {
 
 export default function AdUnit({ slot, label = 'Advertisement', className = '' }: AdUnitProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const { hasConsent, adsenseReady } = useCookieConsent();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!isMounted || !adsenseClient || !slot || typeof window === 'undefined') {
+    if (!isMounted || !hasConsent || !adsenseReady || !adsenseClient || !slot || typeof window === 'undefined') {
       return;
     }
 
@@ -34,9 +36,9 @@ export default function AdUnit({ slot, label = 'Advertisement', className = '' }
     } catch (error) {
       console.warn('AdSense slot failed to initialize:', error);
     }
-  }, [isMounted, slot]);
+  }, [adsenseReady, hasConsent, isMounted, slot]);
 
-  if (!isMounted || !adsenseClient || !slot) {
+  if (!isMounted || !hasConsent || !adsenseReady || !adsenseClient || !slot) {
     return null;
   }
 
