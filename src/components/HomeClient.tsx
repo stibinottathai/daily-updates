@@ -38,15 +38,13 @@ export default function HomeClient({
   initialCategory,
   initialRegion = null,
   initialSearchQuery = '',
-  serverLoadFailed = false,
 }: {
   articles: NewsArticle[];
   initialCategory: string | null;
   initialRegion?: string | null;
   initialSearchQuery?: string;
-  serverLoadFailed?: boolean;
 }) {
-  const { articles: liveArticles, isLoading, toggleBookmark, isBookmarked, addToast } = useNews();
+  const { toggleBookmark, isBookmarked, addToast } = useNews();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -56,8 +54,6 @@ export default function HomeClient({
   const itemsPerPage = useItemsPerPage();
   const searchTimerRef = useRef<number | null>(null);
   const selectedCategory = initialCategory;
-  const displayArticles = articles.length > 0 ? articles : (selectedCategory ? [] : liveArticles);
-  const isRecovering = serverLoadFailed && isLoading && displayArticles.length === 0;
 
   // Keep searchQuery in sync when URL search params change on the client
   const handleParamsSync = useCallback((q: string) => {
@@ -102,8 +98,8 @@ export default function HomeClient({
 
   // Filter logic
   let filteredArticles = selectedCategory
-    ? displayArticles.filter(a => a.category === selectedCategory)
-    : displayArticles;
+    ? articles.filter(a => a.category === selectedCategory)
+    : articles;
 
   // Add region/sub_category filtering
   if (initialRegion) {
@@ -198,11 +194,7 @@ export default function HomeClient({
         </div>
       </div>
 
-      {isRecovering ? (
-        <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }} className="animate-fade-in stagger-2">
-          <p>Loading the latest stories...</p>
-        </div>
-      ) : filteredArticles.length === 0 ? (
+      {filteredArticles.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)' }} className="animate-fade-in stagger-2">
           <p>No stories found matching your criteria.</p>
         </div>
@@ -313,7 +305,7 @@ export default function HomeClient({
                             fill
                             className="card-image"
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            style={{ objectFit: 'contain' }}
+                            style={{ objectFit: 'cover' }}
                           />
                         )}
                       </div>

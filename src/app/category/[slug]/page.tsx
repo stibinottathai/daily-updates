@@ -124,7 +124,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (error) {
     logCategoryFetchWarning(error, `Unable to fetch articles for ${category}`);
     return (
-      <HomeClient articles={[]} initialCategory={category} initialRegion={regionFilter} initialSearchQuery={initialSearchQuery} serverLoadFailed />
+      <section style={{ padding: '5rem 0', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{category} News</h1>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '42rem', margin: '0 auto 1.5rem' }}>
+          We could not load articles for this section right now.
+        </p>
+        <a href={categoryPath(category)} className="btn btn-outline">Retry</a>
+      </section>
     );
   }
 

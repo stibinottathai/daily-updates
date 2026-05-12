@@ -34,12 +34,13 @@ export default async function Page({
   if (error) {
     console.error('Error fetching articles:', error);
     return (
-      <HomeClient
-        articles={[]}
-        initialCategory={initialCategory}
-        initialSearchQuery={initialSearchQuery}
-        serverLoadFailed
-      />
+      <section style={{ padding: '5rem 0', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Latest News</h1>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '42rem', margin: '0 auto 1.5rem' }}>
+          We could not load the latest stories from the news source right now.
+        </p>
+        <a href="/" className="btn btn-outline">Retry</a>
+      </section>
     );
   }
 

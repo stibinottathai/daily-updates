@@ -75,8 +75,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Theme init must run before first paint to prevent flash-of-wrong-theme */}
-        <script
+        <Script
           id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitScript }}
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
