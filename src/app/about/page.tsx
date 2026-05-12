@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { baseMetadata, SITE_NAME } from '../../lib/seo';
 
 export const metadata: Metadata = baseMetadata({
-  title: 'About this page',
-  description: `Learn more about ${SITE_NAME} and how this site is structured.`,
+  title: 'About',
+  description: `Learn about ${SITE_NAME}, the team behind it, and the editorial standards we follow.`,
   path: '/about',
 });
 
@@ -13,18 +13,25 @@ export default function AboutPage() {
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ marginBottom: '2rem' }}>
           <span className="card-category">About</span>
-          <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem' }}>About this page</h1>
+          <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem' }}>
+            About {SITE_NAME}
+          </h1>
+          <p style={{ margin: 0, maxWidth: '68ch', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.7 }}>
+            We built {SITE_NAME} to make it easier to follow the stories that matter, understand where they came from,
+            and trust how they were put together.
+          </p>
         </div>
 
-        <div className="contact-page-card" style={{ display: 'grid', gap: '1.5rem' }}>
+        <div className="contact-page-card" style={{ display: 'grid', gap: '1.75rem' }}>
           <section>
+            <h2 style={{ marginTop: 0 }}>Our Story</h2>
             <p style={{ marginTop: 0 }}>
-              Welcome to {SITE_NAME}, your trusted destination for the latest news, trending stories, and informative
-              updates from around the world.
+              {SITE_NAME} began as a simple idea: local readers deserve a fast, readable news source that still feels
+              careful and accountable. The site grew around the need for a daily update stream that could cover both
+              breaking headlines and useful context without overwhelming people.
             </p>
             <p>
-              Our mission is to deliver accurate, timely, and easy-to-understand news content covering a wide range of topics
-              including:
+              Today, we focus on a practical mix of news, explainers, and updates across topics including:
             </p>
             <ul>
               <li>Technology</li>
@@ -36,52 +43,73 @@ export default function AboutPage() {
               <li>Kerala and Local Updates</li>
             </ul>
             <p>
-              At {SITE_NAME}, we believe that information should be accessible, reliable, and engaging. Our goal is to
-              keep readers informed with quality content and a smooth reading experience across all devices.
+              The goal is straightforward: publish news that is useful, readable, and easy to verify.
             </p>
           </section>
 
           <section>
-            <h2>We are committed to:</h2>
-            <ul>
-              <li>Publishing informative and trustworthy content</li>
-              <li>Covering trending and important topics</li>
-              <li>Maintaining a user-friendly experience</li>
-              <li>Continuously improving our platform</li>
-            </ul>
-            <p>
-              Whether you are looking for breaking news, technology updates, or trending stories, we aim to provide content that
-              keeps you connected and informed.
+            <h2>Team</h2>
+            <p style={{ marginTop: 0 }}>
+              {SITE_NAME} is run by a small editorial team that combines reporting, editing, and technical maintenance.
+              That keeps decisions close to the content and makes corrections easier to move quickly.
             </p>
-            <p>
-              Thank you for visiting {SITE_NAME} and being part of our growing community.
-            </p>
-          </section>
-
-          <section>
-            <h2>Our Editorial Team</h2>
-            <p>
-              {SITE_NAME} is powered by a dedicated team of journalists and content creators who are passionate about
-              reporting the news that matters. Our team includes experienced staff writers and subject matter experts
-              committed to the highest standards of journalistic integrity.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
-              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--accent-gold)', margin: '0 auto 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 800 }}>DU</div>
-                <h3 style={{ margin: 0, fontSize: '1rem' }}>Editorial Desk</h3>
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Daily News Operations</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Editorial Desk</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  Plans coverage, checks framing, and makes sure stories stay clear and useful.
+                </p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '8px', textAlign: 'center', border: '1px solid var(--border-color)' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--accent-gold)', margin: '0 auto 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 800 }}>ST</div>
-                <h3 style={{ margin: 0, fontSize: '1rem' }}>Staff Writers</h3>
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>Global Correspondents</p>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Writers and Reporters</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  Gather information from primary sources, draft updates, and add context where it helps readers.
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Product and Site Ops</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  Keeps the site fast, stable, and accessible across devices so the journalism stays easy to read.
+                </p>
               </div>
             </div>
           </section>
 
           <section>
-            <h2>Contact Us</h2>
-            <p>If you have any questions, suggestions, or business inquiries, feel free to contact us:</p>
+            <h2>Editorial Standards</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Verify first</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  We prefer primary sources, official statements, and direct evidence before publication.
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Correct openly</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  If something is wrong, we update it quickly and make the correction clear in the story.
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Avoid noise</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  Headlines should be accurate, not exaggerated. We avoid filler and keep language plain.
+                </p>
+              </div>
+              <div style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Separate news from opinion</h3>
+                <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  Reporting stays factual, and any analysis or commentary is clearly framed as such.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2>Contact</h2>
+            <p style={{ marginTop: 0 }}>
+              Questions, corrections, or collaboration requests can be sent to:
+            </p>
             <ul>
               <li>Email: dailyupdatesnewss@gmail.com</li>
               <li>Website: https://www.dailyupdatesnews.online</li>

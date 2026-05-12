@@ -223,7 +223,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
         <div style={{ height: '100%', background: 'var(--accent-gold)', width: `${scrollProgress * 100}%`, transition: 'width 0.1s' }}></div>
       </div>
 
-      <article className="animate-fade-in stagger-1" lang={language} xmlLang={language}>
+      <article className="animate-fade-in stagger-1" lang={language}>
         <div className="article-hero">
           <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: 0 }}>
             <ArrowLeft size={16} /> Back

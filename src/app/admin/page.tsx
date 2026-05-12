@@ -658,7 +658,8 @@ export default function AdminDashboard() {
                       author: currentArticle.author || 'Anonymous',
                       image_url: currentArticle.image_url || '',
                       created_at: currentArticle.created_at || new Date().toISOString(),
-                    } as NewsArticle} 
+                    } as NewsArticle}
+                    language="en" 
                   />
                 </div>
               </div>

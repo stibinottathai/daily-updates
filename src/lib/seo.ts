@@ -127,7 +127,7 @@ export function baseMetadata({
   type?: 'website' | 'article';
   locale?: string;
 }): Metadata {
-  const resolvedTitle = title === SITE_NAME ? SITE_NAME : `${title} | ${SITE_NAME}`;
+  const resolvedTitle = title;
   const canonicalUrl = absoluteUrl(path);
   const imageUrl = absoluteUrl(image);
 
