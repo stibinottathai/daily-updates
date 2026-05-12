@@ -119,6 +119,11 @@ export default function Navbar() {
   const hiddenCategories = otherCategories.slice(9);
   const themeLabel = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
   const ThemeIcon = theme === 'dark' ? Sun : Moon;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -160,9 +165,15 @@ export default function Navbar() {
           </div>
           
           <div className="nav-actions" style={{ display: 'none' }} id="desktop-actions">
-            <button onClick={toggleTheme} aria-label={themeLabel} title={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
-              <ThemeIcon size={16} />
-            </button>
+            {mounted ? (
+              <button onClick={toggleTheme} aria-label={themeLabel} title={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
+                <ThemeIcon size={16} />
+              </button>
+            ) : (
+              <button aria-label="Light Mode" title="Light Mode" className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '4px', marginRight: '1rem' }}>
+                <Sun size={16} />
+              </button>
+            )}
             {user.isAuthenticated ? (
               <>
                 {user.role === 'super_admin' && (
@@ -202,10 +213,17 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div style={{ padding: '1rem', background: 'var(--surface-color)', borderBottom: '1px solid var(--border-color)', position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50 }}>
             <div style={{ marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-              <button onClick={() => { toggleTheme(); setMobileMenuOpen(false); }} aria-label={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ThemeIcon size={16} />
-                {themeLabel}
-              </button>
+              {mounted ? (
+                <button onClick={() => { toggleTheme(); setMobileMenuOpen(false); }} aria-label={themeLabel} className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ThemeIcon size={16} />
+                  {themeLabel}
+                </button>
+              ) : (
+                <button aria-label="Light Mode" className="meta-text" style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sun size={16} />
+                  Light Mode
+                </button>
+              )}
             </div>
              {user.isAuthenticated ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
