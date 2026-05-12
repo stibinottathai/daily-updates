@@ -7,7 +7,6 @@ import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
-import { SITE_NAME } from '../lib/seo';
 import { sanitizeHtml } from '../lib/sanitizeHtml';
 
 const articleAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE || '';
@@ -237,11 +236,6 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
           
           <div className="article-hero-meta">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>By</span>
-              <span style={{ fontWeight: 600 }}>{article.author}</span>
-            </div>
-            <div style={{ width: '1px', background: 'var(--border-color)' }}></div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Published</span>
               <span style={{ fontWeight: 600 }}>{formatDate(article.created_at)}</span>
             </div>
@@ -297,42 +291,6 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
             {renderArticleContent(article.content)}
           </div>
 
-          <div 
-            className="author-bio-card"
-            style={{ 
-              marginTop: '4rem', 
-              padding: '2rem', 
-              background: 'var(--surface-color)', 
-              borderRadius: '12px', 
-              borderLeft: '4px solid var(--accent-gold)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1.5rem',
-            }}
-          >
-            <div style={{ 
-              width: '60px', 
-              height: '60px', 
-              borderRadius: '50%', 
-              background: 'var(--accent-gold)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#000',
-              fontSize: '1.5rem',
-              fontWeight: 800,
-              flexShrink: 0
-            }}>
-              {article.author.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>{article.author}</h3>
-              <p style={{ margin: '0.25rem 0 0', fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Staff Writer at {SITE_NAME}. Specializing in delivering timely updates and in-depth analysis on {article.category.toLowerCase()} and trending global stories.
-              </p>
-            </div>
-          </div>
-          
           {!isExpanded && (
             <div style={{ 
               display: 'flex', 

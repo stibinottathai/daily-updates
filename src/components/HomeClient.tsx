@@ -262,8 +262,6 @@ export default function HomeClient({
                     <p className="card-excerpt" style={{ fontSize: '1.05rem' }}>{featuredArticle.excerpt}</p>
                   </Link>
                   <div className="meta-text">
-                    <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{featuredArticle.author}</span>
-                    <span>•</span>
                     <span>{formatDate(featuredArticle.created_at)}</span>
                     <span>•</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {getReadingTime(featuredArticle.content)} min read</span>
@@ -349,8 +347,6 @@ export default function HomeClient({
                       <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{article.title}</h3>
                     </Link>
                     <div className="meta-text" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{article.author}</span>
-                      <span>•</span>
                       <span>{formatDate(article.created_at)}</span>
                     </div>
                   </div>

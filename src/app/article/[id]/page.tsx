@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import Script from 'next/script';
 import { supabase } from '../../../lib/supabase';
 import ArticleDetailClient from '../../../components/ArticleDetailClient';
 import type { NewsArticle } from '../../../types';
@@ -83,7 +82,6 @@ export async function generateMetadata({ params }: Props) {
         [language]: absoluteUrl(articlePath(article)),
       },
     },
-    authors: [{ name: article.author || SITE_NAME }],
     keywords: tags.join(', '),
     category: article.category,
     openGraph: {
@@ -91,7 +89,6 @@ export async function generateMetadata({ params }: Props) {
       type: 'article',
       publishedTime: article.created_at,
       modifiedTime: article.updated_at || article.created_at,
-      authors: [article.author || SITE_NAME],
       section: article.category,
       tags: tags,
     },
@@ -136,10 +133,6 @@ export default async function ArticlePage({ params }: Props) {
     image: [absoluteUrl(shareImage)],
     datePublished: article.created_at,
     dateModified: article.updated_at || article.created_at,
-    author: {
-      '@type': 'Person',
-      name: article.author || SITE_NAME,
-    },
     publisher: {
       '@type': 'Organization',
       '@id': `${absoluteUrl('/')}#organization`,
@@ -159,10 +152,9 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <>
-      <Script
+      <script
         id={`ld-article-${article.id}`}
         type="application/ld+json"
-        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <ArticleDetailClient article={article} language={language} />

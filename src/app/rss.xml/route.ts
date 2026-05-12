@@ -22,7 +22,6 @@ export async function GET() {
       <guid isPermaLink="true">${absoluteUrl(articlePath(article))}</guid>
       <description>${escapeXml(article.excerpt)}</description>
       <category>${escapeXml(article.category)}</category>
-      <author>${escapeXml(article.author)}</author>
       <pubDate>${new Date(article.created_at).toUTCString()}</pubDate>
       ${shareImage ? `<enclosure url="${escapeXml(absoluteUrl(shareImage))}" type="image/jpeg" />` : ''}
     </item>
