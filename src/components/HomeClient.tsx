@@ -216,7 +216,6 @@ export default function HomeClient({
                           alt={featuredArticle.title}
                           fill
                           priority
-                          unoptimized
                           className="card-image"
                           sizes="(max-width: 768px) 100vw, 65vw"
                           style={{ objectFit: 'contain', backgroundColor: '#f0f0f0' }}
@@ -256,7 +255,7 @@ export default function HomeClient({
                   <div className="meta-text">
                     <span>{formatDate(featuredArticle.created_at)}</span>
                     <span>•</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {getReadingTime(featuredArticle.content)} min read</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {getReadingTime(featuredArticle.content || featuredArticle.excerpt)} min read</span>
                   </div>
                 </div>
               </article>

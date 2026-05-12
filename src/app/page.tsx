@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import HomeClient from '../components/HomeClient';
 import { CATEGORIES, type NewsArticle } from '../types';
 import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION } from '../lib/seo';
+import { ARTICLE_LIST_COLUMNS, ARTICLE_LIST_LIMIT } from '../lib/articles';
 
 export const revalidate = 60;
 
@@ -28,8 +29,9 @@ export default async function Page({
 
   const { data, error } = await supabase
     .from('articles')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select(ARTICLE_LIST_COLUMNS)
+    .order('created_at', { ascending: false })
+    .limit(ARTICLE_LIST_LIMIT);
 
   if (error) {
     console.error('Error fetching articles:', error);
@@ -46,7 +48,7 @@ export default async function Page({
 
   return (
     <HomeClient
-      articles={data as NewsArticle[]}
+      articles={data as unknown as NewsArticle[]}
       initialCategory={initialCategory}
       initialSearchQuery={initialSearchQuery}
     />

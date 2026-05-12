@@ -3,6 +3,7 @@ import { supabase } from '../../../lib/supabase';
 import HomeClient from '../../../components/HomeClient';
 import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES, type NewsArticle } from '../../../types';
 import { baseMetadata, categoryFromSlug, categoryPath, truncateDescription } from '../../../lib/seo';
+import { ARTICLE_LIST_COLUMNS, ARTICLE_LIST_LIMIT } from '../../../lib/articles';
 
 export const revalidate = 60;
 
@@ -90,12 +91,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if ((category === 'News' || category === 'India' || category === 'Sports') && regionFilter) {
     const regionResult = await supabase
       .from('articles')
-      .select('*')
+      .select(ARTICLE_LIST_COLUMNS)
       .eq('category', category)
       .eq('sub_category', regionFilter)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(ARTICLE_LIST_LIMIT);
 
-    data = regionResult.data as NewsArticle[] | null;
+    data = regionResult.data as unknown as NewsArticle[] | null;
     error = regionResult.error;
 
     if (error) {
@@ -103,21 +105,23 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
       const fallbackResult = await supabase
         .from('articles')
-        .select('*')
+        .select(ARTICLE_LIST_COLUMNS)
         .eq('category', category)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(ARTICLE_LIST_LIMIT);
 
-      data = fallbackResult.data as NewsArticle[] | null;
+      data = fallbackResult.data as unknown as NewsArticle[] | null;
       error = fallbackResult.error;
     }
   } else {
     const categoryResult = await supabase
       .from('articles')
-      .select('*')
+      .select(ARTICLE_LIST_COLUMNS)
       .eq('category', category)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(ARTICLE_LIST_LIMIT);
 
-    data = categoryResult.data as NewsArticle[] | null;
+    data = categoryResult.data as unknown as NewsArticle[] | null;
     error = categoryResult.error;
   }
 

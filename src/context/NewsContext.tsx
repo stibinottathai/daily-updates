@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useState, useContext, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 import type { NewsArticle, User, Toast, VisitorStats } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -53,30 +54,18 @@ const getInitialTheme = (): 'dark' | 'light' => {
 };
 
 export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [user, setUser] = useState<User>({ email: '', isAuthenticated: false });
   const [isLoading, setIsLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [bookmarks, setBookmarks] = useState<string[]>([]);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(getInitialTheme);
 
-  useEffect(() => {
-    setMounted(true);
-    const initialTheme = getInitialTheme();
-    setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
-    document.documentElement.style.colorScheme = initialTheme;
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) {
-      return;
-    }
-
+  useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.colorScheme = theme;
-  }, [mounted, theme]);
+  }, [theme]);
 
   useEffect(() => {
     const syncTheme = (event: StorageEvent) => {
@@ -103,9 +92,10 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   }, []);
 
-  const currentTheme = mounted ? theme : 'dark';
+  const currentTheme = theme;
 
   const toastIdRef = useRef(0);
+  const articlesLoadedRef = useRef(false);
 
   const addToast = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     const id = String(++toastIdRef.current);
@@ -238,29 +228,19 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  // Fetch articles and auth state
+  // Fetch auth globally, but only run the heavier article sync in the admin area.
   useEffect(() => {
-    const fetchArticles = async () => {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        addToast('Failed to load articles', 'error');
-      } else if (data) {
-        setArticles(data as NewsArticle[]);
+    let isActive = true;
+
+    const initAuth = async () => {
+      setIsLoading(true);
+      await refreshAuth();
+      if (isActive) {
+        setIsLoading(false);
       }
     };
 
-    const init = async () => {
-      setIsLoading(true);
-      await fetchArticles();
-      await refreshAuth();
-      setIsLoading(false);
-    };
-
-    init();
+    initAuth();
 
     // Listen for changes on auth state
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -270,6 +250,47 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser({ email: '', isAuthenticated: false });
       }
     });
+
+    return () => {
+      isActive = false;
+      authSub.unsubscribe();
+    };
+  }, [refreshAuth]);
+
+  useEffect(() => {
+    if (!pathname.startsWith('/admin')) {
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchArticles = async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        addToast('Failed to load articles', 'error');
+      } else if (data) {
+        if (isActive) {
+          setArticles(data as NewsArticle[]);
+          articlesLoadedRef.current = true;
+        }
+      }
+    };
+
+    const init = async () => {
+      if (!articlesLoadedRef.current) {
+        setIsLoading(true);
+        await fetchArticles();
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    init();
 
     // Real-time subscription for articles
     const articleSub = supabase.channel('public:articles')
@@ -285,10 +306,10 @@ export const NewsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       .subscribe();
 
     return () => {
-      authSub.unsubscribe();
+      isActive = false;
       supabase.removeChannel(articleSub);
     };
-  }, [addToast, refreshAuth]);
+  }, [addToast, pathname]);
 
   const addArticle = async (article: Omit<NewsArticle, 'id' | 'created_at' | 'updated_at'>) => {
     const { error } = await supabase.from('articles').insert([{...article, author_id: user.id}]);

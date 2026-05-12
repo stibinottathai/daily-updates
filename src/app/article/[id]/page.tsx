@@ -44,10 +44,23 @@ const getArticleByParam = cache(async (param: string): Promise<NewsArticle | nul
 
   const { data } = await supabase
     .from('articles')
-    .select('*')
+    .select('id,title')
     .order('created_at', { ascending: false });
 
-  return ((data as NewsArticle[] | null) || []).find(article => slugify(article.title) === decodedParam) || null;
+  const matchedArticle = ((data as Pick<NewsArticle, 'id' | 'title'>[] | null) || [])
+    .find(article => slugify(article.title) === decodedParam);
+
+  if (!matchedArticle) {
+    return null;
+  }
+
+  const { data: article } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('id', matchedArticle.id)
+    .single();
+
+  return (article as NewsArticle | null) || null;
 });
 
 export async function generateMetadata({ params }: Props) {
