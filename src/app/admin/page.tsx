@@ -855,15 +855,46 @@ export default function AdminDashboard() {
               ) : (
                 paginatedArticles.map(article => (
                   <tr key={article.id}>
-                    <td style={{ fontWeight: '500', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{article.title}</td>
+                    <td style={{ fontWeight: '600', maxWidth: '400px', fontSize: '0.95rem', lineHeight: 1.4 }}>{article.title}</td>
                     <td>
-                      <span style={{ color: 'var(--accent-gold)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{article.category}</span>
+                      <span style={{ 
+                        display: 'inline-block',
+                        padding: '0.25rem 0.65rem',
+                        borderRadius: '2rem',
+                        background: 'rgba(99, 102, 241, 0.12)',
+                        color: 'var(--accent-gold)',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em'
+                      }}>
+                        {article.category}
+                      </span>
                       {article.category === 'News' && article.sub_category && (
-                        <span style={{ display: 'block', marginTop: '0.25rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{article.sub_category}</span>
+                        <span style={{ display: 'block', marginTop: '0.35rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>{article.sub_category}</span>
                       )}
                     </td>
-                    <td>{article.author}</td>
-                    <td>{formatDate(article.created_at)}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.7rem',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          textTransform: 'uppercase'
+                        }}>
+                          {(article.author || 'A').charAt(0)}
+                        </div>
+                        <span style={{ fontWeight: 500 }}>{article.author}</span>
+                      </div>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)' }}>{formatDate(article.created_at)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                         <button className="btn btn-outline" style={{ padding: '0.4rem 0.6rem' }} onClick={() => editArticle(article)}>

@@ -126,79 +126,8 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function ArticlePage({ params }: Props) {
   const { id } = await params;
-  const article = await getArticleByParam(id);
-
-  if (!article) {
-    return (
-      <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
-        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Article not found</h2>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>The article you are looking for does not exist or has been removed.</p>
-        <a href="/" className="btn btn-outline">Return Home</a>
-      </div>
-    );
-  }
-
-  const language = detectArticleLanguage(article);
-  // Record the actual view, URL might be UUID or slug
-  let shareImageValue = article.image_url;
-  if (!shareImageValue && article.content) {
-    const imgMatch = article.content.match(/!\[.*?\]\((.*?)\)/);
-    if (imgMatch && imgMatch[1]) {
-      shareImageValue = imgMatch[1];
-    } else {
-      const htmlImgMatch = article.content.match(/<img[^>]+src=["']([^"']+)["']/i);
-      if (htmlImgMatch && htmlImgMatch[1]) {
-        shareImageValue = htmlImgMatch[1];
-      }
-    }
-  }
-
-  const shareImage = getShareImageUrl(shareImageValue);
-  const canonicalUrl = absoluteUrl(articlePath(article));
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    url: canonicalUrl,
-    headline: article.title,
-    description: truncateDescription(article.excerpt),
-    image: [absoluteUrl(shareImage)],
-    datePublished: article.created_at,
-    dateModified: article.updated_at || article.created_at,
-    inLanguage: language,
-    isAccessibleForFree: true,
-    wordCount: article.content.trim().split(/\s+/).length,
-    author: {
-      '@type': 'Person',
-      name: article.author?.trim() || 'InkFlow Writer',
-    },
-    publisher: {
-      '@type': 'Organization',
-      '@id': `${absoluteUrl('/')}#organization`,
-      name: SITE_NAME,
-      url: absoluteUrl('/'),
-      logo: {
-        '@type': 'ImageObject',
-        url: absoluteUrl('/favicon.svg'),
-        width: 512,
-        height: 512,
-      },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': canonicalUrl,
-    },
-    articleSection: article.category,
-    keywords: [article.category, 'stories', 'reading', 'writing'].join(', '),
-  };
 
   return (
-    <>
-      <script
-        id={`ld-article-${article.id}`}
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-      />
-      <ArticleDetailClient article={article} language={language} />
-    </>
+    <ArticleDetailClient article={null} articleId={id} language="en" />
   );
 }

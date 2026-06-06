@@ -11,6 +11,8 @@ import { articlePath } from '../lib/seo';
 import { sanitizeHtml } from '../lib/sanitizeHtml';
 import AdUnit from './AdUnit';
 import SearchParamsSync from './SearchParamsSync';
+import { supabase } from '../lib/supabase';
+import { ARTICLE_LIST_COLUMNS, ARTICLE_LIST_LIMIT } from '../lib/articles';
 
 const homeAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME || '';
 
@@ -39,7 +41,7 @@ export default function HomeClient({
   initialRegion = null,
   initialSearchQuery = '',
 }: {
-  articles: NewsArticle[];
+  articles: NewsArticle[] | null;
   initialCategory: string | null;
   initialRegion?: string | null;
   initialSearchQuery?: string;
@@ -48,7 +50,8 @@ export default function HomeClient({
   const router = useRouter();
   const pathname = usePathname();
 
-  // searchQuery state initialised from server-side searchParams — no Suspense needed here
+  const [dbArticles, setDbArticles] = useState<NewsArticle[] | null>(articles);
+  const [loading, setLoading] = useState(articles === null);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = useItemsPerPage();
@@ -59,6 +62,44 @@ export default function HomeClient({
   const handleParamsSync = useCallback((q: string) => {
     setSearchQuery(q);
   }, []);
+
+  // Fetch client side articles if not passed via props
+  useEffect(() => {
+    if (articles !== null) {
+      setDbArticles(articles);
+      setLoading(false);
+      return;
+    }
+
+    const loadArticles = async () => {
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('articles')
+          .select(ARTICLE_LIST_COLUMNS)
+          .order('created_at', { ascending: false })
+          .limit(ARTICLE_LIST_LIMIT);
+
+        if (selectedCategory) {
+          query = query.eq('category', selectedCategory);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error fetching client-side articles:', error);
+          addToast('Could not load latest stories', 'error');
+        } else if (data) {
+          setDbArticles(data as unknown as NewsArticle[]);
+        }
+      } catch (err) {
+        console.error('Unexpected error loading articles:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadArticles();
+  }, [articles, selectedCategory]);
 
   // Reset to page 1 when search or category changes
   useEffect(() => {
@@ -98,8 +139,8 @@ export default function HomeClient({
 
   // Filter logic
   let filteredArticles = selectedCategory
-    ? articles.filter(a => a.category === selectedCategory)
-    : articles;
+    ? (dbArticles || []).filter(a => a.category === selectedCategory)
+    : (dbArticles || []);
 
   // Add region/sub_category filtering
   if (initialRegion) {
@@ -161,6 +202,76 @@ export default function HomeClient({
   const pageTitle = searchQuery
     ? 'Search Results'
     : selectedCategory || 'All Stories';
+
+  if (loading) {
+    return (
+      <div style={{ padding: '2rem 0' }}>
+        {/* Header Row Skeleton */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', margin: '1rem 0 2rem' }}>
+          <div className="skeleton skeleton-title" style={{ width: '220px', height: '2.5rem', marginBottom: 0 }}></div>
+          <div className="skeleton" style={{ width: '100%', maxWidth: '300px', height: '42px', borderRadius: '2rem' }}></div>
+        </div>
+
+        {/* Hero + Sidebar Grid Skeleton */}
+        <div className="hero-sidebar-grid" style={{ marginBottom: '3rem' }}>
+          {/* Left Hero Card Skeleton */}
+          <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="skeleton skeleton-img" style={{ aspectRatio: '16/9', maxHeight: '350px' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '80px', height: '0.8rem' }}></div>
+            <div className="skeleton skeleton-title" style={{ width: '90%', height: '2.2rem' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '100%' }}></div>
+            <div className="skeleton skeleton-text" style={{ width: '95%' }}></div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.5rem' }}>
+              <div className="skeleton skeleton-avatar"></div>
+              <div className="skeleton skeleton-text" style={{ width: '120px', height: '0.8rem', marginBottom: 0 }}></div>
+            </div>
+          </div>
+
+          {/* Right Sidebar Skeleton */}
+          <div className="trending-sidebar">
+            <div className="trending-header" style={{ marginBottom: '1.5rem' }}>
+              <span className="trending-bar" style={{ background: 'var(--border-color)' }} />
+              <div className="skeleton skeleton-text" style={{ width: '150px', height: '0.8rem', marginBottom: 0 }}></div>
+            </div>
+            <div className="trending-list" style={{ gap: '1rem' }}>
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="skeleton skeleton-avatar" style={{ width: '20px', height: '20px' }}></div>
+                    <div className="skeleton skeleton-text" style={{ width: '80px', height: '0.7rem', marginBottom: 0 }}></div>
+                  </div>
+                  <div className="skeleton skeleton-text" style={{ width: '90%', height: '0.9rem' }}></div>
+                  <div className="skeleton skeleton-text" style={{ width: '40%', height: '0.7rem' }}></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ borderTop: '2px solid var(--border-color)', marginBottom: '2rem' }} />
+
+        {/* 4-Column Grid Skeleton */}
+        <div className="home-news-grid">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <div key={idx} className="glass-panel" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="skeleton skeleton-img" style={{ aspectRatio: '16/10' }}></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div className="skeleton skeleton-text" style={{ width: '60px', height: '0.7rem' }}></div>
+                <div className="skeleton skeleton-text" style={{ width: '30px', height: '0.7rem' }}></div>
+              </div>
+              <div className="skeleton skeleton-title" style={{ width: '90%', height: '1.2rem', marginBottom: 0 }}></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div className="skeleton skeleton-avatar" style={{ width: '16px', height: '16px' }}></div>
+                <div className="skeleton skeleton-text" style={{ width: '80px', height: '0.7rem', marginBottom: 0 }}></div>
+              </div>
+              <div className="skeleton skeleton-text" style={{ width: '100px', height: '0.7rem', marginBottom: 0 }}></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -8,6 +8,8 @@ import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
 import { sanitizeHtml } from '../lib/sanitizeHtml';
+import { slugify } from '../lib/seo';
+import { supabase } from '../lib/supabase';
 
 const articleAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE || '';
 const articleBottomAdSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_BOTTOM || '';
@@ -175,12 +177,88 @@ function renderArticleContent(content: string) {
   return <div className="article-content">{elements}</div>;
 }
 
-export default function ArticleDetailClient({ article, language }: { article: NewsArticle; language: 'en' | 'ml' }) {
+export default function ArticleDetailClient({
+  article: initialArticle,
+  articleId,
+  language = 'en',
+}: {
+  article: NewsArticle | null;
+  articleId?: string;
+  language?: 'en' | 'ml';
+}) {
   const { toggleBookmark, isBookmarked, addToast } = useNews();
   const router = useRouter();
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const byline = article.author?.trim() || 'Anonymous';
+  const [article, setArticle] = useState<NewsArticle | null>(initialArticle);
+  const [loading, setLoading] = useState(initialArticle === null);
+
+  useEffect(() => {
+    if (initialArticle !== null) {
+      setArticle(initialArticle);
+      setLoading(false);
+      return;
+    }
+
+    if (!articleId) return;
+
+    const loadArticle = async () => {
+      setLoading(true);
+      try {
+        const decodedParam = decodeURIComponent(articleId);
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const slugWithUuidPattern = /^(.*)-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i;
+        let fetchedData: NewsArticle | null = null;
+
+        if (uuidPattern.test(decodedParam)) {
+          const { data } = await supabase
+            .from('articles')
+            .select('*')
+            .eq('id', decodedParam)
+            .single();
+          fetchedData = data as NewsArticle | null;
+        } else {
+          const suffixedMatch = decodedParam.match(slugWithUuidPattern);
+          if (suffixedMatch) {
+            const idValue = suffixedMatch[2];
+            const { data } = await supabase
+              .from('articles')
+              .select('*')
+              .eq('id', idValue)
+              .single();
+            fetchedData = data as NewsArticle | null;
+          } else {
+            const { data } = await supabase
+              .from('articles')
+              .select('id,title')
+              .order('created_at', { ascending: false });
+
+            const matchedArticle = ((data as any[]) || [])
+              .find(a => slugify(a.title) === decodedParam);
+
+            if (matchedArticle) {
+              const { data: finalData } = await supabase
+                .from('articles')
+                .select('*')
+                .eq('id', matchedArticle.id)
+                .single();
+              fetchedData = finalData as NewsArticle | null;
+            }
+          }
+        }
+
+        if (fetchedData) {
+          setArticle(fetchedData);
+        }
+      } catch (err) {
+        console.error('Error loading article on client side:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadArticle();
+  }, [initialArticle, articleId]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -194,6 +272,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
   }, []);
 
   const handleShare = async () => {
+    if (!article) return;
     const shareData = {
       title: article.title,
       text: article.excerpt,
@@ -214,6 +293,42 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 0' }}>
+        <div className="skeleton" style={{ width: '80px', height: '1.5rem', marginBottom: '2rem' }}></div>
+        <div className="skeleton skeleton-text" style={{ width: '120px', height: '0.8rem', marginBottom: '1rem' }}></div>
+        <div className="skeleton skeleton-title" style={{ width: '100%', height: '3rem', marginBottom: '1.5rem' }}></div>
+        <div className="skeleton skeleton-text" style={{ width: '90%', height: '1.25rem', marginBottom: '2rem' }}></div>
+        <div className="skeleton" style={{ width: '100%', height: '60px', borderRadius: 'var(--radius-md)', marginBottom: '2.5rem' }}></div>
+        <div className="skeleton skeleton-img" style={{ width: '100%', aspectRatio: '16/9', marginBottom: '3rem' }}></div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="skeleton skeleton-text" style={{ width: '100%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '98%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '95%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '40%' }}></div>
+          <div style={{ height: '1.5rem' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '100%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '99%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '96%' }}></div>
+          <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!article) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
+        <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Article not found</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>The article you are looking for does not exist or has been removed.</p>
+        <a href="/" className="btn btn-outline">Return Home</a>
+      </div>
+    );
+  }
+
+  const byline = article.author?.trim() || 'Anonymous';
 
   return (
     <>
