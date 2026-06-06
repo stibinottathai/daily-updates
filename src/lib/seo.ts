@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import type { NewsArticle } from '../types';
 
-export const SITE_NAME = 'Daily Updates';
-export const SITE_TAGLINE = 'Latest World News, Business, Tech, Health and Sports';
+export const SITE_NAME = 'InkFlow';
+export const SITE_TAGLINE = 'Share Ideas, Write Stories, Connect Minds';
 export const DEFAULT_DESCRIPTION =
-  'Daily Updates brings you the latest world news, business, technology, health, sports and culture stories, curated fresh every day.';
+  'InkFlow is a modern article writing and sharing platform where ideas flow and writers connect. Read, write, and share deep stories on technology, business, design, productivity, and culture.';
 export const SITE_LOCALE = 'en_US';
 export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT || 'ca-pub-4262255714876275';
 export const MALAYALAM_LOCALE = 'ml_IN';
@@ -158,7 +158,7 @@ export function baseMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      site: '@DailyUpdates',
+      site: '@InkFlow',
       title: resolvedTitle,
       description,
       images: [imageUrl],

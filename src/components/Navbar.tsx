@@ -3,8 +3,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, Moon, Sun, ChevronDown, Search } from 'lucide-react';
-import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES } from '../types';
+import { LogIn, LogOut, Settings, Users, Menu, X as XIcon, Moon, Sun, ChevronDown, Search, Plus } from 'lucide-react';
+import { CATEGORIES } from '../types';
 import { useNews } from '../context/NewsContext';
 import { categoryFromSlug, categoryPath } from '../lib/seo';
 import { supabase } from '../lib/supabase';
@@ -28,6 +28,7 @@ export default function Navbar() {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number } | null>(null);
@@ -92,31 +93,42 @@ export default function Navbar() {
     setMoreDropdownOpen(false);
   }, [pathname]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginEmail,
-      password: loginPassword,
-    });
-    
-    if (error) {
-      addToast(error.message, 'error');
+    if (isSignUp) {
+      const { data, error } = await supabase.auth.signUp({
+        email: loginEmail,
+        password: loginPassword,
+      });
+      if (error) {
+        addToast(error.message, 'error');
+      } else {
+        addToast('Sign up successful! You can now log in.', 'success');
+        setIsSignUp(false);
+      }
     } else {
-      await refreshAuth();
-      addToast('Logged in successfully', 'success');
-      setLoginModalOpen(false);
-      setLoginEmail('');
-      setLoginPassword('');
-      router.push('/admin');
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+      if (error) {
+        addToast(error.message, 'error');
+      } else {
+        await refreshAuth();
+        addToast('Logged in successfully', 'success');
+        setLoginModalOpen(false);
+        setLoginEmail('');
+        setLoginPassword('');
+        router.push('/admin');
+      }
     }
     setLoginLoading(false);
   };
 
-  const otherCategories = CATEGORIES.filter(c => c !== 'News');
-  const visibleCategories = otherCategories.slice(0, 9);
-  const hiddenCategories = otherCategories.slice(9);
+  const visibleCategories = CATEGORIES.slice(0, 6);
+  const hiddenCategories = CATEGORIES.slice(6);
   const themeLabel = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
   const ThemeIcon = theme === 'dark' ? Sun : Moon;
   const [mounted, setMounted] = useState(false);
@@ -176,9 +188,12 @@ export default function Navbar() {
             )}
             {user.isAuthenticated ? (
               <>
+                <Link href="/admin" className="btn btn-primary animate-fade-in" style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Plus size={14} /> Write
+                </Link>
                 {user.role === 'super_admin' && (
                   <Link href="/manage-users" className="meta-text" style={{ color: 'var(--text-main)' }}>
-                    <Users size={16} /> Users
+                    <Users size={16} /> Creators
                   </Link>
                 )}
                 <Link href="/admin" className="meta-text" style={{ color: 'var(--text-main)' }}>
@@ -193,8 +208,8 @@ export default function Navbar() {
                 <Link href="/contact" className="meta-text" style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   Contact Us
                 </Link>
-                <button onClick={() => setLoginModalOpen(true)} className="meta-text" style={{ color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <LogIn size={16} /> Admin
+                <button onClick={() => { setIsSignUp(false); setLoginModalOpen(true); }} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <LogIn size={14} /> Join / Sign In
                 </button>
               </>
             )}
@@ -227,9 +242,12 @@ export default function Navbar() {
             </div>
              {user.isAuthenticated ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <Link href="/admin" className="btn btn-primary" onClick={() => setMobileMenuOpen(false)} style={{ justifyContent: 'flex-start' }}>
+                  <Plus size={14} /> Write Story
+                </Link>
                 {user.role === 'super_admin' && (
                   <Link href="/manage-users" className="meta-text" onClick={() => setMobileMenuOpen(false)}>
-                    <Users size={16} /> Manage Users
+                    <Users size={16} /> Manage Creators
                   </Link>
                 )}
                 <Link href="/admin" className="meta-text" onClick={() => setMobileMenuOpen(false)}>
@@ -244,6 +262,9 @@ export default function Navbar() {
                 <Link href="/contact" className="meta-text" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   Contact Us
                 </Link>
+                <button onClick={() => { setIsSignUp(false); setLoginModalOpen(true); setMobileMenuOpen(false); }} className="btn btn-outline" style={{ justifyContent: 'flex-start' }}>
+                  <LogIn size={14} /> Join / Sign In
+                </button>
               </div>
             )}
           </div>
@@ -255,13 +276,6 @@ export default function Navbar() {
         <div className="container category-list">
           <Link href="/" className={`cat-link ${!currentCategory ? 'active' : ''}`}>
             Home
-          </Link>
-          <Link
-            href={categoryPath('News')}
-            className={`cat-link ${currentCategory === 'News' ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            News
           </Link>
           {visibleCategories.map(category => (
             <Link 
@@ -394,88 +408,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* News Region Sub-Nav — only visible when News category is active */}
-      {currentCategory === 'News' && (
-        <nav className="region-subnav" aria-label="News regions">
-          <div className="container region-list">
-            <Link
-              href={categoryPath('News')}
-              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
-            >
-              All News
-            </Link>
-            {NEWS_REGIONS.map(region => {
-              const slug = region.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const isActive = searchParams.get('region') === slug;
-              return (
-                <Link
-                  key={region}
-                  href={`${categoryPath('News')}?region=${slug}`}
-                  className={`region-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {region}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-
-      {currentCategory === 'India' && (
-        <nav className="region-subnav" aria-label="India regions">
-          <div className="container region-list">
-            <Link
-              href={categoryPath('India')}
-              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
-            >
-              All India
-            </Link>
-            {INDIA_REGIONS.map(region => {
-              const slug = region.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const isActive = searchParams.get('region') === slug;
-              return (
-                <Link
-                  key={region}
-                  href={`${categoryPath('India')}?region=${slug}`}
-                  className={`region-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {region}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-
-      {currentCategory === 'Sports' && (
-        <nav className="region-subnav" aria-label="Sports types">
-          <div className="container region-list">
-            <Link
-              href={categoryPath('Sports')}
-              className={`region-link ${!searchParams.get('region') ? 'active' : ''}`}
-            >
-              All Sports
-            </Link>
-            {SPORTS_TYPES.map(sport => {
-              const slug = sport.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const isActive = searchParams.get('region') === slug;
-              return (
-                <Link
-                  key={sport}
-                  href={`${categoryPath('Sports')}?region=${slug}`}
-                  className={`region-link ${isActive ? 'active' : ''}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {sport}
-                </Link>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-      
       {/* Small hack for desktop actions visibility */}
       <style>{`
         @media (min-width: 768px) {
@@ -504,14 +436,14 @@ export default function Navbar() {
               <XIcon size={20} />
             </button>
 
-            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-              <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Admin Login</h2>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{isSignUp ? 'Join InkFlow' : 'Sign In'}</h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                Access the dashboard to manage news.
+                {isSignUp ? 'Create an account to start sharing your stories.' : 'Welcome back! Access your writer panel.'}
               </p>
             </div>
 
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleAuth}>
               <div className="form-group">
                 <label className="form-label">Email</label>
                 <input
@@ -521,7 +453,7 @@ export default function Navbar() {
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
                   disabled={loginLoading}
-                  placeholder="editor@dailyupdates.com"
+                  placeholder="writer@inkflow.com"
                 />
               </div>
               <div className="form-group">
@@ -536,9 +468,20 @@ export default function Navbar() {
                 />
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={loginLoading}>
-                {loginLoading ? 'Logging in...' : 'Login'}
+                {loginLoading ? (isSignUp ? 'Joining...' : 'Signing in...') : (isSignUp ? 'Join Now' : 'Sign In')}
               </button>
             </form>
+
+            <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              {isSignUp ? 'Already have an account?' : 'Want to start writing?'}{' '}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                style={{ background: 'none', border: 'none', color: 'var(--accent-gold)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+              >
+                {isSignUp ? 'Sign In' : 'Sign Up / Join'}
+              </button>
+            </p>
           </div>
         </div>
       )}

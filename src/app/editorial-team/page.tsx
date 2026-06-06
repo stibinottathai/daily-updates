@@ -7,34 +7,29 @@ export const metadata: Metadata = baseMetadata({
   path: '/editorial-team',
 });
 
-const teamMembers = [
+const communityRoles = [
   {
-    role: 'Editorial Desk',
-    name: 'Daily Updates Editorial Desk',
-    description: 'Coordinates coverage, verifies copy, and publishes the final newsroom version of each story when no individual byline is attached.',
+    role: 'Writers & Creators',
+    name: 'Open Contributor Policy',
+    description: 'Any registered user on InkFlow can write and publish articles directly to the feed, keeping ownership of their words and creative direction.',
   },
   {
-    role: 'Writers and Reporters',
-    name: 'Staff Contributors',
-    description: 'Produce original reporting, source material, and timely updates with visible bylines on published stories.',
+    role: 'Editor Review',
+    name: 'Community Guidelines Desk',
+    description: 'Reviews reported content to ensure all publications adhere to standard community rules on originality, harassment, and transparency.',
   },
   {
-    role: 'Fact-Checking and Standards',
-    name: 'Editorial Review',
-    description: 'Checks names, dates, context, and source references before publication and during corrections.',
-  },
-  {
-    role: 'Product and Site Operations',
-    name: 'Publishing Support',
-    description: 'Keeps the site fast, accessible, and stable so editorial work is easy to read and trust on any device.',
+    role: 'Publishing Support',
+    name: 'Operations Team',
+    description: 'Keeps the underlying platform stable, fast, and accessible across all devices so your ideas are presented cleanly.',
   },
 ];
 
-const standards = [
-  'Every article should have a visible byline or a clearly labeled editorial desk credit.',
-  'Updates should be corrected openly when a factual issue is found.',
-  'Opinion and analysis should not be presented as straight reporting.',
-  'Primary and official sources are preferred whenever they are available.',
+const guidelines = [
+  'Share original insights, tutorials, or perspectives that add value to readers.',
+  'Format your articles cleanly using headers, bullet lists, and standard inline styling.',
+  'Always cite original sources and give proper credits for images or research facts.',
+  'Write under your own name or transparent pseudonyms; transparent bylines build trust.',
 ];
 
 export default function EditorialTeamPage() {
@@ -42,36 +37,43 @@ export default function EditorialTeamPage() {
     <div className="container" style={{ padding: '4rem 0 5rem' }}>
       <div style={{ maxWidth: '920px', margin: '0 auto' }}>
         <div style={{ marginBottom: '2rem' }}>
-          <span className="card-category">Editorial</span>
-          <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem' }}>
-            Editorial Team
+          <span className="card-category">Community</span>
+          <h1 style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.8rem)', marginTop: '1rem', marginBottom: '0.75rem', fontFamily: 'var(--font-display)', fontWeight: 800 }}>
+            Writing Guidelines
           </h1>
           <p style={{ margin: 0, maxWidth: '68ch', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.7 }}>
-            Readers should know who is responsible for a story. This page explains how we attribute articles, how our
-            team is structured, and what standards guide our newsroom.
+            InkFlow is a creator-first platform. We want to make sure everyone writes with clarity, respects readers, and builds trust through transparency.
           </p>
         </div>
 
         <div className="contact-page-card" style={{ display: 'grid', gap: '1.75rem' }}>
           <section>
-            <h2 style={{ marginTop: 0 }}>Byline Policy</h2>
+            <h2 style={{ marginTop: 0, fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Ownership & Bylines</h2>
             <p style={{ marginTop: 0 }}>
-              Published stories carry a named author whenever one is available. When a story is published by the news
-              desk, the byline will state <strong>Daily Updates Editorial Desk</strong> so the ownership is still clear.
+              All articles carry the direct name of their author. As a writer, you hold the copyright to your story. Bylines should state your actual name or professional handle to establish ownership and transparency.
             </p>
           </section>
 
           <section>
-            <h2 style={{ marginTop: 0 }}>Team Roles</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-              {teamMembers.map(member => (
-                <div key={member.role} style={{ padding: '1rem', background: 'var(--surface-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                  <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>{member.role}</h3>
+            <h2 style={{ marginTop: 0, fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Community Guidelines</h2>
+            <ul style={{ marginTop: 0, paddingLeft: '1.25rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
+              {guidelines.map((guideline, i) => (
+                <li key={i}>{guideline}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section>
+            <h2 style={{ marginTop: 0, fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Platform Structure</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+              {communityRoles.map(role => (
+                <div key={role.role} style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                  <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>{role.role}</h3>
                   <p style={{ margin: '0 0 0.65rem', color: 'var(--accent-gold)', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.78rem' }}>
-                    {member.name}
+                    {role.name}
                   </p>
-                  <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                    {member.description}
+                  <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                    {role.description}
                   </p>
                 </div>
               ))}
@@ -79,18 +81,9 @@ export default function EditorialTeamPage() {
           </section>
 
           <section>
-            <h2 style={{ marginTop: 0 }}>Editorial Standards</h2>
-            <ul style={{ marginTop: 0, paddingLeft: '1.25rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
-              {standards.map(standard => (
-                <li key={standard}>{standard}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <h2 style={{ marginTop: 0 }}>Contact</h2>
+            <h2 style={{ marginTop: 0, fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Support & Reports</h2>
             <p style={{ marginTop: 0 }}>
-              Questions about authorship, corrections, or editorial policy can be sent to{' '}
+              If you have questions about copyright, need to report plagiarism, or require assistance with your writer account, contact{' '}
               <a href="mailto:dailyupdatesnewss@gmail.com" style={{ color: 'var(--accent-gold)', textDecoration: 'underline' }}>
                 dailyupdatesnewss@gmail.com
               </a>.

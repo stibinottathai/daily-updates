@@ -3,7 +3,7 @@ import { baseMetadata, SITE_NAME } from '../../lib/seo';
 
 export const metadata: Metadata = baseMetadata({
   title: 'Privacy Policy',
-  description: 'Read the Daily Updates privacy policy.',
+  description: 'Read the InkFlow privacy policy.',
   path: '/privacy-policy',
 });
 
@@ -114,31 +114,31 @@ export default function PrivacyPolicyPage() {
                 <tbody>
                   <tr>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>theme</td>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>InkFlow</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Remembers your light/dark mode preference.</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
                   </tr>
                   <tr>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>bookmarks</td>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>InkFlow</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Stores saved articles on your device.</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
                   </tr>
                   <tr>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_cookie_consent</td>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>inkflow_cookie_consent</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>InkFlow</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Stores your cookie consent choice.</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you change or clear your preference.</td>
                   </tr>
                   <tr>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_visitor_id</td>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>inkflow_visitor_id</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>InkFlow</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Helps count unique visitors in site analytics.</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
                   </tr>
                   <tr>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>daily_updates_popup_ad_last_shown</td>
-                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Daily Updates</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem 0.75rem 0' }}>inkflow_popup_ad_last_shown</td>
+                    <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>InkFlow</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0.5rem' }}>Prevents the popup ad from showing too often.</td>
                     <td style={{ borderBottom: '1px solid var(--border-color)', padding: '0.75rem 0 0.75rem 0.5rem' }}>Until you clear browser storage.</td>
                   </tr>

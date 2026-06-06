@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useNews } from '../context/NewsContext';
-import { Clock, ArrowLeft, Bookmark, Share2, UserRound } from 'lucide-react';
+import { Clock, ArrowLeft, Bookmark, Share2 } from 'lucide-react';
 import { getReadingTime, formatDate, getDisplayCategory, type NewsArticle } from '../types';
 import { useEffect, useState } from 'react';
 import AdUnit from './AdUnit';
@@ -180,8 +180,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
   const router = useRouter();
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const byline = article.author?.trim() || 'Daily Updates Editorial Desk';
+  const byline = article.author?.trim() || 'Anonymous';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -223,26 +222,40 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
         <div style={{ height: '100%', background: 'var(--accent-gold)', width: `${scrollProgress * 100}%`, transition: 'width 0.1s' }}></div>
       </div>
 
-      <article className="animate-fade-in stagger-1" lang={language}>
+      <article className="animate-fade-in stagger-1" lang={language} style={{ maxWidth: '800px', margin: '0 auto' }}>
         <div className="article-hero">
           <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: 0 }}>
             <ArrowLeft size={16} /> Back
           </button>
           
           <span className="article-hero-category">{getDisplayCategory(article)}</span>
-          <h1 className="article-hero-title">{article.title}</h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '800px', marginBottom: '2rem', lineHeight: 1.6 }}>
+          <h1 className="article-hero-title" style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', lineHeight: 1.1, fontWeight: 800, letterSpacing: '-0.03em', margin: '1rem 0 1.5rem' }}>{article.title}</h1>
+          <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', maxWidth: '800px', marginBottom: '2rem', lineHeight: 1.6, fontFamily: 'var(--font-sans)', fontWeight: 400 }}>
             {article.excerpt}
           </p>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-main)', textTransform: 'none', letterSpacing: 0, fontSize: '1rem', fontWeight: 600 }}>
-              <UserRound size={16} /> {byline}
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', color: 'var(--text-main)', fontSize: '1rem', fontWeight: 600 }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                color: '#fff',
+                textTransform: 'uppercase'
+              }}>
+                {byline.charAt(0)}
+              </div>
+              {byline}
             </span>
-            <span>Byline</span>
           </div>
           
-          <div className="article-hero-meta">
+          <div className="article-hero-meta" style={{ display: 'flex', gap: '1.5rem', padding: '1rem 0', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Published</span>
               <span style={{ fontWeight: 600 }}>{formatDate(article.created_at)}</span>
@@ -283,45 +296,51 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
               </div>
             )
           )}
-
-          <AdUnit slot={articleAdSlot} label="Advertisement" className="article-ad-slot" />
         </div>
 
-        <div className="article-body" style={{ position: 'relative' }}>
+        <div className="article-body" style={{ position: 'relative', fontFamily: 'var(--font-display)', fontSize: '1.2rem', lineHeight: 1.8 }}>
           <div style={{ 
-            whiteSpace: article.content.startsWith('<!-- FORMAT:HTML -->') ? 'normal' : 'pre-wrap',
-            maxHeight: isExpanded ? 'none' : '400px',
-            overflow: 'hidden',
-            maskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',
-            WebkitMaskImage: isExpanded ? 'none' : 'linear-gradient(to bottom, black 50%, transparent 100%)',
-            transition: 'max-height 0.3s ease-out'
+            whiteSpace: article.content.startsWith('<!-- FORMAT:HTML -->') ? 'normal' : 'pre-wrap'
           }}>
             {renderArticleContent(article.content)}
           </div>
-
-          {!isExpanded && (
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              position: 'absolute', 
-              bottom: 0, 
-              left: 0, 
-              right: 0, 
-              paddingTop: '4rem',
-              background: 'linear-gradient(to bottom, transparent, var(--bg-color) 80%)'
-            }}>
-              <button 
-                className="btn btn-primary" 
-                onClick={() => setIsExpanded(true)}
-                style={{ padding: '0.75rem 2rem', borderRadius: '2rem', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}
-              >
-                Read More
-              </button>
-            </div>
-          )}
         </div>
 
-        <AdUnit slot={articleBottomAdSlot} label="Sponsored" className="article-bottom-ad-slot" />
+        {/* Creator Profile Card at Bottom */}
+        <div style={{ 
+          marginTop: '4rem', 
+          padding: '2rem', 
+          borderRadius: 'var(--radius-lg)', 
+          background: 'var(--surface-color)', 
+          border: '1px solid var(--border-color)',
+          display: 'flex',
+          gap: '1.5rem',
+          alignItems: 'center',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.75rem',
+            fontWeight: 'bold',
+            color: '#fff',
+            textTransform: 'uppercase',
+            boxShadow: '0 4px 14px rgba(232, 197, 71, 0.25)'
+          }}>
+            {byline.charAt(0)}
+          </div>
+          <div style={{ flex: 1, minWidth: '240px' }}>
+            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Written by {byline}</h4>
+            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              Writer and contributor on InkFlow. Sharing stories and ideas on topics across technology, culture, design, and science.
+            </p>
+          </div>
+        </div>
       </article>
     </>
   );

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import HomeClient from '../../../components/HomeClient';
-import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES, type NewsArticle } from '../../../types';
+import { CATEGORIES, type NewsArticle } from '../../../types';
 import { baseMetadata, categoryFromSlug, categoryPath, truncateDescription } from '../../../lib/seo';
 import { ARTICLE_LIST_COLUMNS, ARTICLE_LIST_LIMIT } from '../../../lib/articles';
 
@@ -45,9 +45,9 @@ export async function generateMetadata({ params }: Props) {
   }
 
   return baseMetadata({
-    title: `${category} News`,
+    title: `${category}`,
     description: truncateDescription(
-      `Read the latest ${category.toLowerCase()} news, analysis and daily headlines from Daily Updates.`
+      `Read the latest articles on ${category.toLowerCase()} from InkFlow.`
     ),
     path: categoryPath(category),
   });
@@ -63,67 +63,18 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // For the News category, support optional region filtering
-  const regionParam = typeof resolvedSearch.region === 'string' ? resolvedSearch.region : null;
-
-  // Resolve region slug back to a display name
-  let regionFilter: string | null = null;
-  if (category === 'News' && regionParam) {
-    const matched = NEWS_REGIONS.find(
-      r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
-    );
-    regionFilter = matched ?? null;
-  } else if (category === 'India' && regionParam) {
-    const matched = INDIA_REGIONS.find(
-      r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
-    );
-    regionFilter = matched ?? null;
-  } else if (category === 'Sports' && regionParam) {
-    const matched = SPORTS_TYPES.find(
-      r => r.toLowerCase().replace(/[^a-z0-9]+/g, '-') === regionParam
-    );
-    regionFilter = matched ?? null;
-  }
-
   let data: NewsArticle[] | null = null;
   let error: unknown = null;
 
-  if ((category === 'News' || category === 'India' || category === 'Sports') && regionFilter) {
-    const regionResult = await supabase
-      .from('articles')
-      .select(ARTICLE_LIST_COLUMNS)
-      .eq('category', category)
-      .eq('sub_category', regionFilter)
-      .order('created_at', { ascending: false })
-      .limit(ARTICLE_LIST_LIMIT);
+  const categoryResult = await supabase
+    .from('articles')
+    .select(ARTICLE_LIST_COLUMNS)
+    .eq('category', category)
+    .order('created_at', { ascending: false })
+    .limit(ARTICLE_LIST_LIMIT);
 
-    data = regionResult.data as unknown as NewsArticle[] | null;
-    error = regionResult.error;
-
-    if (error) {
-      logCategoryFetchWarning(error, `Falling back to all ${category} articles for ${regionFilter}`);
-
-      const fallbackResult = await supabase
-        .from('articles')
-        .select(ARTICLE_LIST_COLUMNS)
-        .eq('category', category)
-        .order('created_at', { ascending: false })
-        .limit(ARTICLE_LIST_LIMIT);
-
-      data = fallbackResult.data as unknown as NewsArticle[] | null;
-      error = fallbackResult.error;
-    }
-  } else {
-    const categoryResult = await supabase
-      .from('articles')
-      .select(ARTICLE_LIST_COLUMNS)
-      .eq('category', category)
-      .order('created_at', { ascending: false })
-      .limit(ARTICLE_LIST_LIMIT);
-
-    data = categoryResult.data as unknown as NewsArticle[] | null;
-    error = categoryResult.error;
-  }
+  data = categoryResult.data as unknown as NewsArticle[] | null;
+  error = categoryResult.error;
 
   if (error) {
     logCategoryFetchWarning(error, `Unable to fetch articles for ${category}`);
@@ -139,6 +90,6 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   }
 
   return (
-    <HomeClient articles={data as NewsArticle[]} initialCategory={category} initialRegion={regionFilter} initialSearchQuery={initialSearchQuery} />
+    <HomeClient articles={data as NewsArticle[]} initialCategory={category} initialSearchQuery={initialSearchQuery} />
   );
 }

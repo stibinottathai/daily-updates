@@ -4,7 +4,7 @@ import ContactPageClient from '../../components/ContactPageClient';
 
 export const metadata: Metadata = baseMetadata({
   title: 'Contact Us',
-  description: 'Reach out to the Daily Updates team.',
+  description: 'Reach out to the InkFlow team.',
   path: '/contact',
 });
 

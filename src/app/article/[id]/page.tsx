@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: Props) {
   if (!article) {
     return {
       title: 'Article Not Found',
-      description: 'This Daily Updates story could not be found.',
+      description: 'This InkFlow article could not be found.',
     };
   }
 
@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: Props) {
     locale: getLocaleForLanguage(language),
   });
 
-  const tags = [article.category, 'news'];
+  const tags = [article.category, 'article', 'publishing', 'stories'];
   if (article.sub_category) {
     tags.push(article.sub_category);
   }
@@ -157,7 +157,7 @@ export default async function ArticlePage({ params }: Props) {
   const canonicalUrl = absoluteUrl(articlePath(article));
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
+    '@type': 'Article',
     url: canonicalUrl,
     headline: article.title,
     description: truncateDescription(article.excerpt),
@@ -169,7 +169,7 @@ export default async function ArticlePage({ params }: Props) {
     wordCount: article.content.trim().split(/\s+/).length,
     author: {
       '@type': 'Person',
-      name: article.author?.trim() || 'Daily Updates Editorial Desk',
+      name: article.author?.trim() || 'InkFlow Writer',
     },
     publisher: {
       '@type': 'Organization',
@@ -188,7 +188,7 @@ export default async function ArticlePage({ params }: Props) {
       '@id': canonicalUrl,
     },
     articleSection: article.category,
-    keywords: [article.category, 'latest news', 'breaking news'].join(', '),
+    keywords: [article.category, 'stories', 'reading', 'writing'].join(', '),
   };
 
   return (

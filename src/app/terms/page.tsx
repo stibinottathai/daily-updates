@@ -3,7 +3,7 @@ import { baseMetadata, SITE_NAME } from '../../lib/seo';
 
 export const metadata: Metadata = baseMetadata({
   title: 'Terms',
-  description: 'Read the Daily Updates terms of use.',
+  description: 'Read the InkFlow terms of use.',
   path: '/terms',
 });
 
@@ -118,7 +118,7 @@ export default function TermsPage() {
             <h2>Contact Us</h2>
             <p>If you have any questions regarding these Terms and Conditions, you may contact us at:</p>
             <ul>
-              <li>Email: dailyupdatesnewss@gmail.com</li>
+              <li>Email: hello@inkflow.online</li>
               <li>Website: https://www.dailyupdatesnews.online</li>
             </ul>
           </section>

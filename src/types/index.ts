@@ -20,60 +20,16 @@ export interface ContactMessage {
 }
 
 export const CATEGORIES = [
-  'News',
-  'World',
-  'India',
-  'Business',
   'Technology',
+  'Business',
+  'Design',
+  'Productivity',
   'Science',
-  'Health',
-  'Sports',
-  'Entertainment',
-  'Politics',
-  'Blog',
-  'Travel',
+  'Writing',
   'Lifestyle',
-  'Automotive',
-  'Education',
-  'Environment'
+  'Culture',
+  'Health'
 ] as const;
-
-export const NEWS_REGIONS = [
-  'US & Canada',
-  'UK',
-  'Africa',
-  'Asia',
-  'Australia',
-  'Europe',
-  'Latin America',
-  'Middle East',
-] as const;
-
-export const INDIA_REGIONS = [
-  'Kerala',
-  'Tamil Nadu',
-  'Karnataka',
-  'Mumbai',
-  'Gujarat',
-  'Kolkata',
-  'Delhi',
-] as const;
-
-export const SPORTS_TYPES = [
-  'Cricket',
-  'Football',
-  'Hockey',
-  'Badminton',
-  'Tennis',
-  'Athletics',
-  'Basketball',
-  'WWE',
-  'Formula 1',
-] as const;
-
-export type NewsRegion = typeof NEWS_REGIONS[number];
-export type IndiaRegion = typeof INDIA_REGIONS[number];
-export type SportsType = typeof SPORTS_TYPES[number];
 
 export type Category = typeof CATEGORIES[number];
 
@@ -120,9 +76,8 @@ export function formatDate(dateStr: string): string {
 
 /** 
  * Returns the category to display for an article.
- * For News, India, and Sports, it returns the sub_category if present.
  */
 export function getDisplayCategory(article: NewsArticle): string {
-  const needsSub = ['News', 'India', 'Sports'].includes(article.category);
-  return (needsSub && article.sub_category) ? article.sub_category : article.category;
+  return article.category;
 }
+

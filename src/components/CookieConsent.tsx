@@ -22,7 +22,7 @@ type CookieConsentContextValue = {
   resetConsent: () => void;
 };
 
-const CONSENT_STORAGE_KEY = 'daily_updates_cookie_consent';
+const CONSENT_STORAGE_KEY = 'inkflow_cookie_consent';
 const adsenseClient = ADSENSE_CLIENT_ID;
 
 const CookieConsentContext = createContext<CookieConsentContextValue | null>(null);
@@ -69,7 +69,7 @@ function ConsentBanner({ onAccept, onReject }: { onAccept: () => void; onReject:
           <h2>Choose how we use cookies</h2>
           <p>
             We use essential cookies to keep the site working. With your consent, we also load Google AdSense and
-            limited analytics that help support and improve Daily Updates.
+            limited analytics that help support and improve InkFlow.
           </p>
           <p>
             You can accept or reject non-essential cookies now, and change this choice later from the footer.

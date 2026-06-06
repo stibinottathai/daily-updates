@@ -6,7 +6,6 @@ import { NewsProvider } from '../context/NewsContext';
 import Navbar from '../components/Navbar';
 import ToastContainer from '../components/ToastContainer';
 import VisitorTracker from '../components/VisitorTracker';
-import PopupAd from '../components/PopupAd';
 import Logo from '../components/Logo';
 import { CookieConsentProvider, CookiePreferencesButton } from '../components/CookieConsent';
 import { baseMetadata, categoryPath, DEFAULT_DESCRIPTION, defaultOgImage, SITE_NAME, SITE_TAGLINE } from '../lib/seo';
@@ -42,7 +41,7 @@ export const metadata: Metadata = {
     image: defaultOgImage,
   }),
   title: {
-    default: `${SITE_NAME} - ${SITE_TAGLINE}`,
+    default: `${SITE_NAME} | ${SITE_TAGLINE}`,
     template: `%s | ${SITE_NAME}`,
   },
 };
@@ -89,7 +88,6 @@ export default function RootLayout({
             <React.Suspense fallback={null}>
               <VisitorTracker />
             </React.Suspense>
-            <PopupAd />
             <Script
               id="json-ld-site"
               type="application/ld+json"
@@ -134,33 +132,33 @@ export default function RootLayout({
                       <Logo />
                   </a>
                   <p>
-                    Timely world, business, technology, health and sports coverage curated for readers who want the essential story fast.
+                    A modern writing and sharing platform where ideas flow and creative minds connect. Read and publish deep insights.
                   </p>
                 </div>
 
                 <div className="footer-column">
-                  <h3>Sections</h3>
+                  <h3>Topics</h3>
                   <div className="footer-links">
-                    {CATEGORIES.slice(0, 6).map(category => (
+                    {CATEGORIES.slice(0, 5).map(category => (
                       <a key={category} href={categoryPath(category)}>{category}</a>
                     ))}
                   </div>
                 </div>
 
                 <div className="footer-column">
-                  <h3>More News</h3>
+                  <h3>Explore</h3>
                   <div className="footer-links">
-                    {CATEGORIES.slice(6).map(category => (
+                    {CATEGORIES.slice(5).map(category => (
                       <a key={category} href={categoryPath(category)}>{category}</a>
                     ))}
                   </div>
                 </div>
 
                 <div className="footer-column">
-                  <h3>Company</h3>
+                  <h3>Platform</h3>
                   <div className="footer-links">
-                    <a href="/about">About this page</a>
-                    <a href="/editorial-team">Editorial Team</a>
+                    <a href="/about">About InkFlow</a>
+                    <a href="/editorial-team">Writing Guidelines</a>
                     <a href="/contact">Contact Us</a>
                     <a href="/privacy-policy">Privacy Policy</a>
                     <CookiePreferencesButton />
@@ -170,7 +168,7 @@ export default function RootLayout({
               </div>
 
               <div className="container footer-bottom">
-                <p suppressHydrationWarning>Copyright {new Date().getFullYear()} Daily Updates. All rights reserved.</p>
+                <p suppressHydrationWarning>Copyright {new Date().getFullYear()} InkFlow. All rights reserved.</p>
                 <div>
                   <a href="/robots.txt">Robots</a>
                   <a href="/sitemap.xml">Sitemap</a>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import ArticleDetailClient from '../../components/ArticleDetailClient';
 import { useNews } from '../../context/NewsContext';
 import type { NewsArticle, VisitorStats } from '../../types';
-import { CATEGORIES, NEWS_REGIONS, INDIA_REGIONS, SPORTS_TYPES, formatDate } from '../../types';
+import { CATEGORIES, formatDate } from '../../types';
 import { Plus, Edit2, Trash2, X, BarChart3, FileText, LayoutDashboard, MessageSquare, Bold, Italic, List, ListOrdered, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Quote, Link as LinkIcon, Eye, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -157,9 +157,7 @@ export default function AdminDashboard() {
       ...currentArticle,
       content: finalContent,
       image_url: currentArticle.image_url?.trim() || '',
-      sub_category: (currentArticle.category === 'News' || currentArticle.category === 'India' || currentArticle.category === 'Sports')
-        ? currentArticle.sub_category?.trim() || null
-        : null,
+      sub_category: null,
     };
     if (currentArticle.id) {
       success = await updateArticle(currentArticle.id, articleToSave);
@@ -272,11 +270,15 @@ export default function AdminDashboard() {
     }
   };
 
+  const filteredArticlesForUser = (user.role === 'super_admin' || user.role === 'admin') 
+    ? articles 
+    : articles.filter(a => a.author_id === user.id);
+
   // Stats calculation
-  const totalArticles = articles.length;
+  const totalArticles = filteredArticlesForUser.length;
   const articlesPerPage = 10;
   const totalArticlePages = Math.max(1, Math.ceil(totalArticles / articlesPerPage));
-  const paginatedArticles = articles.slice(
+  const paginatedArticles = filteredArticlesForUser.slice(
     (articlesPage - 1) * articlesPerPage,
     articlesPage * articlesPerPage
   );
@@ -284,7 +286,7 @@ export default function AdminDashboard() {
   const articleRangeEnd = Math.min(articlesPage * articlesPerPage, totalArticles);
   const myArticles = articles.filter(a => a.author_id === user.id).length;
   const popularCategory = Object.entries(
-    articles.reduce((acc, curr) => {
+    filteredArticlesForUser.reduce((acc, curr) => {
       acc[curr.category] = (acc[curr.category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
@@ -342,7 +344,7 @@ export default function AdminDashboard() {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                   <div className="form-group">
-                    <label className="form-label">Category</label>
+                    <label className="form-label">Category / Tag</label>
                     <select
                       className="form-input"
                       value={currentArticle.category || ''}
@@ -351,62 +353,17 @@ export default function AdminDashboard() {
                         setCurrentArticle({
                           ...currentArticle,
                           category: nextCategory,
-                          sub_category: (nextCategory === 'News' || nextCategory === 'India' || nextCategory === 'Sports') ? currentArticle.sub_category || '' : null,
+                          sub_category: null,
                         });
                       }}
                       required
                     >
-                      <option value="" disabled>Select a category...</option>
+                      <option value="" disabled>Select a topic...</option>
                       {CATEGORIES.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
                   </div>
-                  {currentArticle.category === 'News' && (
-                    <div className="form-group">
-                      <label className="form-label">News Subcategory</label>
-                      <select
-                        className="form-input"
-                        value={currentArticle.sub_category || ''}
-                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
-                      >
-                        <option value="">All News</option>
-                        {NEWS_REGIONS.map(region => (
-                          <option key={region} value={region}>{region}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {currentArticle.category === 'India' && (
-                    <div className="form-group">
-                      <label className="form-label">India Subcategory</label>
-                      <select
-                        className="form-input"
-                        value={currentArticle.sub_category || ''}
-                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
-                      >
-                        <option value="">All India</option>
-                        {INDIA_REGIONS.map(region => (
-                          <option key={region} value={region}>{region}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                  {currentArticle.category === 'Sports' && (
-                    <div className="form-group">
-                      <label className="form-label">Sports Subcategory</label>
-                      <select
-                        className="form-input"
-                        value={currentArticle.sub_category || ''}
-                        onChange={e => setCurrentArticle({...currentArticle, sub_category: e.target.value || null})}
-                      >
-                        <option value="">All Sports</option>
-                        {SPORTS_TYPES.map(sport => (
-                          <option key={sport} value={sport}>{sport}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
                   <div className="form-group">
                     <label className="form-label">Author Byline</label>
                     <input
@@ -752,8 +709,8 @@ export default function AdminDashboard() {
     <div className="animate-fade-in stagger-1">
       <div className="dashboard-header">
         <div>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Editorial Dashboard</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Manage articles, track performance, and publish new content.</p>
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-display)', fontWeight: 800 }}>Writer's Dashboard</h2>
+          <p style={{ color: 'var(--text-muted)' }}>Share your ideas, track your stories, and reach your readers.</p>
         </div>
         <button 
           className="btn btn-primary"

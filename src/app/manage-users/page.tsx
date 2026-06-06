@@ -99,10 +99,10 @@ export default function ManageUsers() {
     <div className="animate-fade-in stagger-1">
       <div className="dashboard-header">
         <div>
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <ShieldAlert size={36} color="var(--accent-gold)" /> Access Control
+          <h2 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem', fontFamily: 'var(--font-display)', fontWeight: 800 }}>
+            <ShieldAlert size={36} color="var(--accent-gold)" /> Creator Permissions
           </h2>
-          <p style={{ color: 'var(--text-muted)' }}>Manage platform administrators and their permissions.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Manage platform writers, editors, and roles.</p>
         </div>
       </div>
 
@@ -111,12 +111,12 @@ export default function ManageUsers() {
         {/* Create User Form */}
         <div style={{ background: 'var(--surface-color)', padding: '2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <UserPlus size={24} color="var(--accent-gold)" /> Provision New Admin
+            <UserPlus size={24} color="var(--accent-gold)" /> Invite New Creator
           </h3>
           <form onSubmit={handleCreateUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Mail size={14} /> Email Address</label>
-              <input type="email" className="form-input" value={newEmail} onChange={e => setNewEmail(e.target.value)} required placeholder="editor@dailyupdates.com" />
+              <input type="email" className="form-input" value={newEmail} onChange={e => setNewEmail(e.target.value)} required placeholder="writer@inkflow.com" />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Lock size={14} /> Password</label>
@@ -125,19 +125,19 @@ export default function ManageUsers() {
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Shield size={14} /> Access Level</label>
               <select className="form-input" value={newRole} onChange={e => setNewRole(e.target.value as any)}>
-                <option value="admin">Editor (Admin)</option>
-                <option value="sub_admin">Contributor (Sub Admin)</option>
+                <option value="admin">Editor</option>
+                <option value="sub_admin">Writer</option>
               </select>
             </div>
             <button type="submit" className="btn btn-primary" style={{ height: '45px' }} disabled={createLoading}>
-              {createLoading ? 'Provisioning...' : 'Provision User'}
+              {createLoading ? 'Inviting...' : 'Add Creator'}
             </button>
           </form>
         </div>
 
         {/* Users Table */}
         <div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Active Administrators</h3>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Active Creators & Editors</h3>
           <div className="table-container">
             <table>
               <thead>
@@ -150,7 +150,7 @@ export default function ManageUsers() {
               <tbody>
                 {loadingProfiles ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>Fetching access records...</td>
+                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>Fetching creator records...</td>
                   </tr>
                 ) : (
                   profiles.map(profile => (
@@ -175,8 +175,8 @@ export default function ManageUsers() {
                           disabled={profile.id === user.id}
                         >
                           <option value="super_admin">Super Administrator</option>
-                          <option value="admin">Editor (Admin)</option>
-                          <option value="sub_admin">Contributor (Sub Admin)</option>
+                          <option value="admin">Editor</option>
+                          <option value="sub_admin">Writer</option>
                         </select>
                       </td>
                       <td style={{ color: 'var(--text-muted)' }}>{formatDate(profile.created_at)}</td>

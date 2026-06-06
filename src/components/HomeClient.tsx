@@ -160,9 +160,7 @@ export default function HomeClient({
 
   const pageTitle = searchQuery
     ? 'Search Results'
-    : initialRegion
-    ? `${initialRegion} News`
-    : selectedCategory || 'Home';
+    : selectedCategory || 'All Stories';
 
   return (
     <div>
@@ -176,8 +174,8 @@ export default function HomeClient({
       </Suspense>
 
       {/* Header Row */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', margin: '2rem 0' }}>
-        <h1 style={{ fontSize: '2rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }} className="animate-fade-in stagger-1">
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', margin: '2.5rem 0 1.5rem' }}>
+        <h1 style={{ fontSize: '2.25rem', fontFamily: 'var(--font-display)', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }} className="animate-fade-in stagger-1">
           {pageTitle}
         </h1>
 
@@ -249,10 +247,27 @@ export default function HomeClient({
                     </div>
                   </div>
                   <Link href={articlePath(featuredArticle)}>
-                    <h2 className="card-title">{featuredArticle.title}</h2>
-                    <p className="card-excerpt" style={{ fontSize: '1.05rem' }}>{featuredArticle.excerpt}</p>
+                    <h2 className="card-title" style={{ fontSize: '2.2rem', fontFamily: 'var(--font-display)', lineHeight: 1.15, fontWeight: 800 }}>{featuredArticle.title}</h2>
+                    <p className="card-excerpt" style={{ fontSize: '1.05rem', marginTop: '0.5rem' }}>{featuredArticle.excerpt}</p>
                   </Link>
-                  <div className="meta-text">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '0.25rem' }}>
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      color: '#fff'
+                    }}>
+                      {(featuredArticle.author?.trim() || 'Anonymous').charAt(0).toUpperCase()}
+                    </div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{featuredArticle.author?.trim() || 'Anonymous'}</span>
+                  </div>
+                  <div className="meta-text" style={{ fontSize: '0.75rem' }}>
                     <span>{formatDate(featuredArticle.created_at)}</span>
                     <span>•</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> {getReadingTime(featuredArticle.content || featuredArticle.excerpt)} min read</span>
@@ -260,25 +275,47 @@ export default function HomeClient({
                 </div>
               </article>
 
-              {/* Right: Trending Now Sidebar */}
+              {/* Right: Recommended Reads Sidebar */}
               <aside className="trending-sidebar animate-fade-in stagger-3">
-                <div className="trending-header">
-                  <span className="trending-bar" />
-                  <h2 className="trending-title">Trending Now</h2>
+                <div className="trending-header" style={{ marginBottom: '1.5rem' }}>
+                  <span className="trending-bar" style={{ background: 'linear-gradient(to bottom, var(--accent-gold), #ff5e62)' }} />
+                  <h2 className="trending-title" style={{ fontSize: '0.85rem', letterSpacing: '0.15em', fontWeight: 800 }}>Recommended Reads</h2>
                 </div>
                 <ol className="trending-list">
-                  {gridArticles.slice(0, 7).map((article, idx) => (
-                    <li key={article.id} className="trending-item">
-                      <span className="trending-number">{String(idx + 1).padStart(2, '0')}</span>
-                      <div className="trending-content">
-                        <span className="card-category" style={{ fontSize: '0.65rem' }}>{getDisplayCategory(article)}</span>
-                        <Link href={articlePath(article)} className="trending-link">
-                          {article.title}
-                        </Link>
-                        <span className="trending-date">{formatDate(article.created_at)}</span>
-                      </div>
-                    </li>
-                  ))}
+                  {gridArticles.slice(0, 5).map((article, idx) => {
+                    const authorName = article.author?.trim() || 'Anonymous';
+                    return (
+                      <li key={article.id} className="trending-item" style={{ borderBottom: '1px solid var(--border-color)', padding: '1rem 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                          <div style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.65rem',
+                            fontWeight: 'bold',
+                            color: '#fff'
+                          }}>
+                            {authorName.charAt(0).toUpperCase()}
+                          </div>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{authorName}</span>
+                        </div>
+                        <div className="trending-content">
+                          <Link href={articlePath(article)} className="trending-link" style={{ fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.4 }}>
+                            {article.title}
+                          </Link>
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            <span>{formatDate(article.created_at)}</span>
+                            <span>•</span>
+                            <span>{getReadingTime(article.content || '')} min read</span>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ol>
               </aside>
             </div>
@@ -335,13 +372,29 @@ export default function HomeClient({
                       </div>
                     </div>
                     <Link href={articlePath(article)}>
-                      <h3 className="card-title" style={{ fontSize: '1.1rem' }}>{article.title}</h3>
+                      <h3 className="card-title" style={{ fontSize: '1.2rem', fontFamily: 'var(--font-display)', fontWeight: 700, lineHeight: 1.25 }}>{article.title}</h3>
                     </Link>
-                    <div style={{ marginTop: '0.35rem', fontSize: '0.78rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                      By {article.author?.trim() || 'Daily Updates Editorial Desk'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.55rem',
+                        fontWeight: 'bold',
+                        color: '#fff'
+                      }}>
+                        {(article.author?.trim() || 'Anonymous').charAt(0).toUpperCase()}
+                      </div>
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{article.author?.trim() || 'Anonymous'}</span>
                     </div>
-                    <div className="meta-text" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <div className="meta-text" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.75rem' }}>
                       <span>{formatDate(article.created_at)}</span>
+                      <span>•</span>
+                      <span>{getReadingTime(article.content || '')} min read</span>
                     </div>
                   </div>
                 </article>

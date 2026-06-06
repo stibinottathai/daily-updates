@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
-  <title id="title">Daily Updates</title>
-  <desc id="desc">A social preview image for Daily Updates news coverage.</desc>
+  <title id="title">InkFlow</title>
+  <desc id="desc">A social preview image for InkFlow article sharing platform.</desc>
   <rect width="1200" height="630" fill="#101114"/>
   <rect x="64" y="64" width="1072" height="502" fill="#f7f2e8"/>
   <rect x="104" y="104" width="992" height="76" fill="#101114"/>
-  <text x="132" y="154" fill="#f7f2e8" font-family="Georgia, serif" font-size="44" font-weight="700">Daily Updates</text>
-  <text x="132" y="258" fill="#101114" font-family="Georgia, serif" font-size="86" font-weight="700">Latest News</text>
-  <text x="132" y="338" fill="#101114" font-family="Arial, sans-serif" font-size="34">World, business, technology, health and sports</text>
+  <text x="132" y="154" fill="#f7f2e8" font-family="Georgia, serif" font-size="44" font-weight="700">InkFlow</text>
+  <text x="132" y="258" fill="#101114" font-family="Georgia, serif" font-size="86" font-weight="700">Share Ideas</text>
+  <text x="132" y="338" fill="#101114" font-family="Arial, sans-serif" font-size="34">Write stories and connect minds on technology, design, and culture.</text>
   <line x1="132" y1="404" x2="1068" y2="404" stroke="#c9a34e" stroke-width="6"/>
-  <text x="132" y="482" fill="#55504a" font-family="Arial, sans-serif" font-size="28">Curated fresh every day</text>
+  <text x="132" y="482" fill="#55504a" font-family="Arial, sans-serif" font-size="28">A modern publishing space</text>
 </svg>
