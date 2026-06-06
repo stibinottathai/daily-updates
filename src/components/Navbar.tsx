@@ -355,13 +355,14 @@ export default function Navbar() {
                 >
                 <div style={{ 
                     zIndex: 9999,
-                    backgroundColor: 'var(--surface-color)',
-                    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.4)',
-                    borderRadius: 'var(--radius-lg)',
+                    backgroundColor: 'rgba(21, 23, 34, 0.75)',
+                    backdropFilter: 'blur(16px)',
+                    boxShadow: 'var(--shadow-lg), var(--shadow-glow)',
+                    borderRadius: 'var(--radius-md)',
                     minWidth: '200px',
                     padding: '0.5rem 0',
                     border: '1px solid var(--border-color)',
-                    animation: 'dropdown-slide-up 0.2s ease-out'
+                    animation: 'fadeInUp 0.2s ease-out'
                   }}
                 >
                   {/* Header */}

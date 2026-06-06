@@ -240,7 +240,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
                 width: '24px',
                 height: '24px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -307,12 +307,9 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
         </div>
 
         {/* Creator Profile Card at Bottom */}
-        <div style={{ 
+        <div className="glass-panel" style={{ 
           marginTop: '4rem', 
           padding: '2rem', 
-          borderRadius: 'var(--radius-lg)', 
-          background: 'var(--surface-color)', 
-          border: '1px solid var(--border-color)',
           display: 'flex',
           gap: '1.5rem',
           alignItems: 'center',
@@ -322,7 +319,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
             width: '60px',
             height: '60px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+            background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -330,7 +327,7 @@ export default function ArticleDetailClient({ article, language }: { article: Ne
             fontWeight: 'bold',
             color: '#fff',
             textTransform: 'uppercase',
-            boxShadow: '0 4px 14px rgba(232, 197, 71, 0.25)'
+            boxShadow: '0 4px 14px rgba(99, 102, 241, 0.25)'
           }}>
             {byline.charAt(0)}
           </div>

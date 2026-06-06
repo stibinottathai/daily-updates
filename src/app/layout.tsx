@@ -77,9 +77,14 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
       </head>
       <body suppressHydrationWarning>
+        <div className="bg-blobs">
+          <div className="blob blob-1"></div>
+          <div className="blob blob-2"></div>
+          <div className="blob blob-3"></div>
+        </div>
         <NewsProvider>
           <CookieConsentProvider>
             <React.Suspense fallback={<div style={{ height: '60px' }}>Loading...</div>}>
@@ -128,8 +133,8 @@ export default function RootLayout({
             <footer className="site-footer">
               <div className="container footer-grid">
                 <div className="footer-brand">
-                    <a href="/">
-                      <Logo />
+                  <a href="/">
+                    <Logo />
                   </a>
                   <p>
                     A modern writing and sharing platform where ideas flow and creative minds connect. Read and publish deep insights.

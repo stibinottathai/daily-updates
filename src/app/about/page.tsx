@@ -21,7 +21,7 @@ export default function AboutPage() {
           </p>
         </div>
 
-        <div className="contact-page-card" style={{ display: 'grid', gap: '1.75rem' }}>
+        <div className="glass-panel" style={{ display: 'grid', gap: '2rem', padding: '2.5rem' }}>
           <section>
             <h2 style={{ marginTop: 0, fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Our Vision</h2>
             <p style={{ marginTop: 0 }}>
@@ -47,20 +47,20 @@ export default function AboutPage() {
             <p style={{ marginTop: 0 }}>
               InkFlow is powered by its writers, editors, and readers. Unlike traditional news desks with rigid structures, we support an open contributor system where anyone can create a profile and start publishing articles.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginTop: '1.5rem' }}>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginTop: '1.5rem' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', hover: { borderColor: 'var(--border-hover)' } } as any}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Writers & Creators</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   Independent authors drafting, polishing, and sharing original perspectives directly with their audience.
                 </p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', hover: { borderColor: 'var(--border-hover)' } } as any}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Community Readers</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   Finding high-quality pieces, bookmarking articles to read later, and engaging with creative works.
                 </p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', hover: { borderColor: 'var(--border-hover)' } } as any}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Site Support</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   Keeping the platform fast, stable, and highly responsive so writers can focus entirely on words.
@@ -71,20 +71,20 @@ export default function AboutPage() {
 
           <section>
             <h2 style={{ fontFamily: 'var(--font-sans)', fontWeight: 700 }}>Our Publishing Values</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Value Originality</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   We encourage original stories, detailed guides, and insights built on primary experiences.
                 </p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Clean Design</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   Our reader layout focuses solely on the story, avoiding pop-up ads and clutter.
                 </p>
               </div>
-              <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <h3 style={{ marginTop: 0, marginBottom: '0.5rem' }}>Writer Ownership</h3>
                 <p style={{ margin: 0, color: 'var(--text-muted)', lineHeight: 1.6, fontSize: '0.9rem' }}>
                   Writers keep total control over their drafts, edit histories, and are credited on bylines.

@@ -255,7 +255,7 @@ export default function HomeClient({
                       width: '24px',
                       height: '24px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                      background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -278,7 +278,7 @@ export default function HomeClient({
               {/* Right: Recommended Reads Sidebar */}
               <aside className="trending-sidebar animate-fade-in stagger-3">
                 <div className="trending-header" style={{ marginBottom: '1.5rem' }}>
-                  <span className="trending-bar" style={{ background: 'linear-gradient(to bottom, var(--accent-gold), #ff5e62)' }} />
+                  <span className="trending-bar" style={{ background: 'linear-gradient(to bottom, var(--accent-gold), hsl(320, 85%, 60%))' }} />
                   <h2 className="trending-title" style={{ fontSize: '0.85rem', letterSpacing: '0.15em', fontWeight: 800 }}>Recommended Reads</h2>
                 </div>
                 <ol className="trending-list">
@@ -291,7 +291,7 @@ export default function HomeClient({
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
-                            background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                            background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -379,7 +379,7 @@ export default function HomeClient({
                         width: '16px',
                         height: '16px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--accent-gold) 0%, #ff5e62 100%)',
+                        background: 'linear-gradient(135deg, var(--accent-amber) 0%, hsl(320, 85%, 60%) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
